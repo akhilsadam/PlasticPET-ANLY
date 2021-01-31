@@ -1,0 +1,8 @@
+$ cat Documentation/.gitignore
+# ignore generated __pycache__ files,
+__pycache__
+
+
+#*.png
+# except foo.html which is maintained by hand
+#!foo.html
