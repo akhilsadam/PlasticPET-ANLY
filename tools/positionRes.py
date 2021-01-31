@@ -78,10 +78,10 @@ for i in range(3):
 	print("Error = +-", 0.5*FWHMC*param[1]," mm")
 plt.tight_layout()
 if Strip_Based_Reconstruction:
-	plt.savefig('PositionResolution_StripCounts.png')
+	plt.savefig(plotDIR+'PositionResolution_StripCounts.png')
 else: 
 	if SiPM_Based_Reconstruction:
-		plt.savefig('PositionResolution_SiPMCounts_True.png')
+		plt.savefig(plotDIR+'PositionResolution_SiPMCounts_True.png')
 	else:
-		plt.savefig('PositionResolution_Strip_Endcounts.png')
+		plt.savefig(plotDIR+'PositionResolution_Strip_Endcounts.png')
 plt.show()

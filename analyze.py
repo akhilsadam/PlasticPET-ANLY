@@ -7,6 +7,8 @@ from scipy import stats
 from scipy.optimize import curve_fit
 import cv2
 #------------------------------------------------------------------------------------
+plotDIR = "plots/"
+#------------------------------------------------------------------------------------
 #Defining Flags:
 STRIPHIST = False
 #subdefines - needs striphist True and SiPM_Based_Reconstruction False
@@ -15,7 +17,7 @@ Detection = False
 PD = False
 #---------------
 Strip_Based_Reconstruction = False #otherwise uses only endcount data
-SiPM_Based_Reconstruction = False #massages data to use only averaged SiPM counts #unrealistic!
+SiPM_Based_Reconstruction = False #massages data to use only binned SiPM counts #unrealistic!
 #---------------
 POSRES = False
 RES_ADD = True

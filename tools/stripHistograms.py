@@ -12,7 +12,7 @@ if Creation:
 	axs[0,nx-1].text(.95,.95,"Interacted Events = %1.0f" %(nEvents-uninteractedEvents),verticalalignment='top',horizontalalignment='right',transform=axs[0,nx-1].transAxes,fontsize=10)
 	plt.tight_layout()
 	plt.subplots_adjust(wspace=0,hspace=0)
-	plt.savefig("Created Photon Distributions.png")
+	plt.savefig(plotDIR+"Created Photon Distributions.png")
 	plt.show()
 if Detection:
 	mx=400
@@ -29,7 +29,7 @@ if Detection:
 	axs[0,nx-1].text(.95,.95,"Interacted Events = %1.0f" %(nEvents-uninteractedEvents),verticalalignment='top',horizontalalignment='right',transform=axs[0,nx-1].transAxes,fontsize=10)
 	plt.tight_layout()
 	plt.subplots_adjust(wspace=0,hspace=0)
-	plt.savefig("Detected Photon Distributions.png")
+	plt.savefig(plotDIR+"Detected Photon Distributions.png")
 	plt.show()
 if PD:
 	#--- produced
@@ -48,5 +48,5 @@ if PD:
 	axs[0,nx-1].text(.95,.95,"Interacted Events = %1.0f" %(nEvents-uninteractedEvents),verticalalignment='top',horizontalalignment='right',transform=axs[0,nx-1].transAxes,fontsize=10)
 	plt.tight_layout()
 	plt.subplots_adjust(wspace=0,hspace=0)
-	plt.savefig("Produced-Detected Ratio.png")
+	plt.savefig(plotDIR+"Produced-Detected Ratio.png")
 	plt.show()

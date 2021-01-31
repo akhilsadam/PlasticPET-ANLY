@@ -59,10 +59,10 @@ if SiPM_Based_Reconstruction:
 	axs[0].set_title("Each SiPM pair vs z-position")
 	axs[1].set_title("Both side totals (by event)")
 	plt.tight_layout()
-	plt.savefig('signalResolutionVSzpos_SiPM.png')
+	plt.savefig(plotDIR+'signalResolutionVSzpos_SiPM.png')
 else: 
 	axs[0].set_title("Each strip vs z-position")
 	axs[1].set_title("Both side totals (by event)")
 	plt.tight_layout()
-	plt.savefig('signalResolutionVSzpos.png')
+	plt.savefig(plotDIR+'signalResolutionVSzpos.png')
 plt.show()

@@ -84,14 +84,14 @@ axs.text(0.99, 0.54, "Mean ~= time to vertex,\n FWHM  = reconstruction error",ve
 if Strip_Based_Reconstruction:
 	axs.set_title("Gamma TOF to Scintillator Interaction (Actual Strip Counts Rec): Time_D +- delta T_I")
 	plt.tight_layout()
-	plt.savefig('TimeRes/gammaTOF_StripCounts.png')
+	plt.savefig(plotDIR+'TimeRes/gammaTOF_StripCounts.png')
 else:
 	if SiPM_Based_Reconstruction:
 		axs.set_title("Gamma TOF to Scintillator Interaction (SiPM Rec): Time_D +- delta T_I")
 		plt.tight_layout()
-		plt.savefig('TimeRes/gammaTOF_SiPM.png')
+		plt.savefig(plotDIR+'TimeRes/gammaTOF_SiPM.png')
 	else: 
 		axs.set_title("Gamma TOF to Scintillator Interaction (Strip Endcount Rec): Time_D +- delta T_I")
 		plt.tight_layout()
-		plt.savefig('TimeRes/gammaTOF_StripEndcounts.png')
+		plt.savefig(plotDIR+'TimeRes/gammaTOF_StripEndcounts.png')
 plt.show()

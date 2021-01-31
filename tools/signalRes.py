@@ -100,9 +100,9 @@ axs.text(0.99, 0.79, "Gaussian: RSQ = %1.2f" %(RSQ(hist,pdf_g)),verticalalignmen
 if SiPM_Based_Reconstruction:
 	axs.set_title("Signal amplitude actual/predicted ratio histogram for each SiPM pair")
 	plt.tight_layout()
-	plt.savefig('signalResolution_SiPM.png')
+	plt.savefig(plotDIR+'signalResolution_SiPM.png')
 else: 
 	axs.set_title("Signal amplitude actual/predicted ratio histogram for each strip")
 	plt.tight_layout()
-	plt.savefig('signalResolution.png')
+	plt.savefig(plotDIR+'signalResolution.png')
 plt.show()

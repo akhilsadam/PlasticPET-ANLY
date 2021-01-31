@@ -45,10 +45,10 @@ if SiPM_Based_Reconstruction:
 	axs[0].set_title("Each SiPM block vs average z-position")
 	axs[1].set_title("(by event)")
 	plt.tight_layout()
-	plt.savefig('rec_zposVSzpos_SiPM.png')
+	plt.savefig(plotDIR+'rec_zposVSzpos_SiPM.png')
 else: 
 	axs[0].set_title("Each strip block vs average z-position")
 	axs[1].set_title("(by event)")
 	plt.tight_layout()
-	plt.savefig('rec_zposVSzpos.png')
+	plt.savefig(plotDIR+'rec_zposVSzpos.png')
 plt.show()
