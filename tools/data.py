@@ -6,10 +6,18 @@ def SiPM_Bin(inarray):
 #------------------------------------------------------------------------------------
 #//---------\\ PhotonCounts // photon counts for left, right SiPMs and EJ208 strips
 photonCounts = np.load("../build/B3a/photonCounts.npy")
-nEvents = int(len(photonCounts)/3)
 left = photonCounts[0:len(photonCounts):3,:,:] #left,strip,right photons - indices:evt#,y,x
 strip = photonCounts[1:len(photonCounts):3,:,:]
 right = photonCounts[2:len(photonCounts):3,:,:]
+
+if MaxEventLimit:
+	nEvents = MaxEvents
+else:
+	nEvents = int(len(photonCounts)/3)
+
+left = left[0:nEvents]
+strip = strip[0:nEvents]
+right = right[0:nEvents]
 
 if SiPM_Based_Reconstruction:
 	#massage left&right data
@@ -20,8 +28,8 @@ print("----- Number of Events: ", nEvents)
 #print(left[0]) 
 #//---------\\ BeamData // position and direction of fired gamma
 beamData = np.load("../build/B3a/beamData.npy")
-evtPos = beamData[:,0,:] # - first index is event #
-evtDir = beamData[:,1,:]
+evtPos = beamData[0:nEvents,0,:] # - first index is event #
+evtDir = beamData[0:nEvents,1,:]
 #print(evtPos)
 #print(evtDir)
 #//---------\\ BeamInteract // interaction positions by compton/photoelectric effect
@@ -51,5 +59,41 @@ for i in range(nEvents):
 	evtInteract.append(np.transpose(np.array(pos)));
 	pos = []
 	line = beamInteract.readline()
+beamInteract.close()
 #-------------
-#print(evtInteract)
+def photonSiPMData(evt):
+	#import time
+	#t = time.time()
+	#photonSiPMFile = open("../build/B3a/photonSiPMData.txt")
+	filename = "../build/B3a/photonSiPMData.txt"
+	#textLines = np.zeros(shape = (nEvents),dtype=list)
+	photonList = []
+	photonData = np.zeros(5) # x,y,z,t,lambda
+	#for evt in range(nEvents):
+		#textLines[evt] = photonSiPMFile.readline().rstrip('\n').split('|')
+
+
+	#photonSiPMFile.close()
+	#print("Closed PhotonSiPMFile" + str(t-time.time()))
+	#t = time.time()
+	with open(filename) as fp:
+		for i, line in enumerate(fp):
+			if i == evt:
+				# evt+1th line
+				textLine = line.rstrip('\n').split('|')
+			elif i > evt:
+				break
+
+	#textLines = [photonSiPMFile.readline().rstrip('\n').split('|') for evt in range(0,nEvents)]
+	for idv in range(0,len(textLine)-1):
+		photonData = np.asarray(textLine[idv].split(" "))[0:5].astype(float);
+		photonList.append(photonData)
+	#photonData = float(textLines[evt][idv].split(" ")[0:5]);
+	#print(photonData)
+#	print(t-time.time())
+		
+	return np.transpose(photonList) #np.asarray(photonList).T'
+
+
+#print(photonSiPMData[1][2]) photonSiPMData[evt][x,y,z,t,lambda][photonIndex]
+#-------------

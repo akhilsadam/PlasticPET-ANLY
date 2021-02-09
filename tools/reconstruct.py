@@ -103,4 +103,8 @@ for evt in range(nEvents):
 		errorPosN[evt] = [np.nan,np.nan,np.nan]
 		actEvtPosN[evt] = [np.nan,np.nan,np.nan]
 		time_I_N[evt] = np.nan
-
+#------------------------------------------------------------------------------------
+if(SiPMTime_Based_Reconstruction):
+	with open('tools/reconstruct_SIPMTime.py') as f: exec(f.read()) # helper file
+	#recPosT = ACTTimeReconstruct() #need to complete implementation - at present only useful for vis2
+	ZrecPosT,err_ZrecPosT = ACTZTimeReconstruct(photoLen)

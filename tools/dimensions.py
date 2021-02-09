@@ -1,3 +1,10 @@
+
+att_len = 4000
+c_const = 299792458.0 #define as double
+n_EJ208 = 1.58
+
+nanosec = 1/1000000000
+
 #------------------------------------------------------------------------------------
 #Geometry Setup
 #------------------------------------------------------------------------------------
@@ -19,6 +26,8 @@ U = [UX,UY,UZ]
 
 VKT = 0.1
 
+TC_SiPM_X = (((LZ/1000)*n_EJ208)/c_const)/nanosec #time limit for SiPM
+
 stripx = 25.4
 stripy = 6.2
 stripWx= stripx+2*VKT # strip plus individual VK
@@ -29,9 +38,4 @@ binz = 1000
 
 stdG=[binx,biny,binz]
 
-att_len = 4000
-c_const = 299792458.0 #define as double
-n_EJ208 = 1.58
-
-nanosec = 1/1000000000
 
