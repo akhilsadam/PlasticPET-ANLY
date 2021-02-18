@@ -26,9 +26,9 @@ manualSeed = 999
 random.seed(manualSeed)
 torch.manual_seed(manualSeed)
 #-------------------------------------------------------
-def fold(n,folds):
-	x = list(range(nEvents))
+def fold(length,n,folds):
+	x = list(range(length))
 	random.shuffle(x)
-	return [x[i:i + n] for i in range(0, len(x), n)]
+	return [x[i:i + n] for i in range(0, length, n)]
 def batch(batch_size,length):
 	return [random.randint(0,length-1) for i in range(0,batch_size)]
