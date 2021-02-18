@@ -61,6 +61,7 @@ for i in range(nEvents):
 	line = beamInteract.readline()
 beamInteract.close()
 #-------------
+@lru_cache(maxsize=2000)
 def photonSiPMData(evt):
 	#import time
 	#t = time.time()

@@ -5,9 +5,15 @@ L_time = 0.001 #ns
 
 UL = [77.4,103.2,1000]
 
+#from joblib import Parallel,delayed
+import multiprocessing
+from itertools import repeat
+from functools import partial
+num_cores = multiprocessing.cpu_count()
+
 def ACTTimeReconstruct():
 
-	photoLen = 5 # set parameter
+	#photoLen = 5 # set parameter
 	photonData = np.zeros(shape=(5,photoLen))
 	recPosT = np.zeros(shape=(nEvents,4))
 	for c in range(3,4):#nEvents
@@ -38,61 +44,74 @@ def ACTTimeReconstruct():
 		recPosT[c] = point
 		
 	return recPosT
-def ACTZTimeReconstruct(photoLen):
 
-	#photoLen = 5 # set parameter
-	photonData = np.zeros(shape=(5,photoLen))
-	ZrecPosT = np.zeros(shape=(nEvents,3))
-	err_ZrecPosT = np.zeros(shape=(nEvents,2))
-	for c in range(nEvents):
-		photonDatas = photonSiPMData(c)
-		if(len(photonDatas)==0):
-			ZrecPosT[c] = np.nan
-			err_ZrecPosT[c] = np.nan
-			continue
+@lru_cache(maxsize=2000)
+def process_ACTZT(c):
+	photonDatas = photonSiPMData(c)
+	if(len(photonDatas)==0):
+		r_Z,r_T,readTime = np.nan,np.nan,np.nan
+	else:
 		photonDataL = np.transpose(photonDatas[:,photonDatas[2]>UZ])
 		photonDataR = np.transpose(photonDatas[:,photonDatas[2]<=UZ])
 		if((len(photonDataL)==0) or (len(photonDataR)==0)):
-			ZrecPosT[c] = np.nan
-			err_ZrecPosT[c] = np.nan
-			continue
-		photonDataL = np.transpose(sorted(photonDataL, key=lambda photonDataL: photonDataL[3]))
-		photonDataR = np.transpose(sorted(photonDataR, key=lambda photonDataR: photonDataR[3]))
-		#if lengths differ
-		minlen = min(len(photonDataL),len(photonDataR),photoLen)
-		if (photonDataL.ndim>1) and (photonDataR.ndim>1):
-			photonDataL = photonDataL[:,0:minlen]
-			photonDataR = photonDataR[:,0:minlen]
-		elif (photonDataL.ndim>1):
-			photonDataL = photonDataL[:,0]
+			r_Z,r_T,readTime = np.nan,np.nan,np.nan
 		else:
-			photonDataR = photonDataR[:,0]
-			
-		fastestTime = min(min(photonDataL[3]),min(photonDataR[3]))
-		slowestTime = max(max(photonDataL[3]),max(photonDataR[3]))
-		readTime = slowestTime-fastestTime
-		#print(photonDataL)
-		#print(photonDataR)
-		Ltimes = photonDataL[3] - ((photonDataL[2]-LZ)*n_EJ208/(1000*c_const*nanosec))
-		Rtimes = photonDataR[3] + ((photonDataR[2])*n_EJ208/(1000*c_const*nanosec))
-		#if lengths differ
-		minlen = min(len(Ltimes),len(Rtimes),photoLen)
-#		print(len(np.transpose(photonDataL)),len(np.transpose(photonDataR)))
-		delTime = Ltimes[0:minlen]-Rtimes[0:minlen]
-		#print(delTime)
-		r_Z = np.average(0.5*(LZ - 1000*(c_const/n_EJ208)*(delTime*nanosec)))
-		if(r_Z <= UZ):
-			dist = r_Z
-		else:
-			dist = LZ-r_Z
+			photonDataL = np.transpose(sorted(photonDataL, key=lambda photonDataL: photonDataL[3]))
+			photonDataR = np.transpose(sorted(photonDataR, key=lambda photonDataR: photonDataR[3]))
+			#if lengths differ
+			minlen = min(len(photonDataL),len(photonDataR),photoLen)
+			if (photonDataL.ndim>1) and (photonDataR.ndim>1):
+				photonDataL = photonDataL[:,0:minlen]
+				photonDataR = photonDataR[:,0:minlen]
+			elif (photonDataL.ndim>1):
+				photonDataL = photonDataL[:,0]
+			else:
+				photonDataR = photonDataR[:,0]
+				
+			#print(photonDataL)
+			#print(photonDataR)
+			Ltimes = photonDataL[3] - ((photonDataL[2]-LZ)*n_EJ208/(1000*c_const*nanosec))
+			Rtimes = photonDataR[3] + ((photonDataR[2])*n_EJ208/(1000*c_const*nanosec))
 
-		r_T = fastestTime - (dist)*n_EJ208/(1000*c_const*nanosec)
-		ZrecPosT[c] = [r_Z,r_T,readTime]
-		err_ZrecPosT[c] = [r_Z - actEvtPosN[c,2], r_T - time_I_N[c]]
-		#print([r_Z,r_T,readTime])
+			fastestTime = min(min(Ltimes),min(Rtimes))
+			slowestTime = max(max(Ltimes),max(Rtimes))
+			readTime = slowestTime-fastestTime
+			#if lengths differ
+			minlen = min(len(Ltimes),len(Rtimes),photoLen)
+			#print(len(np.transpose(photonDataL)),len(np.transpose(photonDataR)))
+			delTime = Ltimes[0:minlen]-Rtimes[0:minlen]
+			#print(delTime)
+			r_Z = np.average(0.5*(LZ - 1000*(c_const/n_EJ208)*(delTime*nanosec)))
+			if(r_Z <= UZ):
+				dist = r_Z
+			else:
+				dist = LZ-r_Z
 
-	return np.transpose(ZrecPosT),np.transpose(err_ZrecPosT)
+			r_T = fastestTime - (dist)*n_EJ208/(1000*c_const*nanosec)
+	#pbar.update(1)
+	return r_Z,r_T,readTime,r_Z - actEvtPosN[c,2], r_T - time_I_N[c]
+#pbar = tqdm(total=nEvents)
+def ACTZTimeProcess(photoLen):
+	#results = np.zeros(shape=(nEvents,5))
+	#for c in range(nEvents):
+	#		results[c] = process_ACTZT(c,photoLen)
+	#results = Parallel(n_jobs=num_cores)(delayed(process_ACTZT)(c) for c in range(nEvents)
+	#inpt = list(zip(range(nEvents), repeat(photoLen)))
+	#print(inpt)
+	with multiprocessing.Pool(num_cores-1) as pool:
+		results = list(tqdm(pool.imap_unordered(process_ACTZT,range(nEvents)),total=nEvents)) #zip(range(nEvents), repeat(photoLen))
+	return np.transpose(results)
 
+def ACTZTimeReconstruct(photoLen):
+
+	#photoLen = 5 # set parameter
+	ZrecPosT = np.zeros(shape=(nEvents,3))
+	err_ZrecPosT = np.zeros(shape=(nEvents,2))
+	results = ACTZTimeProcess(photoLen)
+	ZrecPosT=results[0:3]
+	err_ZrecPosT=results[3:5]
+	#return np.transpose(ZrecPosT),np.transpose(err_ZrecPosT)
+	return ZrecPosT,err_ZrecPosT
 def ERR(point, photoLen, photonData):
 	pt = np.zeros(shape = (3,photoLen))
 	pt = np.transpose([point[0:3]]*photoLen)
