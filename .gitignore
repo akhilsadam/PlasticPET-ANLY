@@ -2,6 +2,7 @@ $ cat Documentation/.gitignore
 # ignore generated __pycache__ files,
 __pycache__
 *.pt
+toos/ML/Data/*.pt
 
 
 #*.png
