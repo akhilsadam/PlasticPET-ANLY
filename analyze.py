@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import os
+os.environ['MPLCONFIGDIR'] = "/home/Desktop/mplib/graph"
 import matplotlib.pyplot as plt
 import matplotlib.colors as mpt_col
 import matplotlib.cm as cm
@@ -14,7 +16,7 @@ plotDIR = "plots/"
 ML_PATH = "tools/ML/"
 #------------------------------------------------------------------------------------
 MaxEventLimit = True
-MaxEvents = 200
+MaxEvents = 400
 #--------------------------
 #Defining Flags:
 STRIPHIST = False

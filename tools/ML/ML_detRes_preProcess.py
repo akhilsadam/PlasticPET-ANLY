@@ -52,6 +52,7 @@ def process_MLDRESinput(c):
 			TZ[:,2*photoLen] = ETZ
 			#print(TZ)
 			TZ[3] = 1000*(TZ[3]*nanosec)*(c_const/n_EJ208) #UNIT CONVERSION from ns to mm
+			#print(TZ)
 
 	return TZ
 from tqdm import tqdm

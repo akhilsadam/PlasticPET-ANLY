@@ -1,8 +1,9 @@
 #-------------------------------------------------------
 #training loop
 def train(length,folds, num_epochs, batch_size, n):
+	#optimizer = optim.Adam(drnet.parameters(),lr=lr,betas=(beta1,beta2))
 	optimizer = optim.SGD(drnet.parameters(),lr=lr,momentum=momentum)
-	loss_fn = torch.nn.MSELoss()
+	loss_fn = torch.nn.L1Loss()
 	b_losses = torch.empty(batch_size)
 	TestLoss = np.zeros(shape=(folds))
 	lossList = np.zeros(shape=(folds,num_epochs))
@@ -22,6 +23,7 @@ def train(length,folds, num_epochs, batch_size, n):
 		#BAR
 		pbar = tqdm(total=num_epochs)
 		pbar.set_description("Fold "+str(i)+":", refresh=True)
+		drnet.train()
 		for t in range(num_epochs):
 			folded = batch(batch_size,len(indT))
 			for b in range(batch_size):
@@ -47,15 +49,23 @@ def train(length,folds, num_epochs, batch_size, n):
 			pbar.update(batch_size)
 			#print("Fold ",i," Complete.")
 		#Test Loss
+		drnet.eval()
 		y_test = drnet(XT)
 		TestLoss[i] = loss_fn(y_test,YT)
+		ml_detRes_vis(y_test,YT)
 		tqdm.write("TestLoss["+str(i)+"] = "+str(TestLoss[i])+".")
 	tqdm.write("Training Complete.")
 	#fig, axs = plt.subplots(folds)
 	#[axs[i].plot(lossList[i]) for i in range(folds)]
 	#plt.show()
 	return list(lossList.ravel())
-	#ml_detRes_vis(y_test,YT)
+#-------------------------------------------------------
+#test
+def test(net):
+	net.eval()
+	predictTensor = net(inputTensor)
+	ml_detRes_vis2(predictTensor,expectedTensor)
+#-------------------------------------------------------
 def MLDraw(lossList,folds):
 	plt.plot(list(flatten(lossList)))
 	plt.show()
