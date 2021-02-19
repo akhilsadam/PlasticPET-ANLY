@@ -16,6 +16,7 @@ import multiprocessing
 from itertools import repeat
 from functools import partial
 #-------------------------------------------------------
+torch.multiprocessing.set_sharing_strategy('file_system')
 num_cores = multiprocessing.cpu_count()
 ngpu = 1
 device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")

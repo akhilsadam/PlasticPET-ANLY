@@ -29,7 +29,7 @@ def process_MLDRESinput(c):
 			if(minlen != photoLen):
 				return None
 			photonDataL[3] = Ltimes - fastestTime
-			photonDataL[3] = Rtimes - fastestTime
+			photonDataR[3] = Rtimes - fastestTime
 			photonDataL[2]=LZ
 			photonDataR[2]=0
 			photonDataL = photonDataL[0:4]
@@ -51,6 +51,7 @@ def process_MLDRESinput(c):
 			#print(ETZ)
 			TZ[:,2*photoLen] = ETZ
 			#print(TZ)
+			TZ[3] = 1000*(TZ[3]*nanosec)*(c_const/n_EJ208) #UNIT CONVERSION from ns to mm
 
 	return TZ
 from tqdm import tqdm

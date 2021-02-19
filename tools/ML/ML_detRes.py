@@ -11,7 +11,10 @@ def ml_detRes_vis(inpT,expT):
 	typeList = ["X-Resid (mm)","Y-Resid (mm)", "Z-Resid (mm)", "T-Resid (ns)"]
 	fig, axs = plt.subplots(types)
 	plt.suptitle("ML - Det. Res. Residuals (Errors)")
-	[axs[i].hist(resid.detach().cpu().numpy()[:,i]) for i in range(types)]
+	if(device=="cpu"):
+		[axs[i].hist(resid.detach().numpy()[:,i]) for i in range(types)]
+	else:
+		[axs[i].hist(resid.detach().cpu().numpy()[:,i]) for i in range(types)]
 	[axs[i].set_xlabel(typeList[i]) for i in range(types)]
 	[axs[i].set_ylabel("Counts") for i in range(types)]
 	plt.show()
