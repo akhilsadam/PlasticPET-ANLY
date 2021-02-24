@@ -23,6 +23,7 @@ UX = LX/2
 UY = LY/2
 UZ = LZ/2
 U = [UX,UY,UZ]
+LM = np.array([[-UX,UX],[-UY,UY],[0,LZ],[1000*(-10*nanosec)*(c_const/n_EJ208),0]])
 
 VKT = 0.1
 

@@ -1,7 +1,10 @@
 import numpy as np
 import pandas as pd
+import math
 import os
 os.environ['MPLCONFIGDIR'] = "/home/Desktop/mplib/graph"
+import matplotlib
+##matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mpt_col
 import matplotlib.cm as cm
@@ -16,7 +19,7 @@ plotDIR = "plots/"
 ML_PATH = "tools/ML/"
 #------------------------------------------------------------------------------------
 MaxEventLimit = True
-MaxEvents = 400
+MaxEvents = 4000
 #--------------------------
 #Defining Flags:
 STRIPHIST = False

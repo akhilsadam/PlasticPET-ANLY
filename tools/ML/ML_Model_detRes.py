@@ -25,8 +25,8 @@ class DRNet(nn.Module):
 		return out3
 	
 	def _initialize_weights(self):
-		init.ones_(self.conv1.weight)
-		init.ones_(self.conv2.weight)
-		init.ones_(self.conv3.weight)
-		init.ones_(self.lin1.weight)
-		init.ones_(self.lin2.weight)
+		init.normal_(self.conv1.weight,0.0,1.0)
+		init.normal_(self.conv2.weight,0.0,1.0)
+		init.normal_(self.conv3.weight,0.0,1.0)
+		init.normal_(self.lin1.weight,1.0,0.5)
+		init.normal_(self.lin2.weight,1.0,0.5)

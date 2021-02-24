@@ -31,16 +31,15 @@ print(drnet)
 #-------------------------------------------------------------------------------
 #TRAIN
 #torch.autograd.set_detect_anomaly(True)
+ML_showHIST = False
 #-------------------------------------------------------
 with open(ML_PATH+'ML_detRes_LOOP.py') as f: exec(f.read()) # helper file # training loop
 #-------------------------------------------------------
 losses = []
 if(input("Do you wish to load saved model? (y/n):") == ("y")):
 	drnet.load_state_dict(torch.load(model_path)) # LOAD	
-losses.append(train(length,folds, num_epochs, batch_size, n))
-MLDraw(losses,folds)
 while(True):
-	inpval = input("Do you wish to retrain with same model (or test)? (y/n/t):")
+	inpval = input("Do you wish to train/retrain or test model? (y/n/t):")
 	if(inpval == ("y")):
 		losses.append(train(length,folds, num_epochs, batch_size, n))
 		MLDraw(losses,folds)

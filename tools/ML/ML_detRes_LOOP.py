@@ -52,7 +52,7 @@ def train(length,folds, num_epochs, batch_size, n):
 		drnet.eval()
 		y_test = drnet(XT)
 		TestLoss[i] = loss_fn(y_test,YT)
-		ml_detRes_vis(y_test,YT)
+		if(ML_showHIST): ml_detRes_vis(y_test,YT)
 		tqdm.write("TestLoss["+str(i)+"] = "+str(TestLoss[i])+".")
 	tqdm.write("Training Complete.")
 	#fig, axs = plt.subplots(folds)

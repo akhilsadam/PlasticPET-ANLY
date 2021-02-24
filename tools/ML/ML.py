@@ -13,6 +13,8 @@ import torchvision.utils as vutils
 torch.backends.cudnn.benchmark = False#True
 torch.backends.cudnn.enabled = False#True
 import multiprocessing
+import statsmodels.api as sm
+from statsmodels.stats.outliers_influence import summary_table
 from itertools import repeat
 from functools import partial
 #-------------------------------------------------------
@@ -33,3 +35,10 @@ def fold(length,n,folds):
 	return [x[i:i + n] for i in range(0, length, n)]
 def batch(batch_size,length):
 	return [random.randint(0,length-1) for i in range(0,batch_size)]
+#-------------------------------------------------------
+def dataNotWithinLimits(post):
+	for i in range(4):
+		if ~(((LM[i,0] <= post[i]) and (LM[i,1] >= post[i]))):
+			#print("f", LM[i,0],LM[i,1])
+			return True
+	return False
