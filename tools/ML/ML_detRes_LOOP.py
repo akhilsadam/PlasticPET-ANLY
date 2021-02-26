@@ -2,7 +2,10 @@
 #training loop
 def train(length,folds, num_epochs, batch_size, n):
 	#optimizer = optim.Adam(drnet.parameters(),lr=lr,betas=(beta1,beta2))
-	optimizer = optim.SGD(drnet.parameters(),lr=lr,momentum=momentum)
+	if warmstart:
+		optimizer = optim.SGD(drnet.parameters(),lr=0.1*lr,momentum=momentum)
+	else:	
+		optimizer = optim.SGD(drnet.parameters(),lr=lr,momentum=momentum)
 	loss_fn = torch.nn.L1Loss()
 	b_losses = torch.empty(batch_size)
 	TestLoss = np.zeros(shape=(folds))
@@ -64,8 +67,10 @@ def train(length,folds, num_epochs, batch_size, n):
 def test(net):
 	net.eval()
 	predictTensor = net(inputTensor)
-	ml_detRes_vis2(predictTensor,expectedTensor)
+	ml_detRes_vis(predictTensor,expectedTensor)
+	ml_detRes_vis2(predictTensor,expectedTensor,photoLen)
 #-------------------------------------------------------
 def MLDraw(lossList,folds):
 	plt.plot(list(flatten(lossList)))
+	plt.savefig(str(ML_PATH)+"/Models/detRes_Loss_CNN_"+str(photoLen)+".png",dpi=600)
 	plt.show()

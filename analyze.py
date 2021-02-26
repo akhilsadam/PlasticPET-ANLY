@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 import math
 import os
+import io
 os.environ['MPLCONFIGDIR'] = "/home/Desktop/mplib/graph"
 import matplotlib
+matplotlib.use('AGG')
 ##matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mpt_col
@@ -14,12 +16,15 @@ from scipy import stats
 from scipy.optimize import curve_fit
 from tqdm import tqdm
 import cv2
+import sys
+#------------------------------------------------------------------------------------
+PYTHONIOENCODING="UTF-8"  #sys.setdefaultencoding("ISO-8859-1")
 #------------------------------------------------------------------------------------
 plotDIR = "plots/"
 ML_PATH = "tools/ML/"
 #------------------------------------------------------------------------------------
 MaxEventLimit = True
-MaxEvents = 4000
+MaxEvents = 17000
 #--------------------------
 #Defining Flags:
 STRIPHIST = False
@@ -39,6 +44,8 @@ SiPMtimeVSatt = False
 SiPMtimePOSRES = False #multilateration style x,y,z positioning for visualization?.
 ML_DRES = True #(turn off SiPMTime_Based_Reconstruction)
 DRES_Train = True #Train or Test?
+warmstart=True # warmstart the CNN
+KNN = False #using KNN OR CNN ?
 #---------------
 POSRES = False
 RES_ADD = False #additional resolution plots
@@ -85,7 +92,12 @@ if SIGRES:
 #ML - Detector Unit Gamma Interaction Time Resolution
 if ML_DRES:
 	if DRES_Train:
-		with open(ML_PATH+'ML_detResTRAIN.py') as f: exec(f.read()) # helper file
+		if(KNN): 
+			knn_neighbors = 5 #set value
+			with open(ML_PATH+'ML_detRes_KNN.py') as f: exec(f.read()) # KNN instead?
+		else:
+			with open(ML_PATH+'ML_detResTRAIN.py') as f: exec(f.read()) # helper file
+		
 	else:
 		with open(ML_PATH+'ML_detResTEST.py') as f: exec(f.read()) # helper file
 #------------------------------------------ 

@@ -61,7 +61,7 @@ for i in range(nEvents):
 	line = beamInteract.readline()
 beamInteract.close()
 #-------------
-@lru_cache(maxsize=2000)
+@lru_cache(maxsize=17000)
 def photonSiPMData(evt):
 	#import time
 	#t = time.time()
@@ -77,11 +77,11 @@ def photonSiPMData(evt):
 	#photonSiPMFile.close()
 	#print("Closed PhotonSiPMFile" + str(t-time.time()))
 	#t = time.time()
-	with open(filename) as fp:
+	with io.open(filename,'r',encoding='ISO-8859-1') as fp:
 		for i, line in enumerate(fp):
 			if i == evt:
 				# evt+1th line
-				textLine = line.rstrip('\n').split('|')
+				textLine = line.strip('\n').split('|')
 			elif i > evt:
 				break
 

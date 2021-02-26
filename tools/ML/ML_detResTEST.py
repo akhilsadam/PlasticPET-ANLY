@@ -2,7 +2,7 @@
 #-------------------------------------------------------------------------------
 with open(ML_PATH+'ML.py') as f: exec(f.read()) # helper file # import and setup
 with open(ML_PATH+'ML_detRes.py') as f: exec(f.read()) # helper file # PATH and vis
-with open(ML_PATH+'ML_Model_detRes.py') as f: exec(f.read()) # 
+with open(ML_PATH+'ML_Model_detRes_CNN.py') as f: exec(f.read()) # 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #Preprocessing:

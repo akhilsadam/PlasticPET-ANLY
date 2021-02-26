@@ -15,8 +15,10 @@ torch.backends.cudnn.enabled = False#True
 import multiprocessing
 import statsmodels.api as sm
 from statsmodels.stats.outliers_influence import summary_table
+from statsmodels.tools.eval_measures import rmse
 from itertools import repeat
 from functools import partial
+import pandas as pd
 #-------------------------------------------------------
 torch.multiprocessing.set_sharing_strategy('file_system')
 num_cores = multiprocessing.cpu_count()
