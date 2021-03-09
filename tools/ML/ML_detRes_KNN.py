@@ -19,7 +19,7 @@ with open(ML_PATH+'ML_detRes_preProcess.py') as f: exec(f.read()) # helper file 
 inputTensor,expectedTensor = MLDRESpreprocess(photoLen)
 #-------------------------------------------------------
 length = inputTensor.shape[0]
-frac = 0.7
+frac = 0.75
 splitList = [int(length*frac),length - int(length*frac)]
 finalK = 50
 stepK = 2
@@ -70,6 +70,7 @@ dataTensorY = expectedTensor[dataInd]
 expectTensor = expectedTensor[testInd]
 #dataTensorX,dataTensorY,inputTensor,expectTensor
 out = drnet(dataTensorX,dataTensorY,inptTensor)
+ml_detRes_vis(out,expectTensor,knn_neighbors)
 ml_detRes_vis2(out,expectTensor,knn_neighbors)
 #-------------------------------------------------------
 #with open(ML_PATH+'ML_detRes_LOOP.py') as f: exec(f.read()) # helper file # training loop

@@ -5,7 +5,7 @@ else:
 	model_path = str(ML_PATH)+"Data/ML_DET_RES_"+str(photoLen)+"_Photo.pt"
 #-------------------------------------------------------
 #vis
-def ml_detRes_vis(inpT,expT):
+def ml_detRes_vis(inpT,expT,pl):
 	resid = inpT-expT
 	length,types = resid.shape
 	if(types!=4):
@@ -17,18 +17,37 @@ def ml_detRes_vis(inpT,expT):
 	fig, axs = plt.subplots(types)
 	plt.suptitle("ML - Det. Res. Residuals (Errors)")
 	if(device=="cpu"):
-		data = resid.detach().numpy()
+		data = resid.detach()#.numpy()
 	else:
-		data = resid.detach().cpu().numpy()
+		data = resid.detach().cpu()#.numpy()
 
 	data[:,3] = (data[:,3]*n_EJ208)/(1000*nanosec*c_const)
+	for i in range(types):
 	
-	[axs[i].hist(data[:,i], bins=50, range=rangeList[i]) for i in range(types)]
-	[axs[i].set_xlabel(typeList[i]) for i in range(types)]
-	[axs[i].set_ylabel("Counts") for i in range(types)]
+		result = axs[i].hist(data[:,i].numpy(), bins=50, range=rangeList[i],color='#0022D0')
+		axs[i].set_xlabel(typeList[i])
+		axs[i].set_ylabel("Counts")
+		mu = torch.mean(data[:,i])
+		std = math.sqrt(torch.var(data[:,i]))
+		x = np.linspace(rangeList[i][0], rangeList[i][1], 100)
+		dx = result[1][1] - result[1][0]
+		axs[i].plot(x, stats.norm.pdf(x, mu, std)*dx*length, color='red')
+		axs[i].text(0.03, 0.90, "Mean,SD,FWHM = ({0:.3f},{1:.3f},{2:.3f}) ".format(mu,std,FWHMC*std),verticalalignment='top',horizontalalignment='left',transform = axs[i].transAxes,fontsize=8)
+		axs[i].text(0.97, 0.90, "{0} Events".format(length),verticalalignment='top',horizontalalignment='right',transform = axs[i].transAxes,fontsize=8)
+
+	
 	plt.tight_layout()
-	plt.savefig(str(ML_PATH)+"/Models/detRes_training_CNN_"+str(photoLen)+".png",dpi=600)
-	plt.show()
+	if(KNN):
+		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual")
+		plt.savefig(str(ML_PATH)+"/Models/detRes_training_KNN_"+str(pl)+".png",dpi=600)
+		#plt.show()
+		plt.close()
+	else:
+		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual")
+		plt.savefig(str(ML_PATH)+"/Models/detRes_training_CNN_"+str(photoLen)+".png",dpi=600)
+		#plt.show()
+		plt.close()
+
 def ml_detRes_vis2(inpT,expT,pl):
 	length,types = inpT.shape
 	if(types!=4):
@@ -86,8 +105,12 @@ def ml_detRes_vis2(inpT,expT,pl):
 		#ax.plot(x0,predict_mean_ci_upp,color='black')
 		ax.plot(x0,fittedvalues,color='red')
 		ax.plot(ax.get_xticks(),ax.get_xticks(),color='darkred')
+		#ax.set_xlim(min(x),max(x))	
+		#ax.set_ylim(min(x),max(x))
+		ax.text(0.90, 0.20, "FIT:({0:.3f},{1:.3f}) ".format(intercept,slope),verticalalignment='top',horizontalalignment='right',transform = ax.transAxes,fontsize=8)
+		ax.text(0.90, 0.40, "{0} Events".format(length),verticalalignment='top',horizontalalignment='right',transform = ax.transAxes,fontsize=8)
 
-		ax.text(0.90, 0.90, "FIT:({0:.3f},{1:.3f}) ".format(intercept,slope),verticalalignment='top',horizontalalignment='left',transform = ax.transAxes,fontsize=8)
+		
 
 	plt.tight_layout()
 	if(KNN):
@@ -162,7 +185,7 @@ def ml_detRes_vis_knn(inpT,expT,uik,noplt):
 		#plt.show()
 def ml_detRes_vis_knn2(pltx,rmseP):
 	fig, axs = plt.subplots(2,2)
-	typeList = ["X (mm)","Y (mm)", "Z (mm)", "T (also mm)"]
+	typeList = ["X (mm)","Y (mm)", "Z (mm)", "T (ns)"]
 	for i in range(4):
 		ax = axs[int(i/2),i%2]
 		ax.scatter(pltx[:,i,:],rmseP[:,i,:])

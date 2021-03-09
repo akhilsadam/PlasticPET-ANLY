@@ -65,7 +65,6 @@ def process_MLDRESinput(c):
 		print(e)
 		return None
 
-from tqdm import tqdm
 def MLDRESpreprocess(photoLen):
 	with multiprocessing.Pool(workers) as pool:
 		inptL = list(tqdm(pool.imap_unordered(process_MLDRESinput,range(nEvents)),total=nEvents))

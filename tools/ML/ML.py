@@ -10,8 +10,8 @@ import torch.utils.data
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
-torch.backends.cudnn.benchmark = False#True
-torch.backends.cudnn.enabled = False#True
+torch.backends.cudnn.benchmark = True
+torch.backends.cudnn.enabled = True
 import multiprocessing
 import statsmodels.api as sm
 from statsmodels.stats.outliers_influence import summary_table
@@ -19,6 +19,7 @@ from statsmodels.tools.eval_measures import rmse
 from itertools import repeat
 from functools import partial
 import pandas as pd
+from tqdm import tqdm
 #-------------------------------------------------------
 torch.multiprocessing.set_sharing_strategy('file_system')
 num_cores = multiprocessing.cpu_count()
