@@ -5,21 +5,12 @@ with open(ML_PATH+'ML_detRes.py') as f: exec(f.read()) # helper file # PATH and 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 folds = 5
-batch_size = 1 # set of events to train at once
-epochs = 4
-lr = 0.0000001
+batch_size = 8 # set of events to train at once
+epochs = 1
+lr = 0.00001
 momentum = 0.9 #SGD
 beta1 = 0.5 
 beta2 = 0.999 #ADAM
-#-------------------------------------------------------------------------------
-#Preprocessing:
-with open(ML_PATH+'ML_detRes_preProcess.py') as f: exec(f.read()) # helper file # preprocessing
-inputTensor,expectedTensor = MLDRESpreprocess(photoLen)
-#-------------------------------------------------------
-length = inputTensor.shape[0]
-n = int(length/folds)
-num_epochs = int(epochs*n/batch_size)
-#-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #Model Definition
 if warmstart:
@@ -29,15 +20,16 @@ else:
 drnet = DRNet()
 drnet.train()
 drnet._initialize_weights()
+print("Number Of Params:",sum(p.numel() for p in drnet.parameters() if p.requires_grad))
+print("Number Of layerparams:",sum(1 for p in drnet.parameters() if p.requires_grad))
 print(drnet)
+#print(list(drnet.parameters()))
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #TRAIN
 #torch.autograd.set_detect_anomaly(True)
 ML_showHIST = True
-#-------------------------------------------------------
-with open(ML_PATH+'ML_detRes_LOOP.py') as f: exec(f.read()) # helper file # training loop
-#-------------------------------------------------------
+
 losses = []
 if warmstart:
 	if(input("Do you wish to load warmstarted data? (y/n):") == ("y")):
@@ -48,8 +40,25 @@ else:
 	if(input("Do you wish to load saved model? (y/n):") == ("y")):
 		drnet.load_state_dict(torch.load(model_path)) # LOAD	
 
+preprocessed=False
+
 while(True):
 	inpval = input("Do you wish to train/retrain or test model? (y/n/t/(int of train loops)):")
+	#-------------------------------------------------------
+	if(preprocessed==False):
+		#-------------------------------------------------------------------------------
+		#Preprocessing:
+		with open(ML_PATH+'ML_detRes_preProcess.py') as f: exec(f.read()) # helper file # preprocessing
+		inputTensor,expectedTensor = MLDRESpreprocess(photoLen)
+		#-------------------------------------------------------
+		length = inputTensor.shape[0]
+		n = int(length/folds)
+		num_epochs = int(epochs*n/batch_size)
+		#-------------------------------------------------------------------------------
+		with open(ML_PATH+'ML_detRes_LOOP.py') as f: exec(f.read()) # helper file # training loop
+		#-------------------------------------------------------
+		preprocessed=True
+
 	if(inpval == ("y")):
 		losses.append(train(length,folds, num_epochs, batch_size, n))
 		MLDraw(losses,folds)

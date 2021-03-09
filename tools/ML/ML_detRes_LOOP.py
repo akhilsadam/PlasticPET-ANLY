@@ -3,11 +3,17 @@
 def train(length,folds, num_epochs, batch_size, n):
 	#optimizer = optim.Adam(drnet.parameters(),lr=lr,betas=(beta1,beta2))
 	if warmstart:
-		optimizer = optim.SGD(drnet.parameters(),lr=0.1*lr,momentum=momentum)
+		paramList = list(drnet.parameters())
+		paraml = len(paramList)
+		optimizer = optim.Adam(paramList[0:(paraml-2)],lr=0.01*lr,betas=(beta1,beta2))
+		optimize2 = optim.Adam(paramList[(paraml-2):(paraml-1)],lr=10*lr,betas=(beta1,beta2))	#slope
+		optimize3 = optim.Adam(paramList[(paraml-1):paraml],lr=5*lr,betas=(beta1,beta2))	#bias
+		#optimizer = optim.SGD(drnet.parameters(),lr=lr,momentum=momentum*0.5)
+		loss_fn = torch.nn.SmoothL1Loss()
 	else:	
 		optimizer = optim.SGD(drnet.parameters(),lr=lr,momentum=momentum)
-	loss_fn = torch.nn.L1Loss()
-	b_losses = torch.empty(batch_size)
+		loss_fn = torch.nn.L1Loss()
+	#b_losses = torch.empty(batch_size)
 	TestLoss = np.zeros(shape=(folds))
 	lossList = np.zeros(shape=(folds,num_epochs))
 	foldL = fold(length,n,folds)
@@ -29,24 +35,50 @@ def train(length,folds, num_epochs, batch_size, n):
 		drnet.train()
 		for t in range(num_epochs):
 			folded = batch(batch_size,len(indT))
-			for b in range(batch_size):
-				u = folded[b]
-				xb = X[u].reshape(batch_size,4,2*photoLen)
-				yb = Y[u].reshape(batch_size,4)
+			#for b in range(batch_size):
+			#	u = folded[b]
+			#	print(len(u))
+			#	xb = X[u].reshape(batch_size,4,2*photoLen)
+			#	yb = Y[u].reshape(batch_size,4)
+
+			#	y_pred = drnet(xb)			
 				
-				y_pred = drnet(xb)			
 				
 
-				b_losses[b] = loss_fn(y_pred,yb)
+			#	b_losses[b] = loss_fn(y_pred,yb)
 
-			loss = torch.mean(b_losses)
+			#loss = torch.mean(b_losses)
+
+			u = folded
+			xb = X[u].reshape(batch_size,4,2*photoLen)
+			yb = Y[u].reshape(batch_size,4)
+			y_pred = drnet(xb)			
+			loss = loss_fn(y_pred,yb)
+
 			lossList[i,t] = loss.item()
-			b_losses = torch.empty(batch_size)
+
+			#b_losses = torch.empty(batch_size)
 
 			optimizer.zero_grad()
+			if warmstart:
+				optimize2.zero_grad()
+				optimize3.zero_grad()
+			#penalty term ----------------------------
+			# Creates gradients
+			#grad_params = torch.autograd.grad(outputs=loss,inputs=drnet.parameters(),create_graph=True)
+			# Computes the penalty term and adds it to the loss
+			#grad_norm = 0
+			#for grad in grad_params:
+			#	grad_norm += grad.pow(2).sum()
+			#grad_norm = grad_norm.sqrt()
+			#loss = loss + grad_norm
+			# ----------------------------------------
+
 			loss.backward(retain_graph=True)
 			optimizer.step()
-			
+			if warmstart:
+				optimize2.step()
+				optimize3.step()
 
 			#print("[Fold/Epoch]:","[",i,"/",t,"] - Loss:", loss.item())
 			pbar.update(batch_size)
@@ -55,7 +87,7 @@ def train(length,folds, num_epochs, batch_size, n):
 		drnet.eval()
 		y_test = drnet(XT)
 		TestLoss[i] = loss_fn(y_test,YT)
-		if(ML_showHIST): ml_detRes_vis(y_test,YT)
+		if(ML_showHIST): ml_detRes_vis(y_test,YT,photoLen)
 		tqdm.write("TestLoss["+str(i)+"] = "+str(TestLoss[i])+".")
 	tqdm.write("Training Complete.")
 	#fig, axs = plt.subplots(folds)
@@ -67,10 +99,11 @@ def train(length,folds, num_epochs, batch_size, n):
 def test(net):
 	net.eval()
 	predictTensor = net(inputTensor)
-	ml_detRes_vis(predictTensor,expectedTensor)
+	ml_detRes_vis(predictTensor,expectedTensor,photoLen)
 	ml_detRes_vis2(predictTensor,expectedTensor,photoLen)
 #-------------------------------------------------------
 def MLDraw(lossList,folds):
 	plt.plot(list(flatten(lossList)))
 	plt.savefig(str(ML_PATH)+"/Models/detRes_Loss_CNN_"+str(photoLen)+".png",dpi=600)
-	plt.show()
+	#plt.show()
+	plt.close()

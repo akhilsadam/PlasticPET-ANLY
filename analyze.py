@@ -24,7 +24,7 @@ plotDIR = "plots/"
 ML_PATH = "tools/ML/"
 #------------------------------------------------------------------------------------
 MaxEventLimit = True
-MaxEvents = 17000
+MaxEvents =17000#int(input("Number of Events:"))
 #--------------------------
 #Defining Flags:
 STRIPHIST = False
@@ -43,9 +43,10 @@ SiPMtimeRES = False
 SiPMtimeVSatt = False 
 SiPMtimePOSRES = False #multilateration style x,y,z positioning for visualization?.
 ML_DRES = True #(turn off SiPMTime_Based_Reconstruction)
-DRES_Train = True #Train or Test?
+DRES_Train = False #Train or Test/VIS?
 warmstart=True # warmstart the CNN
-KNN = False #using KNN OR CNN ?
+KNN = True #using KNN OR CNN ?
+knn_neighbors = 5 #set value
 #---------------
 POSRES = False
 RES_ADD = False #additional resolution plots
@@ -91,15 +92,14 @@ if SIGRES:
 #------------------------------------------
 #ML - Detector Unit Gamma Interaction Time Resolution
 if ML_DRES:
-	if DRES_Train:
-		if(KNN): 
-			knn_neighbors = 5 #set value
-			with open(ML_PATH+'ML_detRes_KNN.py') as f: exec(f.read()) # KNN instead?
-		else:
-			with open(ML_PATH+'ML_detResTRAIN.py') as f: exec(f.read()) # helper file
-		
+	if(KNN):
+		with open(ML_PATH+'ML_detRes_KNN.py') as f: exec(f.read()) # KNN instead?
 	else:
-		with open(ML_PATH+'ML_detResTEST.py') as f: exec(f.read()) # helper file
+		if DRES_Train:
+			with open(ML_PATH+'ML_detResTRAIN.py') as f: exec(f.read()) # helper file
+			
+		else:
+			with open(ML_PATH+'ML_detResTEST.py') as f: exec(f.read()) # helper file
 #------------------------------------------ 
 #Sub-strip interaction location plots
 if SUBSTRIP:

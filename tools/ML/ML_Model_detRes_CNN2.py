@@ -37,3 +37,11 @@ class DRNet(nn.Module):
 		init.normal_(self.lin2.weight,1.0,0.5)
 		self.lin3.weight = torch.nn.Parameter(torch.diag(torch.Tensor([1/0.1,1/0.376,1,1/1.036])))
 		self.lin3.bias = torch.nn.Parameter(torch.Tensor([-16.839,14.930,17.774,1000*(0.111*nanosec)*(c_const/n_EJ208)]))
+	def init2(self):
+		init.normal_(self.conv1.weight,0.0,1.0)
+		init.normal_(self.conv2.weight,0.0,1.0)
+		init.normal_(self.conv3.weight,0.0,1.0)
+		init.normal_(self.lin1.weight,1.0,0.5)
+		init.normal_(self.lin2.weight,1.0,0.5)
+		self.lin3.weight = torch.nn.Parameter(torch.diag(torch.Tensor([random.uniform(-30,30),random.uniform(-30,30),random.uniform(-30,30),random.uniform(-30,30)])))
+		self.lin3.bias = torch.nn.Parameter(torch.Tensor([random.uniform(-30,30),random.uniform(-30,30),random.uniform(-30,30),random.uniform(-30,30)]))
