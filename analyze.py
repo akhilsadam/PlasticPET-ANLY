@@ -27,7 +27,7 @@ ML_PATH = "tools/ML/"
 cpus = multiprocessing.cpu_count()
 print("CPU Count:",cpus)
 if(cpus>16):
-	num_cores = 40
+	num_cores = 48
 	MaxEventLimit = False
 else:
 	num_cores = cpus
