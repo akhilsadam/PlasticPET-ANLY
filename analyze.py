@@ -18,7 +18,6 @@ from tqdm import tqdm
 import multiprocessing
 import cv2
 import sys
-
 #------------------------------------------------------------------------------------
 PYTHONIOENCODING="UTF-8"  #sys.setdefaultencoding("ISO-8859-1")
 #------------------------------------------------------------------------------------
