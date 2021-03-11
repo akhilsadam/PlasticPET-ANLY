@@ -15,6 +15,7 @@ from functools import lru_cache
 from scipy import stats
 from scipy.optimize import curve_fit
 from tqdm import tqdm
+import multiprocessing
 import cv2
 import sys
 #------------------------------------------------------------------------------------
@@ -23,8 +24,15 @@ PYTHONIOENCODING="UTF-8"  #sys.setdefaultencoding("ISO-8859-1")
 plotDIR = "plots/"
 ML_PATH = "tools/ML/"
 #------------------------------------------------------------------------------------
-MaxEventLimit = True
-MaxEvents =17000#int(input("Number of Events:"))
+if(multiprocessing.cpu_count()>16):
+	num_cores = 40
+	MaxEventLimit = False
+else:
+	num_cores = multiprocessing.cpu_count()
+	MaxEventLimit = True
+#------------------------------------------------------------------------------------
+#MaxEventLimit = True #manual override
+MaxEvents = 500#int(input("Number of Events:"))
 #--------------------------
 #Defining Flags:
 STRIPHIST = False
@@ -43,10 +51,10 @@ SiPMtimeRES = False
 SiPMtimeVSatt = False 
 SiPMtimePOSRES = False #multilateration style x,y,z positioning for visualization?.
 ML_DRES = True #(turn off SiPMTime_Based_Reconstruction)
-DRES_Train = False #Train or Test/VIS?
+DRES_Train = True #Train or Test/VIS?
 warmstart=True # warmstart the CNN
 KNN = True #using KNN OR CNN ?
-knn_neighbors = 5 #set value
+knn_neighbors = 1 #set value
 #---------------
 POSRES = False
 RES_ADD = False #additional resolution plots

@@ -21,8 +21,8 @@ inputTensor,expectedTensor = MLDRESpreprocess(photoLen)
 length = inputTensor.shape[0]
 frac = 0.75
 splitList = [int(length*frac),length - int(length*frac)]
-finalK = 50
-stepK = 2
+finalK = 80
+stepK = 4
 veclen = int((finalK+stepK-1)/stepK)
 #n = int(length/folds)
 epochs = 5
@@ -43,7 +43,7 @@ if(DRES_Train):
 	rmseP = torch.zeros((veclen,4,epochs))
 	pltx = np.zeros((veclen,4,epochs))
 	nk=0
-	for uik in np.arange(1,finalK,stepK):
+	for uik in np.arange(4,finalK,stepK):
 		drnet.setK(uik)
 		for jk in range(epochs):
 			listset = list(range(length))
@@ -55,7 +55,8 @@ if(DRES_Train):
 			expectTensor = expectedTensor[testInd]
 			#dataTensorX,dataTensorY,inputTensor,expectTensor
 			out = drnet(dataTensorX,dataTensorY,inptTensor)
-			rmseP[nk,:,jk] = torch.from_numpy(ml_detRes_vis_knn(out,expectTensor,uik,noplt=True))
+			rmseP[nk,:,jk] = torch.from_numpy(ml_detRes_vis_knn(out,expectTensor,uik,noplt=False))
+			ml_detRes_vis(out,expectTensor,uik)
 			pltx[nk,:,jk] = [uik]*4
 		nk=nk+1
 	ml_detRes_vis_knn2(pltx,rmseP)
