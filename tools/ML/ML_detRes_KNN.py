@@ -35,6 +35,20 @@ drnet.eval() #not train!
 drnet._initialize_weights()
 print(drnet)
 #-------------------------------------------------------------------------------
+def knntest(knn_neighbors):
+	drnet.setK(knn_neighbors)
+	listset = list(range(length))
+	random.shuffle(listset)
+	dataInd,testInd = torch.split(torch.tensor(listset),splitList)
+	dataTensorX = inputTensor[dataInd]
+	inptTensor = inputTensor[testInd]
+	dataTensorY = expectedTensor[dataInd]
+	expectTensor = expectedTensor[testInd]
+	#dataTensorX,dataTensorY,inputTensor,expectTensor
+	out = drnet(dataTensorX,dataTensorY,inptTensor)
+	ml_detRes_vis(out,expectTensor,knn_neighbors)
+	ml_detRes_vis2(out,expectTensor,knn_neighbors)
+	return True
 #-------------------------------------------------------------------------------
 #TRAIN
 #torch.autograd.set_detect_anomaly(True)
@@ -59,20 +73,13 @@ if(DRES_Train):
 			ml_detRes_vis(out,expectTensor,uik)
 			pltx[nk,:,jk] = [uik]*4
 		nk=nk+1
-	ml_detRes_vis_knn2(pltx,rmseP)
-drnet.setK(knn_neighbors)
+	ml_detRes_vis_knn2(pltx,rmseP) #optimal number plot
+else:
+	with multiprocessing.Pool(workers) as pool:
+		lise = list(tqdm(pool.imap(knntest,np.arange(4,finalK,stepK)),total=veclen))
+	print("DONE")
 
-listset = list(range(length))
-random.shuffle(listset)
-dataInd,testInd = torch.split(torch.tensor(listset),splitList)
-dataTensorX = inputTensor[dataInd]
-inptTensor = inputTensor[testInd]
-dataTensorY = expectedTensor[dataInd]
-expectTensor = expectedTensor[testInd]
-#dataTensorX,dataTensorY,inputTensor,expectTensor
-out = drnet(dataTensorX,dataTensorY,inptTensor)
-ml_detRes_vis(out,expectTensor,knn_neighbors)
-ml_detRes_vis2(out,expectTensor,knn_neighbors)
+
 #-------------------------------------------------------
 #with open(ML_PATH+'ML_detRes_LOOP.py') as f: exec(f.read()) # helper file # training loop
 #-------------------------------------------------------

@@ -53,10 +53,10 @@ SiPMtimeRES = False
 SiPMtimeVSatt = False 
 SiPMtimePOSRES = False #multilateration style x,y,z positioning for visualization?.
 ML_DRES = True #(turn off SiPMTime_Based_Reconstruction)
-DRES_Train = True #Train or Test/VIS?
+DRES_Train = False #Train or Test/VIS?
 warmstart=True # warmstart the CNN
 KNN = True #using KNN OR CNN ?
-knn_neighbors = 1 #set value
+knn_neighbors = 4 #set value
 #---------------
 POSRES = False
 RES_ADD = False #additional resolution plots
