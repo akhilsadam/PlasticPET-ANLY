@@ -24,11 +24,13 @@ PYTHONIOENCODING="UTF-8"  #sys.setdefaultencoding("ISO-8859-1")
 plotDIR = "plots/"
 ML_PATH = "tools/ML/"
 #------------------------------------------------------------------------------------
-if(multiprocessing.cpu_count()>16):
+cpus = multiprocessing.cpu_count()
+print("CPU Count:",cpus)
+if(cpus>16):
 	num_cores = 40
 	MaxEventLimit = False
 else:
-	num_cores = multiprocessing.cpu_count()
+	num_cores = cpus
 	MaxEventLimit = True
 #------------------------------------------------------------------------------------
 #MaxEventLimit = True #manual override
