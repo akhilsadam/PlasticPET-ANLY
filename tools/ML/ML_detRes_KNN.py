@@ -75,8 +75,8 @@ if(DRES_Train):
 		nk=nk+1
 	ml_detRes_vis_knn2(pltx,rmseP) #optimal number plot
 else:
-	with multiprocessing.Pool(workers) as pool:
-		lise = list(tqdm(pool.imap(knntest,np.arange(4,finalK,stepK)),total=veclen))
+	with multiprocessing.Pool(processes=8,maxtasksperchild=1000) as pool:
+		lise = list(tqdm(pool.map(knntest,np.arange(4,finalK,stepK)),total=veclen))
 	print("DONE")
 
 

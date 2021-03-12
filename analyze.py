@@ -18,16 +18,17 @@ from tqdm import tqdm
 import multiprocessing
 import cv2
 import sys
+
 #------------------------------------------------------------------------------------
 PYTHONIOENCODING="UTF-8"  #sys.setdefaultencoding("ISO-8859-1")
-#------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------
 plotDIR = "plots/"
 ML_PATH = "tools/ML/"
 #------------------------------------------------------------------------------------
 cpus = multiprocessing.cpu_count()
 print("CPU Count:",cpus)
 if(cpus>16):
-	num_cores = 20 #48
+	num_cores = 48 #48
 	MaxEventLimit = False
 else:
 	num_cores = cpus
