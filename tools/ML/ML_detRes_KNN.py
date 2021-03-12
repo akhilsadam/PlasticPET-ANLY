@@ -21,9 +21,10 @@ inputTensor,expectedTensor = MLDRESpreprocess(photoLen)
 length = inputTensor.shape[0]
 frac = 0.75
 splitList = [int(length*frac),length - int(length*frac)]
-finalK = 80
+initK = 1#4
+finalK = 1#80
 stepK = 4
-veclen = int((finalK+stepK-1)/stepK)
+veclen = int((finalK+stepK-initK)/stepK)
 #n = int(length/folds)
 epochs = 5
 #-------------------------------------------------------------------------------
@@ -57,7 +58,7 @@ if(DRES_Train):
 	rmseP = torch.zeros((veclen,4,epochs))
 	pltx = np.zeros((veclen,4,epochs))
 	nk=0
-	for uik in np.arange(4,finalK,stepK):
+	for uik in np.arange(initK,finalK,stepK):
 		drnet.setK(uik)
 		for jk in range(epochs):
 			listset = list(range(length))
@@ -76,7 +77,7 @@ if(DRES_Train):
 	ml_detRes_vis_knn2(pltx,rmseP) #optimal number plot
 else:
 	with multiprocessing.Pool(processes=8,maxtasksperchild=1000) as pool:
-		lise = list(tqdm(pool.map(knntest,np.arange(4,finalK,stepK)),total=veclen))
+		lise = list(tqdm(pool.map(knntest,np.arange(initK,finalK,stepK)),total=veclen))
 	print("DONE")
 
 
