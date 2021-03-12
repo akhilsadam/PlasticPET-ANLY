@@ -35,7 +35,7 @@ else:
 	MaxEventLimit = True
 #------------------------------------------------------------------------------------
 #MaxEventLimit = True #manual override
-MaxEvents = 500#int(input("Number of Events:"))
+MaxEvents = 2000#int(input("Number of Events:"))
 #--------------------------
 #Defining Flags:
 STRIPHIST = False

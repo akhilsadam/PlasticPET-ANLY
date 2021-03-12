@@ -11,6 +11,7 @@ binList = [5,5,25,0.1]
 locX = 0.95
 locY = 0.05
 spaY = 0.10
+nbins=50
 #-------------------------------------------------------
 MarginalPLT = True
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -59,17 +60,26 @@ def ml_detRes_vis(inpT,expT,pl):
 		data = resid.detach().cpu()#.numpy()
 
 	data[:,3] = (data[:,3]*n_EJ208)/(1000*nanosec*c_const)
+
 	for i in range(types):
 	
-		result = axs[i].hist(data[:,i].numpy(), bins=50, range=rangeList[i],color='#0022D0')
+		result = axs[i].hist(data[:,i].numpy(), bins=nbins, range=rangeList[i],color='#0022D0')
 		axs[i].set_xlabel(typeList[i])
 		axs[i].set_ylabel("Counts")
 		mu = torch.mean(data[:,i])
 		std = math.sqrt(torch.var(data[:,i]))
-		x = np.linspace(rangeList[i][0], rangeList[i][1], 100)
 		dx = result[1][1] - result[1][0]
-		axs[i].plot(x, stats.norm.pdf(x, mu, std)*dx*length, color='red')
-		axs[i].text(0.03, 0.90, "Mean,SD,FWHM = ({0:.3f},{1:.3f},{2:.3f}) ".format(mu,std,FWHMC*std),verticalalignment='top',horizontalalignment='left',transform = axs[i].transAxes,fontsize=8)
+		gy = result[0]
+		gx = result[1][0:(len(result[1])-1)] + 0.5*dx
+		def gaussian(x,mu,sig):
+			return stats.norm.pdf(x, mu, sig)*length*dx
+		popt,pcov = curve_fit(gaussian,gx,gy,p0=[mu,std])
+
+		x = np.linspace(rangeList[i][0], rangeList[i][1], 100)
+		
+		axs[i].plot(x,gaussian(x,popt[0],popt[1]), color='red')
+		#axs[i].plot(x,gaussian(x,popt[0],popt[1],popt[2]), color='red')
+		axs[i].text(0.03, 0.90, "Mean,SD,FWHM = ({0:.3f},{1:.3f},{2:.3f}) ".format(popt[0],popt[1],FWHMC*popt[1]),verticalalignment='top',horizontalalignment='left',transform = axs[i].transAxes,fontsize=8)
 		axs[i].text(0.97, 0.90, "{0} Events".format(length),verticalalignment='top',horizontalalignment='right',transform = axs[i].transAxes,fontsize=8)
 
 	
