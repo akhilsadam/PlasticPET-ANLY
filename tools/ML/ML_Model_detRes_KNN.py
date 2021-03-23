@@ -2,7 +2,7 @@ class DRKNN(nn.Module):
 	def __init__(self):
 		super(DRKNN, self).__init__()
 		self.ngpu = ngpu
-		self.k = 3;
+		self.k = 3
 	def setK(self,kin):
 		self.k = kin	
 
@@ -13,7 +13,7 @@ class DRKNN(nn.Module):
 		a,indx = torch.topk(dist,k=int(self.k),largest=False)
 		outs = dataTensorY[indx]
 		out = torch.mean(outs,1)
-		return out
+		return out,indx
 	
 	def _initialize_weights(self):
 		self.k = 3#np.random.randint(1,50)

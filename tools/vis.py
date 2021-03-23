@@ -5,6 +5,55 @@ def forceAspect(ax,aspect=1):
 	im = ax.get_images()
 	extent = im[0].get_extent()
 	ax.set_aspect(abs((extent[1]-extent[0])/(extent[3]-extent[2]))/aspect)
+def visgrids(ax,i,alpha):
+	xin = (0+i)%4
+	yin = (1+i)%4
+	zin = (2+i)%4
+	ax.axes.set_ylim3d(bottom=LM[xin,0],top=LM[xin,1])
+	ax.axes.set_zlim3d(bottom=LM[yin,0],top=LM[yin,1])
+	ax.axes.set_xlim3d(left=LM[zin,0],right=LM[zin,1])
+
+	xGrid = np.arange(LM[xin,0],LM[xin,1]+BM[xin],BM[xin])
+	yGrid = np.arange(LM[yin,0],LM[yin,1]+BM[yin],BM[yin])
+	zGrid = np.arange(LM[zin,0],LM[zin,1]+BM[zin],BM[zin])
+	XS,YS,ZS = [],[],[]
+	for i in range(len(xGrid)-1):
+		for j in range(len(yGrid)):
+			for k in range(len(zGrid)-1):
+				XS.append(zGrid[k])
+				YS.append(xGrid[i])
+				ZS.append(yGrid[j])
+				XS.append(zGrid[k+1])
+				YS.append(xGrid[i])
+				ZS.append(yGrid[j])
+				ax.plot(XS,YS,ZS,label='parametric curve',color='grey',linestyle='--',linewidth=0.4,alpha=alpha)
+				XS,YS,ZS = [],[],[]
+				XS.append(zGrid[k])
+				YS.append(xGrid[i])
+				ZS.append(yGrid[j])
+				XS.append(zGrid[k])
+				YS.append(xGrid[i+1])
+				ZS.append(yGrid[j])
+				ax.plot(XS,YS,ZS,label='parametric curve',color='grey',linestyle='--',linewidth=0.4,alpha=alpha)
+				XS,YS,ZS = [],[],[]
+				XS.append(zGrid[k+1])
+				YS.append(xGrid[i])
+				ZS.append(yGrid[j])
+				XS.append(zGrid[k+1])
+				YS.append(xGrid[i+1])
+				ZS.append(yGrid[j])
+				ax.plot(XS,YS,ZS,label='parametric curve',color='grey',linestyle='--',linewidth=0.4,alpha=alpha)
+				XS,YS,ZS = [],[],[]
+				XS.append(zGrid[k])
+				YS.append(xGrid[i+1])
+				ZS.append(yGrid[j])
+				XS.append(zGrid[k+1])
+				YS.append(xGrid[i+1])
+				ZS.append(yGrid[j])
+				ax.plot(XS,YS,ZS,label='parametric curve',color='grey',linestyle='--',linewidth=0.4,alpha=alpha)
+				XS,YS,ZS = [],[],[]
+	ax.grid(False)
+
 def vis(eventID):
 	fig = plt.figure(figsize=(5,5))
 	ax = fig.add_subplot(111)
@@ -27,50 +76,8 @@ def vis(eventID):
 		px = evtInteract[eventID][:,i]
 		px = np.insert(px,0,evtPos[eventID,i])
 		p.append(px)
-	ax.axes.set_ylim3d(bottom=-UX,top=UX)
-	ax.axes.set_zlim3d(bottom=-UY,top=UY)
-	ax.axes.set_xlim3d(left=0,right=LZ)
 
-	xGrid = np.arange(-UX,UX+binx,binx)
-	yGrid = np.arange(-UY,UY+biny,biny)
-	zGrid = np.arange(0,LZ+binz,binz)
-	XS,YS,ZS = [],[],[]
-	for i in range(len(xGrid)-1):
-		for j in range(len(yGrid)):
-			for k in range(len(zGrid)-1):
-				XS.append(zGrid[k])
-				YS.append(xGrid[i])
-				ZS.append(yGrid[j])
-				XS.append(zGrid[k+1])
-				YS.append(xGrid[i])
-				ZS.append(yGrid[j])
-				ax.plot(XS,YS,ZS,label='parametric curve',color='grey',linestyle='--',linewidth=0.4)
-				XS,YS,ZS = [],[],[]
-				XS.append(zGrid[k])
-				YS.append(xGrid[i])
-				ZS.append(yGrid[j])
-				XS.append(zGrid[k])
-				YS.append(xGrid[i+1])
-				ZS.append(yGrid[j])
-				ax.plot(XS,YS,ZS,label='parametric curve',color='grey',linestyle='--',linewidth=0.4)
-				XS,YS,ZS = [],[],[]
-				XS.append(zGrid[k+1])
-				YS.append(xGrid[i])
-				ZS.append(yGrid[j])
-				XS.append(zGrid[k+1])
-				YS.append(xGrid[i+1])
-				ZS.append(yGrid[j])
-				ax.plot(XS,YS,ZS,label='parametric curve',color='grey',linestyle='--',linewidth=0.4)
-				XS,YS,ZS = [],[],[]
-				XS.append(zGrid[k])
-				YS.append(xGrid[i+1])
-				ZS.append(yGrid[j])
-				XS.append(zGrid[k+1])
-				YS.append(xGrid[i+1])
-				ZS.append(yGrid[j])
-				ax.plot(XS,YS,ZS,label='parametric curve',color='grey',linestyle='--',linewidth=0.4)
-				XS,YS,ZS = [],[],[]
-	ax.grid(False)
+	visgrids(ax,0,1)
 
 	ax.plot(p[2],p[0],p[1],label='parametric curve')
 	p = []
@@ -96,50 +103,8 @@ def visTime(eventID):
 		px = evtInteract[eventID][:,i]
 		px = np.insert(px,0,evtPos[eventID,i])
 		p.append(px)
-	ax.axes.set_ylim3d(bottom=-UX,top=UX)
-	ax.axes.set_zlim3d(bottom=-UY,top=UY)
-	ax.axes.set_xlim3d(left=0,right=LZ)
 
-	xGrid = np.arange(-UX,UX+binx,binx)
-	yGrid = np.arange(-UY,UY+biny,biny)
-	zGrid = np.arange(0,LZ+binz,binz)
-	XS,YS,ZS = [],[],[]
-	for i in range(len(xGrid)-1):
-		for j in range(len(yGrid)):
-			for k in range(len(zGrid)-1):
-				XS.append(zGrid[k])
-				YS.append(xGrid[i])
-				ZS.append(yGrid[j])
-				XS.append(zGrid[k+1])
-				YS.append(xGrid[i])
-				ZS.append(yGrid[j])
-				ax.plot(XS,YS,ZS,label='parametric curve',color='grey',linestyle='--',linewidth=0.4)
-				XS,YS,ZS = [],[],[]
-				XS.append(zGrid[k])
-				YS.append(xGrid[i])
-				ZS.append(yGrid[j])
-				XS.append(zGrid[k])
-				YS.append(xGrid[i+1])
-				ZS.append(yGrid[j])
-				ax.plot(XS,YS,ZS,label='parametric curve',color='grey',linestyle='--',linewidth=0.4)
-				XS,YS,ZS = [],[],[]
-				XS.append(zGrid[k+1])
-				YS.append(xGrid[i])
-				ZS.append(yGrid[j])
-				XS.append(zGrid[k+1])
-				YS.append(xGrid[i+1])
-				ZS.append(yGrid[j])
-				ax.plot(XS,YS,ZS,label='parametric curve',color='grey',linestyle='--',linewidth=0.4)
-				XS,YS,ZS = [],[],[]
-				XS.append(zGrid[k])
-				YS.append(xGrid[i+1])
-				ZS.append(yGrid[j])
-				XS.append(zGrid[k+1])
-				YS.append(xGrid[i+1])
-				ZS.append(yGrid[j])
-				ax.plot(XS,YS,ZS,label='parametric curve',color='grey',linestyle='--',linewidth=0.4)
-				XS,YS,ZS = [],[],[]
-	ax.grid(False)
+	visgrids(ax,0,1)
 
 	ax.plot(p[2],p[0],p[1],label='parametric curve')
 	p = []
