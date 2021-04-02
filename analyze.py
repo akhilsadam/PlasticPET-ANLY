@@ -12,6 +12,7 @@ import matplotlib.colors as mpt_col
 from matplotlib.colors import ListedColormap,LinearSegmentedColormap
 import matplotlib.cm as cm
 import matplotlib.markers as mk
+import matplotlib.ticker as mticker
 from functools import lru_cache
 from scipy import stats
 from scipy.optimize import curve_fit
@@ -36,7 +37,7 @@ else:
 	MaxEventLimit = True
 #------------------------------------------------------------------------------------
 #MaxEventLimit = True #manual override
-MaxEvents = 40#int(input("Number of Events:"))
+MaxEvents = 80#int(input("Number of Events:"))
 #--------------------------
 #Defining Flags:
 STRIPHIST = False
@@ -55,13 +56,14 @@ SiPMtimeRES = False
 SiPMtimeVSatt = False 
 SiPMtimePOSRES = False #multilateration style x,y,z positioning for visualization?.
 ML_DRES = True #(turn off SiPMTime_Based_Reconstruction)
-DRES_Train = False #Train or Test/VIS?
+DRES_Train = True #Train or Test/VIS?
 #---CNN
 warmstart=True # warmstart the CNN
 #---KNN
-KNN = True #using KNN OR CNN ?
-KVIS = "ERR" #options "False" "ERR" "VIS" #nearest neighbor output visualization?
-knn_neighbors = 5 #set value
+KNN = True #using KNN OR CNN ? 
+MLOPT = ["PCA"] #options "PCA"
+KVIS = "RUNONE" #options "RUN" "OPTNUM" "ERR" "VIS" #nearest neighbor output visualization?
+knn_neighbors = 4 #set value
 #---------------
 POSRES = False
 RES_ADD = False #additional resolution plots

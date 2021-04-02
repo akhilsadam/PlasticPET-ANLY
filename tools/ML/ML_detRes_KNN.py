@@ -17,12 +17,16 @@ beta2 = 0.999 #ADAM
 #Preprocessing:
 with open(ML_PATH+'ML_detRes_preProcess.py') as f: exec(f.read()) # helper file # preprocessing
 inputTensor,expectedTensor = MLDRESpreprocess(photoLen)
+if("PCA" in MLOPT):
+	PATH_OPT=PATH_OPT+"PCA"
+	print(":OPTIONS- ",PATH_OPT)
+	with open(ML_PATH+'ML_PCA.py') as f: exec(f.read()) # helper file # PATH and vis
 #-------------------------------------------------------
 length = inputTensor.shape[0]
 frac = 0.75
 splitList = [int(length*frac),length - int(length*frac)]
-initK = 1#4
-finalK = 2#80
+initK = 5#4
+finalK = 6#80
 stepK = 1
 veclen = int((finalK+stepK-initK)/stepK)
 #n = int(length/folds)
@@ -162,32 +166,36 @@ if(KVIS=="VIS"):
 	kvis(knn_neighbors)
 elif(KVIS=="ERR"):
 	kerr(knn_neighbors)
-else:
-	if(DRES_Train):
-		rmseP = torch.zeros((veclen,4,epochs))
-		pltx = np.zeros((veclen,4,epochs))
-		nk=0
-		for uik in np.arange(initK,finalK,stepK):
-			drnet.setK(uik)
-			for jk in range(epochs):
-				listset = list(range(length))
-				random.shuffle(listset)
-				dataInd,testInd = torch.split(torch.tensor(listset),splitList)
-				dataTensorX = inputTensor[dataInd]
-				inptTensor = inputTensor[testInd]
-				dataTensorY = expectedTensor[dataInd]
-				expectTensor = expectedTensor[testInd]
-				#dataTensorX,dataTensorY,inputTensor,expectTensor
-				out,outs = drnet(dataTensorX,dataTensorY,inptTensor)
-				rmseP[nk,:,jk] = torch.from_numpy(ml_detRes_vis_knn(out,expectTensor,uik,noplt=False))
-				ml_detRes_vis(out,expectTensor,uik)
-				pltx[nk,:,jk] = [uik]*4
-			nk=nk+1
-		ml_detRes_vis_knn2(pltx,rmseP) #optimal number plot
-	else:
-		with multiprocessing.Pool(processes=8,maxtasksperchild=1000) as pool:
-			lise = list(tqdm(pool.map(knntest,np.arange(initK,finalK,stepK)),total=veclen))
-		print("DONE")
+elif(KVIS=="OPTNUM"):
+	rmseP = torch.zeros((veclen,4,epochs))
+	pltx = np.zeros((veclen,4,epochs))
+	nk=0
+	for uik in np.arange(initK,finalK,stepK):
+		drnet.setK(uik)
+		for jk in range(epochs):
+			listset = list(range(length))
+			random.shuffle(listset)
+			dataInd,testInd = torch.split(torch.tensor(listset),splitList)
+			dataTensorX = inputTensor[dataInd]
+			inptTensor = inputTensor[testInd]
+			dataTensorY = expectedTensor[dataInd]
+			expectTensor = expectedTensor[testInd]
+			#dataTensorX,dataTensorY,inputTensor,expectTensor
+			out,outs = drnet(dataTensorX,dataTensorY,inptTensor)
+			rmseP[nk,:,jk] = torch.from_numpy(ml_detRes_vis_knn(out,expectTensor,uik,noplt=False))
+			ml_detRes_vis(out,expectTensor,uik)
+			pltx[nk,:,jk] = [uik]*4
+		nk=nk+1
+	ml_detRes_vis_knn2(pltx,rmseP) #optimal number plot
+elif(KVIS=="RUN"):
+	print("RUN")
+	with multiprocessing.Pool(processes=8) as pool:
+		lise = list(tqdm(pool.map(knntest,np.arange(initK,finalK,stepK)),total=veclen))
+	print("DONE")
+elif(KVIS=="RUNONE"):
+	print("RUN")
+	knntest(knn_neighbors)
+	print("DONE")
 
 #-------------------------------------------------------
 #with open(ML_PATH+'ML_detRes_LOOP.py') as f: exec(f.read()) # helper file # training loop

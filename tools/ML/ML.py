@@ -43,3 +43,5 @@ def dataNotWithinLimits(post):
 			#print("f", LM[i,0],LM[i,1])
 			return True
 	return False
+#-------------------------------------------------------
+PATH_OPT=""

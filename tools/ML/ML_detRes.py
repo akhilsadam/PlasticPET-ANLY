@@ -52,9 +52,7 @@ def marginalPLT2(ax,x,y,i):
 	ax_histy = divider.append_axes("right", 0.2, pad=0.05, sharey=ax)
 	# now determine nice limits by hand:
 	binwidth = binList[i]
-	xmax = np.max(np.abs(x))
-	lim = (int(xmax/binwidth) + 1)*binwidth
-	bins = np.arange(-lim, lim + binwidth, binwidth)
+	bins = np.arange(int(LM[i,0]), int(LM[i,1])+ binwidth, binwidth)
 	binzy = 20
 	ymax = np.max(np.abs(y))
 	binwidthy = int(ymax/binzy)
@@ -118,12 +116,12 @@ def ml_detRes_vis(inpT,expT,pl):
 	
 	if(KNN):
 		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual")
-		plt.savefig(str(ML_PATH)+"/Models/detRes_training_KNN_"+str(pl)+".png",dpi=600)
+		plt.savefig(str(ML_PATH)+"/Models/detRes_training_KNN_"+str(pl)+PATH_OPT+".png",dpi=600)
 		#plt.show()
 		plt.close()
 	else:
 		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual")
-		plt.savefig(str(ML_PATH)+"/Models/detRes_training_CNN_"+str(photoLen)+".png",dpi=600)
+		plt.savefig(str(ML_PATH)+"/Models/detRes_training_CNN_"+str(photoLen)+PATH_OPT+".png",dpi=600)
 		#plt.show()
 		plt.close()
 
@@ -195,11 +193,11 @@ def ml_detRes_vis2(inpT,expT,pl):
 
 	if(KNN):
 		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual")
-		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(pl)+"_.png",bbox_inches='tight',dpi=600)
+		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(pl)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
 		plt.show()
 	else:
 		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual")
-		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_CNN_"+str(pl)+".png",bbox_inches='tight',dpi=600)
+		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_CNN_"+str(pl)+"."+PATH_OPT+"png",bbox_inches='tight',dpi=600)
 		plt.show()
 
 def ml_detRes_vis_knn(inpT,expT,uik,noplt):
@@ -265,7 +263,7 @@ def ml_detRes_vis_knn(inpT,expT,uik,noplt):
 				marginalPLT(ax,x,y,i)
 
 		plt.suptitle("MLKNN (K="+str(uik)+") - Det. Res. Predicted vs Actual")
-		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(uik)+"_.png",bbox_inches='tight',dpi=600)
+		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(uik)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
 		plt.close()
 		return rmseL
 		#plt.show()
@@ -278,5 +276,5 @@ def ml_detRes_vis_knn2(pltx,rmseP):
 		ax.set_xlabel("k-neighbors")
 		ax.set_ylabel("RMSE in "+typeList[i])
 	plt.suptitle("KNN RMSE by K-value - optimal # of neighbors")
-	plt.savefig(str(ML_PATH)+"/Models/detRes_KNN_OptimalNeighbors.png")
+	plt.savefig(str(ML_PATH)+"/Models/detRes_KNN_OptimalNeighbors"+PATH_OPT+".png")
 	plt.close()
