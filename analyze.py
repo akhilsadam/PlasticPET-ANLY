@@ -5,7 +5,7 @@ import os
 import io
 os.environ['MPLCONFIGDIR'] = "/home/Desktop/mplib/graph"
 import matplotlib
-#matplotlib.use('AGG')
+matplotlib.use('AGG')
 ##matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mpt_col
@@ -31,13 +31,13 @@ cpus = multiprocessing.cpu_count()
 print("CPU Count:",cpus)
 if(cpus>16):
 	num_cores = 48 #48
-	MaxEventLimit = False
+	MaxEventLimit = True
 else:
 	num_cores = cpus
 	MaxEventLimit = True
 #------------------------------------------------------------------------------------
 #MaxEventLimit = True #manual override
-MaxEvents = 80#int(input("Number of Events:"))
+MaxEvents = 800#int(input("Number of Events:"))
 #--------------------------
 #Defining Flags:
 STRIPHIST = False
@@ -61,7 +61,7 @@ DRES_Train = True #Train or Test/VIS?
 warmstart=True # warmstart the CNN
 #---KNN
 KNN = True #using KNN OR CNN ? 
-MLOPT = ["PCA"] #options "PCA"
+MLOPT = [] #options "PCA"
 KVIS = "RUNONE" #options "RUN" "OPTNUM" "ERR" "VIS" #nearest neighbor output visualization?
 knn_neighbors = 4 #set value
 #---------------
