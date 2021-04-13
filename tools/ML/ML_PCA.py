@@ -15,7 +15,10 @@ d = int(len(meaninput)/4)
 meaninput[(2*d):(3*d)] = (meaninput[2*d] + meaninput[3*d])/2
 stdinput[(2*d):(3*d)] = meaninput[(2*d):(3*d)]
 #----
-standardinput = (flatinput-meaninput)/stdinput
+if(pcaSTD):
+    standardinput = (flatinput)
+else:
+    standardinput = (flatinput-meaninput)/stdinput
 #covariance --------------------------------------------------------
 cov = torch.tensor(np.cov(standardinput,y=None,rowvar=False),dtype=torch.float32)
 #mahalanobis
@@ -24,8 +27,18 @@ mahalanobis = torch.diagonal(torch.sqrt(torch.chain_matmul(standardinput,torch.p
 print(mahalanobis.shape)
 #eigensystem
 eigenval, eigenvect = torch.eig(cov,eigenvectors=True)
+singular = torch.sqrt(eigenval[:,0])
+scale = singular+(singular==0)*0.2
+#print(scale)
 # pca
 pcainput = torch.matmul(standardinput,eigenvect)
+
+if(pcaSTD):
+    #pcainput = torch.divide(pcainput,singular)
+    pass
+
+print(standardinput.shape)
+print(eigenvect.shape)
 pcacov = np.cov(pcainput,y=None,rowvar=False)
 
 #

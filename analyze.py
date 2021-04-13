@@ -5,7 +5,7 @@ import os
 import io
 os.environ['MPLCONFIGDIR'] = "/home/Desktop/mplib/graph"
 import matplotlib
-matplotlib.use('AGG')
+#matplotlib.use('AGG')
 ##matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mpt_col
@@ -37,7 +37,7 @@ else:
 	MaxEventLimit = True
 #------------------------------------------------------------------------------------
 #MaxEventLimit = True #manual override
-MaxEvents = 800#int(input("Number of Events:"))
+MaxEvents = 300#int(input("Number of Events:"))
 #--------------------------
 #Defining Flags:
 STRIPHIST = False
@@ -53,7 +53,7 @@ SiPM_Based_Reconstruction = False #a binning method, massages data to use only b
 #SiPM Timing: (number of photons to count in SiPM timing) (needs SiPMTime_Based_Reconstruction)
 photoLen = 5
 SiPMtimeRES = False
-SiPMtimeVSatt = False 
+SiPMtimeVSatt = False
 SiPMtimePOSRES = False #multilateration style x,y,z positioning for visualization?.
 ML_DRES = True #(turn off SiPMTime_Based_Reconstruction)
 DRES_Train = True #Train or Test/VIS?
@@ -61,8 +61,8 @@ DRES_Train = True #Train or Test/VIS?
 warmstart=True # warmstart the CNN
 #---KNN
 KNN = True #using KNN OR CNN ? 
-MLOPT = [] #options "PCA"
-KVIS = "RUNONE" #options "RUN" "OPTNUM" "ERR" "VIS" #nearest neighbor output visualization?
+MLOPT = ["PCA","STD"] #options "PCA" "STD" (note STD requires PCA)
+KVIS = "RUNONE" #options "RUNONE" "RUN" "OPTNUM" "ERR" "VIS" "False" #nearest neighbor output visualization?
 knn_neighbors = 4 #set value
 #---------------
 POSRES = False

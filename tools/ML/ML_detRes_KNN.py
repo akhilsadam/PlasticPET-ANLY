@@ -19,8 +19,15 @@ with open(ML_PATH+'ML_detRes_preProcess.py') as f: exec(f.read()) # helper file 
 inputTensor,expectedTensor = MLDRESpreprocess(photoLen)
 if("PCA" in MLOPT):
 	PATH_OPT=PATH_OPT+"PCA"
-	print(":OPTIONS- ",PATH_OPT)
+	pcaSTD = False
+if("STD" in MLOPT):
+	PATH_OPT=PATH_OPT+"-STD"
+	pcaSTD = True
+#---
+print(":OPTIONS- ",PATH_OPT)
+if("PCA" in MLOPT):
 	with open(ML_PATH+'ML_PCA.py') as f: exec(f.read()) # helper file # PATH and vis
+	print("Loaded PCA")
 #-------------------------------------------------------
 length = inputTensor.shape[0]
 frac = 0.75

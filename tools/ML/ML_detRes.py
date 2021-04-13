@@ -115,12 +115,12 @@ def ml_detRes_vis(inpT,expT,pl):
 
 	
 	if(KNN):
-		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual")
+		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual "+PATH_OPT)
 		plt.savefig(str(ML_PATH)+"/Models/detRes_training_KNN_"+str(pl)+PATH_OPT+".png",dpi=600)
 		#plt.show()
 		plt.close()
 	else:
-		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual")
+		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual "+PATH_OPT)
 		plt.savefig(str(ML_PATH)+"/Models/detRes_training_CNN_"+str(photoLen)+PATH_OPT+".png",dpi=600)
 		#plt.show()
 		plt.close()
@@ -192,11 +192,11 @@ def ml_detRes_vis2(inpT,expT,pl):
 			marginalPLT(ax,x,y,i)
 
 	if(KNN):
-		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual")
+		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual "+PATH_OPT)
 		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(pl)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
 		plt.show()
 	else:
-		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual")
+		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual "+PATH_OPT)
 		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_CNN_"+str(pl)+"."+PATH_OPT+"png",bbox_inches='tight',dpi=600)
 		plt.show()
 
@@ -262,7 +262,7 @@ def ml_detRes_vis_knn(inpT,expT,uik,noplt):
 			if MarginalPLT:
 				marginalPLT(ax,x,y,i)
 
-		plt.suptitle("MLKNN (K="+str(uik)+") - Det. Res. Predicted vs Actual")
+		plt.suptitle("MLKNN (K="+str(uik)+") - Det. Res. Predicted vs Actual "+PATH_OPT)
 		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(uik)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
 		plt.close()
 		return rmseL
@@ -275,6 +275,6 @@ def ml_detRes_vis_knn2(pltx,rmseP):
 		ax.scatter(pltx[:,i,:],rmseP[:,i,:])
 		ax.set_xlabel("k-neighbors")
 		ax.set_ylabel("RMSE in "+typeList[i])
-	plt.suptitle("KNN RMSE by K-value - optimal # of neighbors")
+	plt.suptitle("KNN RMSE by K-value - optimal # of neighbors "+PATH_OPT)
 	plt.savefig(str(ML_PATH)+"/Models/detRes_KNN_OptimalNeighbors"+PATH_OPT+".png")
 	plt.close()
