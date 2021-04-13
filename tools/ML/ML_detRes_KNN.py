@@ -32,9 +32,9 @@ if("PCA" in MLOPT):
 length = inputTensor.shape[0]
 frac = 0.75
 splitList = [int(length*frac),length - int(length*frac)]
-initK = 5#4
-finalK = 6#80
-stepK = 1
+initK = 2#4
+finalK = 40#80
+stepK = 5
 veclen = int((finalK+stepK-initK)/stepK)
 #n = int(length/folds)
 epochs = 5

@@ -5,7 +5,7 @@ import os
 import io
 os.environ['MPLCONFIGDIR'] = "/home/Desktop/mplib/graph"
 import matplotlib
-#matplotlib.use('AGG')
+matplotlib.use('AGG')
 ##matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mpt_col
@@ -37,7 +37,7 @@ else:
 	MaxEventLimit = True
 #------------------------------------------------------------------------------------
 #MaxEventLimit = True #manual override
-MaxEvents = 300#int(input("Number of Events:"))
+MaxEvents = 12000#int(input("Number of Events:"))
 #--------------------------
 #Defining Flags:
 STRIPHIST = False
@@ -62,7 +62,7 @@ warmstart=True # warmstart the CNN
 #---KNN
 KNN = True #using KNN OR CNN ? 
 MLOPT = ["PCA","STD"] #options "PCA" "STD" (note STD requires PCA)
-KVIS = "RUNONE" #options "RUNONE" "RUN" "OPTNUM" "ERR" "VIS" "False" #nearest neighbor output visualization?
+KVIS = "RUN" #options "RUNONE" "RUN" "OPTNUM" "ERR" "VIS" "False" #nearest neighbor output visualization?
 knn_neighbors = 4 #set value
 #---------------
 POSRES = False

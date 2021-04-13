@@ -16,7 +16,7 @@ meaninput[(2*d):(3*d)] = (meaninput[2*d] + meaninput[3*d])/2
 stdinput[(2*d):(3*d)] = meaninput[(2*d):(3*d)]
 #----
 if(pcaSTD):
-    standardinput = (flatinput)
+    standardinput = (flatinput-meaninput)
 else:
     standardinput = (flatinput-meaninput)/stdinput
 #covariance --------------------------------------------------------
