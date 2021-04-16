@@ -8,13 +8,16 @@ targetshape=flatinput.shape
 #print(flatinput[0])
 #standardize -------------------------------------------------------
 #Workaround for Z-values:
-if(len(flatinput)==4*2*photoLen):
+#print(targetshape[1])
+if(targetshape[1]==4*2*photoLen):
+    #print("Z-workaround")
     d = int(2*photoLen)
-    flatinput[(2*d):(3*d)] = np.nan
+    flatinput[:,(2*d):(3*d)] = np.nan
 #Zero valuing
 # remove all nan/zero columns in Tensor
 flatinput = flatinput[:,torch.isfinite(flatinput[0])]
 flatlength = len(flatinput[0])
+#print(flatinput[0])
 #
 meaninput = torch.mean(flatinput,dim=0)
 #print(meaninput.shape)

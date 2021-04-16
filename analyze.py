@@ -61,9 +61,9 @@ DRES_Train = True #Train or Test/VIS?
 warmstart=True # warmstart the CNN
 #---KNN
 KNN = True #using KNN OR CNN ? 
-MLOPT = ["DISABLE-ZT"] #options "PCA" "STD" "MAHA" (note MAHA,STD requires PCA)
-KVIS = "RUNONE" #options "RUNONE" "RUN" "OPTNUM" "ERR" "VIS" "False" #nearest neighbor output visualization?
-knn_neighbors =  #set value
+MLOPT = ["DISABLE-ZT"] #options "PCA" "STD" "MAHA" "DISABLE-ZT" (note MAHA,STD requires PCA)
+KVIS = "RUN" #options "RUNONE" "RUN" "OPTNUM" "ERR" "VIS" "False" #nearest neighbor output visualization?
+knn_neighbors = 4 #set value
 #---------------
 POSRES = False
 RES_ADD = False #additional resolution plots
