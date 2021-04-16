@@ -31,7 +31,7 @@ cpus = multiprocessing.cpu_count()
 print("CPU Count:",cpus)
 if(cpus>16):
 	num_cores = 48 #48
-	MaxEventLimit = True
+	MaxEventLimit = False
 else:
 	num_cores = cpus
 	MaxEventLimit = True
@@ -61,7 +61,7 @@ DRES_Train = True #Train or Test/VIS?
 warmstart=True # warmstart the CNN
 #---KNN
 KNN = True #using KNN OR CNN ? 
-MLOPT = ["PCA","STD"] #options "PCA" "STD" (note STD requires PCA)
+MLOPT = ["PCA","DISABLE-ZT"] #options "PCA" "STD" "MAHA" (note MAHA,STD requires PCA)
 KVIS = "RUN" #options "RUNONE" "RUN" "OPTNUM" "ERR" "VIS" "False" #nearest neighbor output visualization?
 knn_neighbors = 4 #set value
 #---------------

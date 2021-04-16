@@ -23,6 +23,9 @@ if("PCA" in MLOPT):
 if("STD" in MLOPT):
 	PATH_OPT=PATH_OPT+"-STD"
 	pcaSTD = True
+if("MAHA" in MLOPT):
+	PATH_OPT=PATH_OPT+"-MAHA"
+	pcaMAHA = True
 #---
 print(":OPTIONS- ",PATH_OPT)
 if("PCA" in MLOPT):

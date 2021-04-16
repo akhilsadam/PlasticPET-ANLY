@@ -28,15 +28,14 @@ print(mahalanobis.shape)
 #eigensystem
 eigenval, eigenvect = torch.eig(cov,eigenvectors=True)
 singular = torch.sqrt(eigenval[:,0])
-scale = singular+(singular==0)*0.2
+scale = singular+(singular==0)*1
 #print(scale)
 # pca
 pcainput = torch.matmul(standardinput,eigenvect)
 
-if(pcaSTD):
-    #pcainput = torch.divide(pcainput,singular)
-    pass
-
+if(pcaMAHA):
+    pcainput = torch.divide(pcainput,singular)
+    
 print(standardinput.shape)
 print(eigenvect.shape)
 pcacov = np.cov(pcainput,y=None,rowvar=False)
