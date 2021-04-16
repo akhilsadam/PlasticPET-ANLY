@@ -2,18 +2,24 @@
 
 #flatten vectors
 flatinput = torch.flatten(inputTensor,start_dim=1)
+
 #print(inputTensor.shape)
-#print(flatinput.shape)
+targetshape=flatinput.shape
 #print(flatinput[0])
 #standardize -------------------------------------------------------
+#Workaround for Z-values:
+if(len(flatinput)==4*2*photoLen):
+    d = int(2*photoLen)
+    flatinput[(2*d):(3*d)] = np.nan
+#Zero valuing
+# remove all nan/zero columns in Tensor
+flatinput = flatinput[:,torch.isfinite(flatinput[0])]
+flatlength = len(flatinput[0])
+#
 meaninput = torch.mean(flatinput,dim=0)
 #print(meaninput.shape)
 stdinput = torch.std(flatinput,dim=0)
 #print(stdinput.shape)
-#workaround for Z-values:
-d = int(len(meaninput)/4)
-meaninput[(2*d):(3*d)] = (meaninput[2*d] + meaninput[3*d])/2
-stdinput[(2*d):(3*d)] = meaninput[(2*d):(3*d)]
 #----
 if(pcaSTD):
     standardinput = (flatinput-meaninput)
@@ -24,7 +30,7 @@ cov = torch.tensor(np.cov(standardinput,y=None,rowvar=False),dtype=torch.float32
 #mahalanobis
 ts = torch.transpose(standardinput,0,1)
 mahalanobis = torch.diagonal(torch.sqrt(torch.chain_matmul(standardinput,torch.pinverse(cov),ts)))
-print(mahalanobis.shape)
+#print(mahalanobis.shape)
 #eigensystem
 eigenval, eigenvect = torch.eig(cov,eigenvectors=True)
 singular = torch.sqrt(eigenval[:,0])
@@ -36,13 +42,16 @@ pcainput = torch.matmul(standardinput,eigenvect)
 if(pcaMAHA):
     pcainput = torch.divide(pcainput,singular)
     
-print(standardinput.shape)
-print(eigenvect.shape)
+#print(standardinput.shape)
+#print(eigenvect.shape)
 pcacov = np.cov(pcainput,y=None,rowvar=False)
 
 #
 OLDinput = inputTensor
-inputTensor = torch.reshape(pcainput, inputTensor.shape)
+target = torch.zeros(targetshape)
+target[:,0:flatlength] = pcainput
+#print(target.shape)
+inputTensor = torch.reshape(target, inputTensor.shape)
 
 fig,ax =plt.subplots(nrows=1,ncols=3,figsize=(15,5),constrained_layout=True)
 cmap = "cool"
@@ -68,3 +77,4 @@ fig.colorbar(covplot,ax = ax[2])
 plt.suptitle("DetRes PCA")
 plt.savefig(str(ML_PATH)+"/Models/detRes_"+PATH_OPT+".png")
 plt.close()
+print("Loaded PCA")

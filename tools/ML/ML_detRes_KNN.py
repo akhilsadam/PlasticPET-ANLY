@@ -20,17 +20,21 @@ inputTensor,expectedTensor = MLDRESpreprocess(photoLen)
 if("PCA" in MLOPT):
 	PATH_OPT=PATH_OPT+"PCA"
 	pcaSTD = False
+	pcaMAHA = False
 if("STD" in MLOPT):
 	PATH_OPT=PATH_OPT+"-STD"
 	pcaSTD = True
 if("MAHA" in MLOPT):
 	PATH_OPT=PATH_OPT+"-MAHA"
 	pcaMAHA = True
+if("DISABLE-ZT" in MLOPT):
+	PATH_OPT=PATH_OPT+"-DISABLE-ZT"
+	inputTensor[:,2:4,:]=np.nan
+	
 #---
 print(":OPTIONS- ",PATH_OPT)
 if("PCA" in MLOPT):
 	with open(ML_PATH+'ML_PCA.py') as f: exec(f.read()) # helper file # PATH and vis
-	print("Loaded PCA")
 #-------------------------------------------------------
 length = inputTensor.shape[0]
 frac = 0.75
