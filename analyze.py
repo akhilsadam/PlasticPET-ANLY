@@ -4,15 +4,6 @@ import math
 import os
 import io
 os.environ['MPLCONFIGDIR'] = "/home/Desktop/mplib/graph"
-import matplotlib
-matplotlib.use('AGG')
-##matplotlib.use('Qt5Agg')
-import matplotlib.pyplot as plt
-import matplotlib.colors as mpt_col
-from matplotlib.colors import ListedColormap,LinearSegmentedColormap
-import matplotlib.cm as cm
-import matplotlib.markers as mk
-import matplotlib.ticker as mticker
 from functools import lru_cache
 from scipy import stats
 from scipy.optimize import curve_fit
@@ -25,6 +16,7 @@ import sys
 PYTHONIOENCODING="UTF-8"  #sys.setdefaultencoding("ISO-8859-1")
 #----------------------------------------------------------------------------------
 plotDIR = "plots/"
+reflectplotDIR = plotDIR + "reflect/"
 ML_PATH = "tools/ML/"
 #------------------------------------------------------------------------------------
 cpus = multiprocessing.cpu_count()
@@ -32,12 +24,23 @@ print("CPU Count:",cpus)
 if(cpus>16):
 	num_cores = 48 #48
 	MaxEventLimit = False
+	import matplotlib
+	matplotlib.use('AGG')
 else:
 	num_cores = cpus
 	MaxEventLimit = True
+	import matplotlib
+	#matplotlib.use('AGG')
+#----------------------------
+import matplotlib.pyplot as plt
+import matplotlib.colors as mpt_col
+from matplotlib.colors import ListedColormap,LinearSegmentedColormap
+import matplotlib.cm as cm
+import matplotlib.markers as mk
+import matplotlib.ticker as mticker
 #------------------------------------------------------------------------------------
 #MaxEventLimit = True #manual override
-MaxEvents = 200#int(input("Number of Events:"))
+MaxEvents = 10#int(input("Number of Events:"))
 #--------------------------
 #Defining Flags:
 STRIPHIST = False
@@ -55,7 +58,8 @@ photoLen = 5
 SiPMtimeRES = False
 SiPMtimeVSatt = False
 SiPMtimePOSRES = False #multilateration style x,y,z positioning for visualization?.
-ML_DRES = True #(turn off SiPMTime_Based_Reconstruction)
+#---------------
+ML_DRES = False #(turn off SiPMTime_Based_Reconstruction)
 DRES_Train = True #Train or Test/VIS?
 #---CNN
 warmstart=True # warmstart the CNN
@@ -72,6 +76,13 @@ SUBSTRIP = False #needs SiPM_Based_Reconstruction False
 SUBSTRIP_RECONSTRUCT = False #needs SiPM_Based_Reconstruction False
 #---------------
 TIMERES = False
+#--------------- --------- --------- -------- TESTS
+ReflectionTest = True
+ReflectOPT = [] #options "DISABLE-VK"
+Ropt = ""
+#---------------------------------
+if("DISABLE-VK" in ReflectOPT):
+    Ropt=Ropt+"_DISABLE_VK"
 #------------------------------------------------------------------------------------
 with open('tools/dimensions.py') as f: exec(f.read()) # helper file
 with open('tools/data.py') as f: exec(f.read()) # helper file
@@ -126,7 +137,11 @@ if SUBSTRIP_RECONSTRUCT:
 #------------------------------------------ 
 #Time Resolution Plots
 if TIMERES:
-	with open('tools/timeGammaRes.py') as f: exec(f.read()) # helper fil
+	with open('tools/timeGammaRes.py') as f: exec(f.read()) # helper file
+#------------------------------------------ 
+# Reflection Tests
+if ReflectionTest:
+	with open('tools/reflectionT.py') as f: exec(f.read()) # helper fil
 #------------------------------------------------------------------------------------
 #event for special analysis
 #vis(eventID = 606)

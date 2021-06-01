@@ -149,3 +149,281 @@ def visTime(eventID):
 	plt.show()
 	#print(evtInteract[eventID])
 	#print(recPos[eventID])
+#
+# 
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+def marginalPLT0(ax,x,y,i):
+	#ax.set_aspect(1.)
+	# create new axes on the right and on the top of the current axes
+	divider = make_axes_locatable(ax)
+	# below height and pad are in inches
+	ax_histx = divider.append_axes("top", 0.2, pad=0.05, sharex=ax)
+	ax_histy = divider.append_axes("right", 0.2, pad=0.05, sharey=ax)
+	# now determine nice limits by hand:
+	binwidth = binList[i]
+	bins = np.arange(int(LM[i,0]), int(LM[i,1])+ binwidth, binwidth)
+
+	ax_histx.hist(x, bins=bins)
+	ax_histy.hist(y, bins=bins, orientation='horizontal')
+	ax_histx.text(locX,locY+spaY, "Bin={0:.1f} {1}".format(binwidth,unitList[i]),verticalalignment='bottom',horizontalalignment='right',transform = ax.transAxes,fontsize=8)
+
+	# the xaxis of ax_histx and yaxis of ax_histy are shared with ax,
+	# thus there is no need to manually adjust the xlim and ylim of these
+	# axis.
+	#ax_histx.set_yticks([0, 50, 100])
+	#ax_histy.set_xticks([0, 50, 100])
+	ax_histx.get_xaxis().set_visible(False)
+	ax_histy.get_yaxis().set_visible(False)
+	ax.tick_params(labelsize=8)
+	ax_histx.tick_params(labelsize=8)
+	ax_histy.tick_params(labelsize=8)
+
+	plt.margins(0,0)
+
+def marginalPLT2(ax,x,y,i):
+	#ax.set_aspect(1.)
+	# create new axes on the right and on the top of the current axes
+	divider = make_axes_locatable(ax)
+	# below height and pad are in inches
+	ax_histx = divider.append_axes("top", 0.2, pad=0.05, sharex=ax)
+	ax_histy = divider.append_axes("right", 0.2, pad=0.05, sharey=ax)
+	# now determine nice limits by hand:
+	binwidth = binList[i]
+	bins = np.arange(int(LM[i,0]), int(LM[i,1])+ binwidth, binwidth)
+	binzy = 20
+	ymax = np.max(np.abs(y))
+	binwidthy = int(ymax/binzy)
+	limy = (int(ymax/binwidthy) + 1)*binwidthy
+	ybins = np.arange(0, limy + binwidthy, binwidthy)
+	ax_histx.hist(x, bins=bins)
+	ax_histy.hist(y, bins=ybins, orientation='horizontal')
+	ax_histx.text(locX,locY+spaY, "Bin={0:.1f} {1}".format(binwidth,unitList[i]),verticalalignment='bottom',horizontalalignment='right',transform = ax.transAxes,fontsize=8)
+
+	# the xaxis of ax_histx and yaxis of ax_histy are shared with ax,
+	# thus there is no need to manually adjust the xlim and ylim of these
+	# axis.
+	#ax_histx.set_yticks([0, 50, 100])
+	#ax_histy.set_xticks([0, 50, 100])
+	ax_histx.get_xaxis().set_visible(False)
+	ax_histy.get_yaxis().set_visible(False)
+	ax.tick_params(labelsize=8)
+	ax_histx.tick_params(labelsize=8)
+	ax_histy.tick_params(labelsize=8)
+
+	plt.margins(0,0)
+
+#--------------------------------------------------- vis REFLECTIONS
+def visReflect(eventID):
+	fig = plt.figure()
+	ax0 = fig.add_subplot(1, 2, 1, projection='3d')
+	ax1 = fig.add_subplot(1, 2, 2, projection='3d')
+	axs=[ax0,ax1]
+	
+	visgrids(axs[0],0,1)
+	visgrids(axs[1],0,1)
+	#photons
+	(nPhotons,psmD) = photonReflectData(eventID)
+	minTimeSiPMphot = min(psmD[3])
+
+	reflectState = psmD[4,:]
+	rp = (reflectState == 1.0)
+	kp = (reflectState == 0.0)
+	other = np.count_nonzero(reflectState == 2.0)
+	reflect = np.count_nonzero(rp)
+	killed = np.count_nonzero(kp)
+	pr = reflect/(reflect+killed+other)
+	tot = len(psmD[0])
+	psmDR = np.reshape(psmD[:,rp],(6,reflect))
+	psmDK = np.reshape(psmD[:,kp],(6,killed))
+
+	cmap = LinearSegmentedColormap.from_list("Segment", [(0,0,0),(0.0,0.7,1)], N=2)
+
+	ax0.scatter(psmDR[2],psmDR[0],psmDR[1],s=2,c=psmDR[4],cmap=cmap,norm=mpt_col.Normalize(vmin=0,vmax=1.0))	
+	ax1.scatter(psmDK[2],psmDK[0],psmDK[1],s=2,c=psmDK[4],cmap=cmap,norm=mpt_col.Normalize(vmin=0,vmax=1.0))
+
+	cbar = fig.colorbar(cm.ScalarMappable(norm=mpt_col.Normalize(vmin=0,vmax=1), cmap=cmap),ax=axs[1])
+	cbar.set_label('Alive/Killed', rotation=-90)
+
+	for ax in axs:
+		ax.set_xlabel("Z - length")
+		ax.set_ylabel("X - depth/width")
+		ax.set_zlabel("Y - height")
+		ax.set_proj_type('persp')
+
+	st = 0.65
+	xt = 0.02
+	plt.figtext(xt, st+.24, "Total Photon-Boundary Interactions = %1.0f" %(tot),fontsize=10)
+	plt.figtext(xt, st+.20, "Reflected = %4.4f" %(reflect),fontsize=10)
+	plt.figtext(xt, st+.16, "Killed = %4.4f" %(killed),fontsize=10)
+	plt.figtext(xt, st+.12, "Unclassified = %4.4f" %(other),fontsize=10)
+	plt.figtext(xt, st+.08, "Reflection Percentage = %4.4f" %(pr),fontsize=10)
+	plt.figtext(xt, st+.04, "Photons~= (1-P(R))*Total = %4.4f" %((1-pr)*tot),fontsize=10)
+	plt.figtext(xt, st+.00, "First Detected Photon Time = %4.4f ns" %(minTimeSiPMphot),fontsize=10)
+
+
+	#plt.tight_layout()
+	plt.suptitle("Single Event "+str(eventID)+" : Reflections")
+	plt.show()
+
+def visReflectBD(eventID,reflectData,kp,title,filename,saveDIR,L):
+	fig = plt.figure()
+	ax0 = fig.add_subplot(2, 2, 1, projection='3d')
+	ax1 = fig.add_subplot(2, 2, 2, projection='3d')
+	ax2 = fig.add_subplot(2, 2, 3, projection='3d')
+	ax3 = fig.add_subplot(2, 2, 4, projection='3d')
+	axs=[ax0,ax1,ax2,ax3]
+	
+	#photons
+
+	killed = np.count_nonzero(kp)
+	psmDR = np.reshape(reflectData[:,kp],(L,killed))
+	anglelist = [[45,45],[0,110],[0,0],[90,90]]
+	fsz = 6
+	for i in range(4):
+		ax = axs[i]
+		ax.view_init(anglelist[i][0],anglelist[i][1])
+		visgrids(ax,0,1)
+		ax.scatter(psmDR[2],psmDR[0],psmDR[1],s=1,alpha = 0.4)
+		ax.set_xlabel("Z - length", fontsize = fsz, clip_on=False)
+		ax.set_ylabel("X - depth/width", fontsize = fsz, clip_on=False)
+		ax.set_zlabel("Y - height", fontsize = fsz, clip_on=False)
+		ax.tick_params(axis='x', labelsize=fsz)
+		ax.tick_params(axis='y', labelsize=fsz)
+		ax.tick_params(axis='z', labelsize=fsz)
+
+	plt.margins(0)
+	plt.tight_layout()
+	plt.suptitle(title+" (Evt="+str(eventID)+")")
+	plt.savefig(saveDIR+filename,dpi=600)
+def visReflectBRD(eventID,reflectData,title,filename,saveDIR):
+	reflectState = reflectData[4,:]
+	rp = (reflectState == 1.0)
+	kp = (reflectState == 0.0)
+	other = np.count_nonzero(reflectState == 2.0)
+	reflect = np.count_nonzero(rp)
+	killed = np.count_nonzero(kp)
+	pr = reflect/(reflect+killed+other)
+	tot = len(reflectData[0])
+	
+	fig, axs = plt.subplots()
+
+	st = 0.65
+	xt = 0.25
+	plt.figtext(xt, st+.24, "Total Photon-Boundary Interactions = %1.0f" %(tot),fontsize=10)
+	plt.figtext(xt, st+.20, "Reflected = %4.4f" %(reflect),fontsize=10)
+	plt.figtext(xt, st+.16, "Killed = %4.4f" %(killed),fontsize=10)
+	plt.figtext(xt, st+.12, "Unclassified = %4.4f" %(other),fontsize=10)
+	plt.figtext(xt, st+.08, "Reflection Percentage = %4.4f" %(pr),fontsize=10)
+	plt.figtext(xt, st+.04, "Photons~= (1-P(R))*Total = %4.4f" %((1-pr)*tot),fontsize=10)
+	plt.figtext(xt, st+.00, "First Detected Photon Time = %4.4f ns" %(minTimeSiPMphot),fontsize=10)
+
+	plt.margins(0)
+	plt.tight_layout()
+	plt.suptitle(title+" (Evt="+str(eventID)+")")
+	axs.plot([1, 2, 3])
+	axs.remove()
+	plt.savefig(saveDIR+filename,dpi=100)
+def visReflectAAK(rp,kp,reflectData,title,filename,saveDIR,L):
+	incident = abs(reflectData[6,:]*180/(np.pi))
+	reflectangle = abs(reflectData[7,:]*180/(np.pi))
+	rpi = incident[rp]
+	kpi = incident[kp]
+	binwidth = 5
+	bins=int(180/binwidth)
+	fig,axs = plt.subplots(2,constrained_layout=True)
+
+	nej = 1.58
+
+	axs[0].hist(rpi, bins=bins, color="blue")
+	axs[0].hist(kpi, bins=bins, color="red")
+	axs[0].set_title("Reflected+Refracted | Absorbed Histograms")
+	rph,bin_edges = np.histogram(rpi,bins)
+	kph,bin_edges = np.histogram(kpi,bins)
+	ratio = rph/kph
+	bin_centers = bin_edges[1:len(bin_edges)] - (bin_edges[1] - bin_edges[0])/2
+	axs[1].set_title("Reflected|Refracted / Absorbed Ratio")	
+	axs[1].plot(bin_centers,ratio, color="blue")
+	for ax in axs:
+		#ax.set_xlim(-180,180)
+		ax.set_ylabel("Counts")
+		ax.set_xlabel("Incident Angle")
+		line = ax.axvline(x=np.arcsin(1/nej)*180/np.pi,color='black')
+		line2 = ax.axvline(x=(np.pi-np.arcsin(1/nej))*180/np.pi,color='black')
+		line.set_label('TIR')
+		line2.set_label('TIR')
+	
+	#plt.tight_layout()
+	plt.suptitle(title)
+	plt.savefig(saveDIR+filename,dpi=100)
+	#plt.show()
+def visReflectAA(rp,reflectData,title,filename,saveDIR,L):
+	incident = (reflectData[6,:]*180/(np.pi))
+	reflectangle = (reflectData[7,:]*180/(np.pi))
+	rpi = incident[rp]
+	rpr = reflectangle[rp]
+	reflected = (np.sign(rpi)==np.sign(rpr))
+	refracted = (np.sign(rpi)!=np.sign(rpr))
+	rpir = abs(rpi[reflected])
+	rprr = abs(rpr[reflected])
+	rpit = abs(rpi[refracted])
+	rprt = abs(rpr[refracted])
+	fig,ax = plt.subplots(1,constrained_layout=True)
+
+	nej = 1.58
+
+	psze = 1
+	#ax.scatter(rpir,rprr,s=psze,color="blue", alpha = 0.2) #reflected (WOULD BE, but the angle signs are incorrect)
+	#ax.scatter(rpit,rprt,s=psze,color="blue", alpha = 0.2) #refracted
+	ax.scatter(abs(rpi),abs(rpr),s=psze,color="blue", alpha = 0.2)
+	ax.set_title("Reflected+Refracted: Exit Angle vs Incidence Angle")
+
+	#ratio = np.histogram(rpi,bins)[0]/np.histogram(kpi,bins)[0]
+	#axs[1].set_title("Reflected|Refracted / Absorbed Ratio")	
+	#axs[1].plot(range(1,180,binwidth),ratio, color="blue")
+	#for ax in axs:
+	ax.set_xlim(0,180)
+	ax.set_ylim(0,180)
+	ax.set_ylabel("Exit Angle")
+	ax.set_xlabel("Incident Angle")
+	tirval = np.arcsin(1/nej)*180/np.pi
+	line = ax.axvline(x=tirval,color='black')
+	line2 = ax.axvline(x=(np.pi-np.arcsin(1/nej))*180/np.pi,color='black')
+	line5 = ax.axvline(x=90-tirval,color='black')
+	line6 = ax.axvline(x=90+tirval,color='black')
+	line.set_label('TIR')
+	line2.set_label('TIR')
+	line3 = ax.axhline(y=tirval,color='black')
+	line4 = ax.axhline(y=(np.pi-np.arcsin(1/nej))*180/np.pi,color='black')
+	line7 = ax.axhline(y=90-tirval,color='black')
+	line8 = ax.axhline(y=90+tirval,color='black')
+	line3.set_label('TIR')
+	line4.set_label('TIR')
+	ax.set_aspect(1)
+
+	ax.text(0.4,1.1,"Red - Refraction, Cyan - Reflection,\nPurple - Transmission, Black - Critical Angles",fontsize=10)
+	
+	color = "red"
+	lw = 1
+	x_sn = np.array(range(90))
+	y_sn = np.arcsin(np.sin(np.pi*(x_sn/180))*nej)*180/np.pi
+	ax.plot(x_sn,y_sn,color=color,linewidth=lw)  #Fresnel Refraction 0-90 from inside EJ208, Exit Angle relative to inner normal (would this be outer VK normal?)
+	x_sn2 = 90-x_sn
+	y_sn2 = 90-y_sn
+	y_sn3 = 90-np.arcsin(np.sin(np.pi*(x_sn/180))/nej)*180/np.pi
+	ax.plot(x_sn2,y_sn3,color=color,linewidth=lw) #Fresnel Refraction 0-90 from inside EJ208, Exit Angle relative to outer normal
+	ax.plot(x_sn2,y_sn2,color=color,linewidth=lw) #Fresnel Refraction 0-90 from outside EJ208, Exit Angle relative to outer normal
+	ax.plot(x_sn,90-y_sn3,color=color,linewidth=lw) #Fresnel Refraction 0-90 from inside EJ208, Exit Angle relative to inner normal
+	ax.plot(90+y_sn,90+x_sn,color=color,linewidth=lw)#ax.plot(x_sn,180-y_sn,color='red') #FR 90-180 from inside EJ208, exit rel. outer EJ
+	ax.plot(180-y_sn,180-x_sn,color=color,linewidth=lw)  #FR 90-180 from outside EJ208, exit rel. outer EJ
+	ax.plot(180-x_sn,180-y_sn,color=color,linewidth=lw)
+	ax.plot(90+x_sn,90+y_sn,color=color,linewidth=lw)
+
+	ax.plot(2*x_sn,180-2*x_sn,color="purple",linewidth=lw)
+	ax.plot(2*x_sn,2*x_sn,color="cyan",linewidth=lw)
+
+	marginalPLT0(ax,np.abs(rpi),np.abs(rpr),4)
+
+	#plt.tight_layout()
+	plt.suptitle(title)
+	plt.savefig(saveDIR+filename,dpi=600)
+	#plt.show()

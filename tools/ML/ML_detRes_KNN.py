@@ -35,6 +35,8 @@ if("DISABLE-ZT" in MLOPT):
 print(":OPTIONS- ",PATH_OPT)
 if("PCA" in MLOPT):
 	with open(ML_PATH+'ML_PCA.py') as f: exec(f.read()) # helper file # PATH and vis
+elif("DISABLE-ZT" in MLOPT):
+	inputTensor[:,2:4,:]=0
 #-------------------------------------------------------
 length = inputTensor.shape[0]
 frac = 0.75

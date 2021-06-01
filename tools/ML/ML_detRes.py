@@ -4,17 +4,9 @@ if warmstart:
 else:
 	model_path = str(ML_PATH)+"Data/ML_DET_RES_"+str(photoLen)+"_Photo.pt"
 #-------------------------------------------------------
-unitList = ["mm","mm", "mm", "ns"]
-typeList = ["X-Resid (mm)","Y-Resid (mm)", "Z-Resid (mm)", "T-Resid (ns)"]
-rangeList = [[-40,40],[-30,30],[-50,50],[-0.3,0.3]]
-binList = [5,5,25,0.1]
-locX = 0.95
-locY = 0.05
-spaY = 0.10
 nbins=50
 #-------------------------------------------------------
 MarginalPLT = True
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 def marginalPLT(ax,x,y,i):
 	ax.set_aspect(1.)
 	# create new axes on the right and on the top of the current axes
@@ -29,37 +21,6 @@ def marginalPLT(ax,x,y,i):
 	bins = np.arange(-lim, lim + binwidth, binwidth)
 	ax_histx.hist(x, bins=bins)
 	ax_histy.hist(y, bins=bins, orientation='horizontal')
-	ax_histx.text(locX,locY+spaY, "Bin={0:.1f} {1}".format(binwidth,unitList[i]),verticalalignment='bottom',horizontalalignment='right',transform = ax.transAxes,fontsize=8)
-
-	# the xaxis of ax_histx and yaxis of ax_histy are shared with ax,
-	# thus there is no need to manually adjust the xlim and ylim of these
-	# axis.
-	#ax_histx.set_yticks([0, 50, 100])
-	#ax_histy.set_xticks([0, 50, 100])
-	ax_histx.get_xaxis().set_visible(False)
-	ax_histy.get_yaxis().set_visible(False)
-	ax.tick_params(labelsize=8)
-	ax_histx.tick_params(labelsize=8)
-	ax_histy.tick_params(labelsize=8)
-
-	plt.margins(0,0)
-def marginalPLT2(ax,x,y,i):
-	#ax.set_aspect(1.)
-	# create new axes on the right and on the top of the current axes
-	divider = make_axes_locatable(ax)
-	# below height and pad are in inches
-	ax_histx = divider.append_axes("top", 0.2, pad=0.05, sharex=ax)
-	ax_histy = divider.append_axes("right", 0.2, pad=0.05, sharey=ax)
-	# now determine nice limits by hand:
-	binwidth = binList[i]
-	bins = np.arange(int(LM[i,0]), int(LM[i,1])+ binwidth, binwidth)
-	binzy = 20
-	ymax = np.max(np.abs(y))
-	binwidthy = int(ymax/binzy)
-	limy = (int(ymax/binwidthy) + 1)*binwidthy
-	ybins = np.arange(0, limy + binwidthy, binwidthy)
-	ax_histx.hist(x, bins=bins)
-	ax_histy.hist(y, bins=ybins, orientation='horizontal')
 	ax_histx.text(locX,locY+spaY, "Bin={0:.1f} {1}".format(binwidth,unitList[i]),verticalalignment='bottom',horizontalalignment='right',transform = ax.transAxes,fontsize=8)
 
 	# the xaxis of ax_histx and yaxis of ax_histy are shared with ax,
