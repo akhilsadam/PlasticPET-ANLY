@@ -6,7 +6,9 @@ import io
 os.environ['MPLCONFIGDIR'] = "/home/Desktop/mplib/graph"
 from functools import lru_cache
 from scipy import stats
+from scipy import signal
 from scipy.optimize import curve_fit
+from scipy.interpolate import make_interp_spline
 from tqdm import tqdm
 import multiprocessing
 import cv2
@@ -28,7 +30,7 @@ if(cpus>16):
 	matplotlib.use('AGG')
 else:
 	num_cores = cpus
-	MaxEventLimit = True
+	MaxEventLimit = False
 	import matplotlib
 	#matplotlib.use('AGG')
 #----------------------------
@@ -40,13 +42,14 @@ import matplotlib.markers as mk
 import matplotlib.ticker as mticker
 #------------------------------------------------------------------------------------
 #MaxEventLimit = True #manual override
-MaxEvents = 10#int(input("Number of Events:"))
+MaxEvents = 5000#int(input("Number of Events:"))
 #--------------------------
 #Defining Flags:
-STRIPHIST = False
+STRIPHIST = True
 #subdefines - needs striphist True and SiPM_Based_Reconstruction False
+STRIP_OPT = ["process_breakdown","photocompton_breakdown","subfigures"] #options "process_breakdown" "photocompton_breakdown" "electron_processes" "subfigures" (#2 requires #1) (#3 - default is gamma_processes) (#4 ~requires #3)
 Creation = False
-Detection = False
+Detection = True
 PD = False
 #---------------
 Strip_Based_Reconstruction = False #otherwise uses only endcount data
@@ -77,8 +80,9 @@ SUBSTRIP_RECONSTRUCT = False #needs SiPM_Based_Reconstruction False
 #---------------
 TIMERES = False
 #--------------- --------- --------- -------- TESTS
-ReflectionTest = True
+ReflectionTest = False
 ReflectOPT = [] #options "DISABLE-VK"
+boundaryinteract = True
 Ropt = ""
 #---------------------------------
 if("DISABLE-VK" in ReflectOPT):
@@ -91,7 +95,7 @@ with open('tools/reconstruct.py') as f: exec(f.read()) # helper file
 with open('tools/vis.py') as f: exec(f.read()) # helper file
 #------------------------------------------------------------------------------------
 # Data Arrays:
-#		left, strip, right
+#		left, strip, right, volumeCounts
 #		evtPos, evtDir
 #		evtPhotoInteract, evtComptonInteract, evtInteract
 #		recPos, errorPosN, actEvtPosN, (recSignal,zTensor if Strip_Based_Reconstruction)

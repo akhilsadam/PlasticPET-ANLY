@@ -6,9 +6,11 @@
 eventID = 2
 (nPhotons,reflectData) = photonReflectData(eventID)
 
-print(nPhotons)
+print("\nTotal # of photons:",nPhotons)
+print("Number of Volumetric Absorptions:",volumeCounts[eventID,0])
+#print(volumeCounts)
 L = (reflectData.shape)[0]
-print(L)
+# print(L)
 # Get all events
 #--------------------------------------
 # NEED TO OPTIMIZE !!!!!!!!
@@ -37,9 +39,10 @@ reflect = np.count_nonzero(rp) # total # of reflections at a boundary
 killed = np.count_nonzero(kp) # total # of kills at a boundary
 other = np.count_nonzero(reflectState == 2) # other ought to be 0 (which it has been so far)
 detect = np.count_nonzero(dp) # detections
-print("killed+detect:"+str(killed+detect)+".\n")
+print("Number of Boundary Absorptions:",(killed))
+print("Number of Detections (non-uniques):",(detect),".\n")
 tot = reflect+killed # total # of interactions (do not count detections)
-print("ASSERT-EQUALS (no other events): "+str(other==0)+" .\n")
+print("ASSERT-EQUALS (no other events): ",(other==0))
 #-------------
 ##
 # DIFFERENT VISUALIZATIONS: SELECT AS PREFERRED
@@ -47,8 +50,8 @@ print("ASSERT-EQUALS (no other events): "+str(other==0)+" .\n")
 #visReflectBD(eventID,reflectData,kp,"Photon Boundary Absorption Interactions"+Ropt,"BoundaryKilled"+Ropt+".png",reflectplotDIR,L)
 #visReflectBD(eventID,reflectData,rp,"Photon Boundary Reflection/Refraction Interactions"+Ropt,"BoundaryReflect"+Ropt+".png",reflectplotDIR,L)
 #visReflectBRD(eventID,reflectData,"Photon Boundary Interactions"+Ropt,"BoundaryStatistics"+Ropt+".png",reflectplotDIR)
-visReflectAAK(rpC,kpC,reflectDataC,"Photon Boundary Angle-Alive/Killed Histogram"+Ropt,"AliveKilledHistogram"+Ropt+".png",reflectplotDIR,L)
-visReflectAA(rpC,reflectDataC,"Photon Boundary Incidence/Reflection Angle"+Ropt,"AliveAngles"+Ropt+".png",reflectplotDIR,L)
+#visReflectAAK(rpC,kpC,reflectDataC,"Photon Boundary Angle-Alive/Killed Histogram"+Ropt,"AliveKilledHistogram"+Ropt+".png",reflectplotDIR,L)
+#visReflectAA(rpC,reflectDataC,"Photon Boundary Incidence/Reflection Angle"+Ropt,"AliveAngles"+Ropt+".png",reflectplotDIR,L)
 #-----------------------------------------------------------------------------------
 #------------
 pr = reflect/(reflect+killed) #pr is probability of reflection/refraction at a boundary interaction
@@ -61,7 +64,7 @@ detects = reflectData[:,dp][5,:]  # IDS of detected events
 #_------------
 incident = abs(reflectData[:,rp][6,:]*180/(np.pi)) # incident angles
 critical = (180/np.pi)*math.asin(1/n_EJ208)
-print(critical)
+print("Critical Angle = " + str(critical) + " degrees\n")
 TIRreflect = incident>critical
 #print(incident)
 #print(TIRreflect)
@@ -70,12 +73,37 @@ incidentTIR = incident[TIRreflect]
 incidentNonTIR = incident[~TIRreflect]
 #print(nonTIRids)
 #-------------
+detprocessEnum = (reflectData[:,dp][8,:]).astype(int)
+killedprocessEnum = (reflectData[:,kp][8,:]).astype(int)
+aliveprocessEnum = (reflectData[:,rp][8,:]).astype(int)
+detprocessEnum = detprocessEnum - ([1]*len(detprocessEnum))
+killedprocessEnum = killedprocessEnum - ([1]*len(killedprocessEnum))
+aliveprocessEnum = aliveprocessEnum - ([1]*len(aliveprocessEnum))
+
+#print(killedprocessEnum)
+#print(aliveprocessEnum)
+
+detprocesses = np.asarray(np.unique(opticalProcessList[detprocessEnum], return_counts=True)).T
+print("Detected Processes: ---------")
+print(detprocesses)
+print("Killed Processes: ---------")
+if(len(killedprocessEnum)>0):
+    killedprocesses = np.asarray(np.unique(opticalProcessList[killedprocessEnum], return_counts=True)).T
+    print(killedprocesses)
+else:
+    print("NO Killed Photons at Boundary!")
+
+aliveprocesses = np.asarray(np.unique(opticalProcessList[aliveprocessEnum], return_counts=True)).T
+print("Reflection/.. Processes: ---------")
+print(aliveprocesses)
+print()
+#-------------
 # Detected LR Photon counts
 lvals = np.sum(left,axis=(1,2))
 rvals = np.sum(right,axis=(1,2))
-print("ASSERT-EQUALS (created Photon Counts match up): "+str(nPhotons==int(np.sum(strip[2])))+" .\n")
-print(lvals)
-print(rvals)
+print("ASSERT-EQUALS (created Photon Counts match up): "+str(nPhotons==int(np.sum(strip[2]))))
+#print(lvals)
+#print(rvals)
 meanL = np.mean(lvals)
 meanR = np.mean(rvals)
 cL = lvals[eventID]
@@ -88,7 +116,6 @@ reflectCounts = np.zeros(nPhotons) # number of reflections by pid
 AbsorptionType = np.zeros(nPhotons)    # Absorbed how (0 - bound.abs., 1 - vol.abs.,2 - det.) by pid?
 #-------------
 
-boundaryinteract = True
 if(boundaryinteract):
 
     def countFunction(i):
@@ -106,7 +133,8 @@ if(boundaryinteract):
 
     with multiprocessing.Pool(processes=8) as pool:
 	    dataout = np.array(list(tqdm(pool.map(countFunction,range(nPhotons)),total=nPhotons)))
-    print(dataout.shape)
+    print("Data shape:",dataout.shape)
+    print()
     reflectCounts = dataout[:,0]
     AbsorptionType = dataout[:,1]
     TIR = dataout[:,2]
@@ -132,11 +160,16 @@ if(boundaryinteract):
     detec = len(DetAbsorbCounts)
     detecTIR = len(DetAbsorbCountsTIR)
     detecNonTIR = len(DetAbsorbCountsNonTIR)
-    print("ASSERT-EQUALS (no double counting of detections): "+str(detec==detect)+" .\n")
-    print("detec: "+str(detec)+" .\n")
-    print("detect: "+str(detect)+" .\n")
+    print("ASSERT-EQUALS (no double counting of detections): "+str(detec==detect))
+    print("Detections (uniques): "+str(detec))
+    print("Detections (non-uniques): "+str(detect)+" .\n")
     noniter = len(VolAbsorbCounts)
-    print("vol.abs: "+str(noniter)+" .\n")
+    print("ASSERT-EQUALS (detected non-unique Photon Counts match up): "+str(detect==int(cL+cR)))
+    print("ASSERT-EQUALS (detected unique Photon Counts match up): "+str(detec==int(cL+cR)))
+    print("ASSERT-EQUALS (vol.abs and noniter // no double counting): "+str(volumeCounts[eventID,0]==noniter)+" .\n")
+    print("Expected # vol.abs if detections were not double counted: "+str(noniter))
+    print("Vol.abs uniques (volumeCounts): "+str(volumeCounts[eventID,0]))
+    print("Double counted detections - detections that did not have a unique id!: "+str(detect-detec))
     #--Ranges
     binwidth=10
     rangeH = max(reflectCounts) # - min(reflectCounts)
@@ -232,14 +265,15 @@ if(boundaryinteract):
     #-------------------------
     # figure & text
     fig,ax = plt.subplots(1,2)
-    ax[0].hist(incidentTIR,bins=int((180-critical)/5))
-    ax[1].hist(incidentNonTIR,bins=int((critical)/5))
+    ax[1].hist(incidentTIR,bins=int((180-critical)/5))
+    ax[0].hist(incidentNonTIR,bins=int((critical)/5))
     ax[0].set_xlabel("Angle [degrees]")
     ax[0].set_ylabel("Counts")
     ax[1].set_xlabel("Angle [degrees]")
     ax[1].set_ylabel("Counts")
-    ax[0].set_xlim(critical,180)
-    ax[1].set_xlim(0,critical)
-    plt.suptitle("TIR / Non-TIR interactions (5 degree bins)"+Ropt)
+    ax[1].set_xlim(critical,180)
+    ax[0].set_xlim(0,critical)
+    plt.suptitle("Non-TIR / TIR interactions (5 degree bins)"+Ropt)
     plt.savefig(reflectplotDIR+"BoundaryInteractionsHist"+Ropt+".png",dpi=600)
+    print()
     #-------------------------

@@ -4,7 +4,7 @@ c_const = 299792458.0 #define as double
 n_EJ208 = 1.58
 
 nanosec = 1/1000000000
-
+FWHM = 2*math.sqrt(2*math.log(2))
 #------------------------------------------------------------------------------------
 #Geometry Setup
 #------------------------------------------------------------------------------------
@@ -49,3 +49,42 @@ stdG=[binx,biny,binz]
 LM = np.array([[-UX,UX],[-UY,UY],[0,LZ],[1000*(-4*nanosec)*(c_const/n_EJ208),0],[0,180]])
 BM = np.array([binx,biny,binz,1000*(0.5*nanosec)*(c_const/n_EJ208),5])
 NM = ["X (Depth)","Y (Width)", "Z (Length)", "T","Angle (deg)"]
+
+opticalProcessList = np.array(["Undefined",
+"FresnelRefraction",
+"FresnelReflection",
+"TotalInternalReflection", 	
+"LambertianReflection", 	
+"LobeReflection",	
+"SpikeReflection",	
+"BackScattering", 	
+"Absorption",	
+"Detection",
+"NotAtBoundary",	
+"SameMaterial",	
+"StepTooSmall", 	
+"NoRINDEX",
+"PolishedLumirrorAirReflection",
+"PolishedLumirrorGlueReflection", 	
+"PolishedAirReflection",
+"PolishedTeflonAirReflection", 	
+"PolishedTiOAirReflection",
+"PolishedTyvekAirReflection",	
+"PolishedVM2000AirReflection",
+"PolishedVM2000GlueReflection",	
+"EtchedLumirrorAirReflection",
+"EtchedLumirrorGlueReflection",
+"EtchedAirReflection",
+"EtchedTeflonAirReflection", 	
+"EtchedTiOAirReflection",
+"EtchedTyvekAirReflection",
+"EtchedVM2000AirReflection",
+"EtchedVM2000GlueReflection",	
+"GroundLumirrorAirReflection",
+"GroundLumirrorGlueReflection", 	
+"GroundAirReflection",
+"GroundTeflonAirReflection", 	
+"GroundTiOAirReflection",
+"GroundTyvekAirReflection",
+"GroundVM2000AirReflection",
+"GroundVM2000GlueReflection"])
