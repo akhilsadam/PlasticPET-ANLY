@@ -47,8 +47,8 @@ MaxEvents = 5000#int(input("Number of Events:"))
 #Defining Flags:
 STRIPHIST = True
 #subdefines - needs striphist True and SiPM_Based_Reconstruction False
-STRIP_OPT = ["process_breakdown","photocompton_breakdown","subfigures"] #options "process_breakdown" "photocompton_breakdown" "electron_processes" "subfigures" (#2 requires #1) (#3 - default is gamma_processes) (#4 ~requires #3)
-Creation = False
+STRIP_OPT = ["process_breakdown","electron_processes"] #options "process_breakdown" "photocompton_breakdown" "electron_processes" "subfigures" (#2 requires #1) (#3 - default is gamma_processes) (#4 ~requires #3)
+Creation = True
 Detection = True
 PD = False
 #---------------
