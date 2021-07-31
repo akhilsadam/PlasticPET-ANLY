@@ -14,10 +14,14 @@ import multiprocessing
 import cv2
 import sys
 
+
 #------------------------------------------------------------------------------------
 PYTHONIOENCODING="UTF-8"  #sys.setdefaultencoding("ISO-8859-1")
 #----------------------------------------------------------------------------------
-plotDIR = "../plot/current/"
+try: plotDIR
+except NameError: plotDIR = "../plot/current/"
+else: pass
+
 reflectplotDIR = plotDIR + "reflect/"
 ML_PATH = "tools/ML/"
 #------------------------------------------------------------------------------------
@@ -42,22 +46,25 @@ import matplotlib.markers as mk
 import matplotlib.ticker as mticker
 #------------------------------------------------------------------------------------
 #MaxEventLimit = True #manual override
-MaxEvents = 5000#int(input("Number of Events:"))
+MaxEvents = 500#int(input("Number of Events:"))
 #--------------------------
 #Defining Flags:
-STRIPHIST = True
-#subdefines - needs striphist True and SiPM_Based_Reconstruction False
+STRIPHIST = False
+#subdefines - needs striphist, Process_Based_Breakdown True and SiPM_Based_Reconstruction False
 STRIP_OPT = ["process_breakdown","electron_processes"] #options "process_breakdown" "photocompton_breakdown" "electron_processes" "subfigures" (#2 requires #1) (#3 - default is gamma_processes) (#4 ~requires #3)
 Creation = True
 Detection = True
 PD = False
 #---------------
+Process_Based_Breakdown = False
 Strip_Based_Reconstruction = False #otherwise uses only endcount data
 SiPMTime_Based_Reconstruction = False
 SiPM_Based_Reconstruction = False #a binning method, massages data to use only binned SiPM counts #unrealistic!
 #---------------
 #SiPM Timing: (number of photons to count in SiPM timing) (needs SiPMTime_Based_Reconstruction)
-photoLen = 5
+try: photoLen
+except NameError: photoLen = 5
+else: pass
 SiPMtimeRES = False
 SiPMtimeVSatt = False
 SiPMtimePOSRES = False #multilateration style x,y,z positioning for visualization?.
@@ -80,7 +87,7 @@ SUBSTRIP_RECONSTRUCT = False #needs SiPM_Based_Reconstruction False
 #---------------
 TIMERES = False
 #--------------- --------- --------- -------- TESTS
-ReflectionTest = False
+ReflectionTest = True
 ReflectOPT = [] #options "DISABLE-VK"
 boundaryinteract = True
 Ropt = ""
@@ -102,6 +109,13 @@ with open('tools/vis.py') as f: exec(f.read()) # helper file
 #		time_I_N, time_I_Rec,
 #		def photonSiPMData(evt)
 #---\
+try: MODE
+except NameError: MODE="MANUAL"
+else: pass
+if MODE=="MANUAL":
+	pass
+else:
+	print("\n[STATUS] IN AUTOMATIC MODE\n")
 #------------------------------------------ 
 #Strip Histogram Plots
 if STRIPHIST:

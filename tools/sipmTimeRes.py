@@ -26,7 +26,7 @@ for i in range(3):
 	bins = bin_edges[0:(len(bin_edges)-1)] + 0.5*(LENGTH/nbins)
 	#axs[i].plot(bins,hist)
 
-	lnspc = np.linspace(xmin,xmax,nbins-1)
+	lnspc = np.linspace(xmin,xmax,len(hist))
 	def pdf(x,m,s):
 		#return	(1/(math.sqrt(2*math.pi)*s))*np.exp(-0.5*((x-m)**2)/(s**2)) #- enable if density=true
 		return	(nbins/dbins)*len(errorPos)*(LENGTH/nbins)*(1/(math.sqrt(2*math.pi)*s))*np.exp(-0.5*((x-m)**2)/(s**2))
@@ -74,4 +74,4 @@ else:
 		pass#plt.savefig(plotDIR+'PositionResolution_SiPMCounts_True.png')
 	else:
 		plt.savefig(plotDIR+'SiPM_TimeRes_'+str(photoLen)+'.png')
-plt.show()
+plt.close()

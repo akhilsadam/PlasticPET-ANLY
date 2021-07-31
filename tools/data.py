@@ -1,6 +1,8 @@
 #------------------------------------------------------------------------------------
 #Data Setup
-datadir = "../data/current/"
+try: datadir
+except NameError: datadir = "../data/current/"
+else: pass
 #datadir = "../data/"
 #------------------------------------------------------------------------------------
 def SiPM_Bin(inarray):
@@ -172,34 +174,35 @@ if ReflectionTest:
 
 	#print(photonSiPMData[1][2]) photonSiPMData[evt][x,y,z,t,lambda][photonIndex]
 	#-------------
-photoA = []
-comptonA = []
-typeA = []
-#photo,photocompt,other,compt = 2,1,0,-1.
-with open(datadir+"electronProcess.txt") as f:
-    for line in f:
-        photo = 0
-        compton = 0
-        split = line.split("|")
-        split = split[0:(len(split)-1)]
-        if(len(np.unique(split))!=len(split)):
-            print("ERROR")
-        for word in split:
-            if (word.startswith("phot")):
-                photo = photo + 1
-            if (word.startswith("compt")):
-                compton = compton + 1    
-        photoA.append(photo)
-        comptonA.append(compton)
-        if(photo > 0):
-            if(compton>0):
-                typeA.append(1)
-            else:
-                typeA.append(2)
-        elif(compton>0):
-            typeA.append(-1)
-        else:
-            typeA.append(0)
-typeA = np.array(typeA)
-photoA = np.array(photoA)
-comptonA = np.array(comptonA)
+if Process_Based_Breakdown:
+	photoA = []
+	comptonA = []
+	typeA = []
+	#photo,photocompt,other,compt = 2,1,0,-1.
+	with open(datadir+"electronProcess.txt") as f:
+		for line in f:
+			photo = 0
+			compton = 0
+			split = line.split("|")
+			split = split[0:(len(split)-1)]
+			if(len(np.unique(split))!=len(split)):
+				print("ERROR")
+			for word in split:
+				if (word.startswith("phot")):
+					photo = photo + 1
+				if (word.startswith("compt")):
+					compton = compton + 1    
+			photoA.append(photo)
+			comptonA.append(compton)
+			if(photo > 0):
+				if(compton>0):
+					typeA.append(1)
+				else:
+					typeA.append(2)
+			elif(compton>0):
+				typeA.append(-1)
+			else:
+				typeA.append(0)
+	typeA = np.array(typeA)
+	photoA = np.array(photoA)
+	comptonA = np.array(comptonA)

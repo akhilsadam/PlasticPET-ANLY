@@ -39,7 +39,7 @@ def ACTTimeReconstruct():
 			#point[3] = point[3] - lrt*tGrad(point, photoLen, photonData)
 			#print(err[:,5])
 		#print(point)
-
+	
 
 		recPosT[c] = point
 		
@@ -53,13 +53,17 @@ def process_ACTZT(c):
 	else:
 		photonDataL = np.transpose(photonDatas[:,photonDatas[2]>UZ])
 		photonDataR = np.transpose(photonDatas[:,photonDatas[2]<=UZ])
+		#print(photonDataL.shape)
 		if((len(photonDataL)==0) or (len(photonDataR)==0)):
 			r_Z,r_T,readTime = np.nan,np.nan,np.nan
 		else:
 			photonDataL = np.transpose(sorted(photonDataL, key=lambda photonDataL: photonDataL[3]))
 			photonDataR = np.transpose(sorted(photonDataR, key=lambda photonDataR: photonDataR[3]))
 			#if lengths differ
-			minlen = min(len(photonDataL),len(photonDataR),photoLen)
+			minlen = min(photonDataL.shape[1],photonDataR.shape[1],photoLen)
+			# print(photonDataL.shape)
+			# print(photoLen)
+			# print(minlen)
 			if (photonDataL.ndim>1) and (photonDataR.ndim>1):
 				photonDataL = photonDataL[:,0:minlen]
 				photonDataR = photonDataR[:,0:minlen]
@@ -78,6 +82,7 @@ def process_ACTZT(c):
 			readTime = slowestTime-fastestTime
 			#if lengths differ
 			minlen = min(len(Ltimes),len(Rtimes),photoLen)
+			#print(minlen)
 			#print(len(np.transpose(photonDataL)),len(np.transpose(photonDataR)))
 			delTime = Ltimes[0:minlen]-Rtimes[0:minlen]
 			#print(delTime)

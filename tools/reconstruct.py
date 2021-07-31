@@ -15,7 +15,7 @@ def reconstruct():
 		X = np.sum(stripPos[:,:,0]*strip[c])/np.sum(strip[c])
 		Y = np.sum(stripPos[:,:,1]*strip[c])/np.sum(strip[c])
 		if((np.sum(left[c])/np.sum(right[c]))!=0):
-			Z = (att_len/16)*math.log(np.sum(left[c])/np.sum(right[c])) + UZ;
+			Z = (att_len/16)*math.log(np.sum(left[c])/np.sum(right[c])) + UZ
 		#elif(((np.sum(left[c])/np.sum(right[c]))==0) and (np.sum(right[c]))!=0)):
 		#	Z = 0
 		#elif(((np.sum(right[c])/np.sum(left[c]))==0) and (np.sum(left[c]))!=0)):
@@ -33,7 +33,7 @@ def ACTreconstruct():
 	zMatrix = np.zeros(shape = (ny,nx))
 	for c in range(nEvents):
 		if((np.sum(left[c])!=0) and (np.sum(right[c])!=0)):
-			zMatrix = (att_len/16)*np.log(left[c]/right[c]) + UZ;
+			zMatrix = (att_len/16)*np.log(left[c]/right[c]) + UZ
 			zTensor[c,:,:] = zMatrix
 
 			sigMatrix = 0.5*((right[c]*np.exp(zMatrix/att_len))+(left[c]*np.exp((LZ-zMatrix)/att_len)))

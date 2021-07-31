@@ -198,6 +198,11 @@ if Detection:
 		print(max(hist_fit))
 		fwhm = coeff[2]*FWHM
 		Mean = coeff[1]
+		amplitude = coeff[0]
+		minlim = Mean-2*coeff[2]
+		maxlim = Mean+2*coeff[2]
+		countsPhotopeak = np.count_nonzero(counts > minlim) 
+		totalcounts = len(counts)
 
 	if(processbreak):
 		axs = ax[0]
@@ -215,10 +220,20 @@ if Detection:
 	axs.text(.95,.90,"Total Events = %1.0f" %(nEvents),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
 	axs.text(.95,.85,"Binwidth = %1.0f" %(binwidth),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
 	if fitted:
+		ENERGYRESOLUTION = fwhm/Mean
+		PHOTOPEAK_SHARPNESS = amplitude/fwhm
+		PHOTOPEAK_FWHM = fwhm
+		PHOTOPEAK_COUNT = countsPhotopeak
+		PHOTOPEAK_PROPORTION = countsPhotopeak/totalcounts
 		axs.text(.95,.80,"FWHM = %4.4f" %(fwhm),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
 		axs.text(.95,.75,"Mean = %4.4f" %(Mean),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
-		axs.text(.95,.70,"Energy Resolution = FWHM/Mean = %4.4f" %(fwhm/Mean),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
+		axs.text(.95,.70,"Energy Resolution = FWHM/Mean = %4.4f" %(ENERGYRESOLUTION),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
 	else:
+		ENERGYRESOLUTION = np.nan
+		PHOTOPEAK_SHARPNESS = np.nan
+		PHOTOPEAK_FWHM = np.nan
+		PHOTOPEAK_COUNT = np.nan
+		PHOTOPEAK_PROPORTION = np.nan
 		axs.text(.95,.80,"Energy Resolution Fit FAILED",verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
 	fig.savefig(plotDIR+"Detected Photon Distributions_Total"+plot_opt+".png", bbox_inches="tight")
 	#plt.show()
