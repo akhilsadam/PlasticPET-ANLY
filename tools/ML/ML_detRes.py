@@ -1,5 +1,5 @@
 from analyzeOptions import *
-if warmstart:
+if Options.warmstart:
 	model_path0 = str(ML_PATH)+"Data/ML_DET_RES_"+str(photoLen)+"_Photo.pt"
 	model_path = str(ML_PATH)+"Data/ML_DET_RES_"+str(photoLen)+"_Photo2.pt"
 else:
@@ -77,7 +77,7 @@ def ml_detRes_vis(inpT,expT,pl):
 		axs[i].text(0.97, 0.90, "{0} Events".format(length),verticalalignment='top',horizontalalignment='right',transform = axs[i].transAxes,fontsize=8)
 
 	
-	if(KNN):
+	if(Options.KNN):
 		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual "+PATH_OPT)
 		plt.savefig(str(ML_PATH)+"/Models/detRes_training_KNN_"+str(pl)+PATH_OPT+".png",dpi=600)
 		#plt.show()
@@ -154,7 +154,7 @@ def ml_detRes_vis2(inpT,expT,pl):
 		if MarginalPLT:
 			marginalPLT(ax,x,y,i)
 
-	if(KNN):
+	if(Options.KNN):
 		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual "+PATH_OPT)
 		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(pl)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
 		plt.close()#plt.show()

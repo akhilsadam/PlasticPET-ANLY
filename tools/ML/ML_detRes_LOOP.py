@@ -2,7 +2,7 @@
 #training loop
 def train(length,folds, num_epochs, batch_size, n):
 	#optimizer = optim.Adam(drnet.parameters(),lr=lr,betas=(beta1,beta2))
-	if warmstart:
+	if Options.warmstart:
 		paramList = list(drnet.parameters())
 		paraml = len(paramList)
 		optimizer = optim.Adam(paramList[0:(paraml-2)],lr=0.01*lr,betas=(beta1,beta2))
@@ -60,7 +60,7 @@ def train(length,folds, num_epochs, batch_size, n):
 			#b_losses = torch.empty(batch_size)
 
 			optimizer.zero_grad()
-			if warmstart:
+			if Options.warmstart:
 				optimize2.zero_grad()
 				optimize3.zero_grad()
 			#penalty term ----------------------------
@@ -76,7 +76,7 @@ def train(length,folds, num_epochs, batch_size, n):
 
 			loss.backward(retain_graph=True)
 			optimizer.step()
-			if warmstart:
+			if Options.warmstart:
 				optimize2.step()
 				optimize3.step()
 

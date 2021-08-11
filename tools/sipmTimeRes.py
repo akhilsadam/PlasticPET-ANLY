@@ -67,11 +67,11 @@ for i in range(3):
 	print("FWHM =", FWHMC*param[1])
 	print("Error = +-", 0.5*FWHMC*param[1])
 plt.tight_layout()
-if Strip_Based_Reconstruction:
-	pass#plt.savefig(plotDIR+'PositionResolution_StripCounts.png')
+if Options.Strip_Based_Reconstruction:
+	pass#plt.savefig(Options.plotDIR+'PositionResolution_StripCounts.png')
 else: 
-	if SiPM_Based_Reconstruction:
-		pass#plt.savefig(plotDIR+'PositionResolution_SiPMCounts_True.png')
+	if Options.SiPM_Based_Reconstruction:
+		pass#plt.savefig(Options.plotDIR+'PositionResolution_SiPMCounts_True.png')
 	else:
-		plt.savefig(plotDIR+'SiPM_TimeRes_'+str(photoLen)+'.png')
+		plt.savefig(Options.plotDIR+'SiPM_TimeRes_'+str(photoLen)+'.png')
 plt.close()

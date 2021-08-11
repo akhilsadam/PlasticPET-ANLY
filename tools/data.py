@@ -1,25 +1,25 @@
 #------------------------------------------------------------------------------------
 #Data Setup
-try: COMPLETEDETECTOR
-except NameError: COMPLETEDETECTOR = True
-try: datadir
-except NameError: datadir = "../data/current/"
-try: MaxEventLimit
-except NameError: MaxEventLimit = False
-try: ReflectionTest
-except NameError: ReflectionTest = False
-try: SiPM_Based_Reconstruction
-except NameError: SiPM_Based_Reconstruction = False
-try: Process_Based_Breakdown
-except NameError: Process_Based_Breakdown = False
+try: Options.COMPLETEDETECTOR
+except NameError: Options.COMPLETEDETECTOR = True
+try: Options.datadir
+except NameError: Options.datadir = "../data/current/"
+try: Options.MaxEventLimit
+except NameError: Options.MaxEventLimit = False
+try: Options.ReflectionTest
+except NameError: Options.ReflectionTest = False
+try: Options.SiPM_Based_Reconstruction
+except NameError: Options.SiPM_Based_Reconstruction = False
+try: Options.Process_Based_Breakdown
+except NameError: Options.Process_Based_Breakdown = False
 dataOpen = True
-#datadir = "../data/"
+#Options.datadir = "../data/"
 #------------------------------------------------------------------------------------
 def SiPM_Bin(inarray):
 	return np.transpose(np.array([np.transpose(np.transpose(inarray,(0,2,1)).reshape(nEvents,nx,ny//Sy,Sy).sum(3),(0,2,1))]*Sy),(1,2,0,3)).reshape(nEvents,ny,nx)/Sy
 #------------------------------------------------------------------------------------
 def photonSiPMDataLoad(nEvents):
-	filename = datadir+"photonSiPMData.txt"
+	filename = Options.datadir+"photonSiPMData.txt"
 	with io.open(filename,'r',encoding='ISO-8859-1') as photonSiPMFile:
 		for line in photonSiPMFile:
 		# textLines = [photonSiPMFile.readline().rstrip('\n').split('|') for evt in range(0,301)]
@@ -32,7 +32,7 @@ textLines = []
 #@lru_cache(maxsize=17000)
 def photonSiPMData(evt):
 
-	filename = datadir+"photonSiPMData.txt"
+	filename = Options.datadir+"photonSiPMData.txt"
 	photonList = []
 	photonData = np.zeros(6) # x,y,z,t,A,lambda
 
@@ -57,11 +57,11 @@ def photonSiPMData(evt):
 	return np.asarray(photonList).T #np.transpose(photonList) #np.asarray(photonList).T'
 #//---------\\ PhotonCounts // photon counts for left, right SiPMs and EJ208 strips
 print(ArrayNumber)
-if COMPLETEDETECTOR:
-	beamData = np.load(datadir+"beamData.npy")
+if Options.COMPLETEDETECTOR:
+	beamData = np.load(Options.datadir+"beamData.npy")
 
-	if MaxEventLimit:
-		nEvents = MaxEvents
+	if Options.MaxEventLimit:
+		nEvents = Options.MaxEvents
 	else:
 		nEvents = len(beamData)
 	
@@ -74,26 +74,26 @@ if COMPLETEDETECTOR:
 
 	# completePhotonDATA = np.zeros(shape=(nArray,3*nEvents,ny,nx))
 	# for i in tqdm(range(nArray)):
-	# 	completePhotonDATA[i,:,:,:] = np.load(datadir+"photonCounts"+str(i)+".npy")
+	# 	completePhotonDATA[i,:,:,:] = np.load(Options.datadir+"photonCounts"+str(i)+".npy")
 
-	photonCounts = np.load(datadir+"photonCounts"+str(ArrayNumber)+".npy")
+	photonCounts = np.load(Options.datadir+"photonCounts"+str(ArrayNumber)+".npy")
 	left = photonCounts[0:3*nEvents:3,:,:] #left,strip,right photons - indices:evt#,y,x
 	strip = photonCounts[1:3*nEvents:3,:,:]
 	right = photonCounts[2:3*nEvents:3,:,:]
 
 
 else:
-	photonCounts = np.load(datadir+"photonCounts.npy")
+	photonCounts = np.load(Options.datadir+"photonCounts.npy")
 	left = photonCounts[0:len(photonCounts):3,:,:] #left,strip,right photons - indices:evt#,y,x
 	strip = photonCounts[1:len(photonCounts):3,:,:]
 	right = photonCounts[2:len(photonCounts):3,:,:]
-	photonCountTypes = np.load(datadir+"photonCountTypes.npy")
+	photonCountTypes = np.load(Options.datadir+"photonCountTypes.npy")
 	comptCounts = photonCountTypes[0:len(photonCounts):3,:,:,:] # - indices:evt#,types,z,y,x
 	photCounts = photonCountTypes[1:len(photonCounts):3,:,:,:]
 	otherCounts = photonCountTypes[2:len(photonCounts):3,:,:,:]
 
-	if MaxEventLimit:
-		nEvents = MaxEvents
+	if Options.MaxEventLimit:
+		nEvents = Options.MaxEvents
 	else:
 		nEvents = int(len(photonCounts)/3)
 	
@@ -104,13 +104,13 @@ else:
 	photCounts = photCounts[0:nEvents]
 	otherCounts = otherCounts[0:nEvents]
 
-if ReflectionTest:
-	volumeCounts = np.loadtxt(datadir+"volProcess.txt").astype(int)
+if Options.ReflectionTest:
+	volumeCounts = np.loadtxt(Options.datadir+"volProcess.txt").astype(int)
 
 	
 
 
-if SiPM_Based_Reconstruction:
+if Options.SiPM_Based_Reconstruction:
 	#massage left&right data
 	left = SiPM_Bin(left)
 	right = SiPM_Bin(right)
@@ -118,14 +118,14 @@ if SiPM_Based_Reconstruction:
 print("----- Number of Events: ", nEvents)
 #print(left[0]) 
 #//---------\\ BeamData // position and direction of fired gamma
-beamData = np.load(datadir+"beamData.npy")
+beamData = np.load(Options.datadir+"beamData.npy")
 evtPos = beamData[0:nEvents,0,:] # - first index is event #
 evtDir = beamData[0:nEvents,1,:]
 #print(evtPos)
 #print(evtDir)
 #//---------\\ BeamInteract // interaction positions by compton/photoelectric effect
 def beamInteraction():
-	beamInteract = open(datadir+"beamInteract.txt")
+	beamInteract = open(Options.datadir+"beamInteract.txt")
 	evtType = np.zeros((nEvents,2),dtype=int) # nCompton, nPhoto (number of interactions for gamma by event)
 	evtType2 = np.zeros((nEvents,2),dtype=int) # nCompton, nPhoto (number of interactions for gamma by event, regardless of photon production)
 	evtPhotoInteract = []
@@ -173,16 +173,16 @@ def beamInteraction():
 
 #-------------
 nPhotons=0
-if ReflectionTest:
-	with open(datadir+"photonReflectCount"+Ropt+".txt") as f:
+if Options.ReflectionTest:
+	with open(Options.datadir+"photonReflectCount"+Options.Ropt+".txt") as f:
 		nPhotoEvents = sum(1 for _ in f)
 	@lru_cache(maxsize=17000)
 	def photonReflectData(evt):
 		#import time
 		#t = time.time()
 		#photonSiPMFile = open("../build/B3a/photonSiPMData.txt")
-		filename = datadir+"photonReflectData"+Ropt+".txt"
-		filename2 = datadir+"photonReflectCount"+Ropt+".txt"
+		filename = Options.datadir+"photonReflectData"+Options.Ropt+".txt"
+		filename2 = Options.datadir+"photonReflectCount"+Options.Ropt+".txt"
 		#textLines = np.zeros(shape = (nEvents),dtype=list)
 		photonList = []
 		L = 9
@@ -221,12 +221,12 @@ if ReflectionTest:
 
 	#print(photonSiPMData[1][2]) photonSiPMData[evt][x,y,z,t,lambda][photonIndex]
 	#-------------
-if Process_Based_Breakdown:
+if Options.Process_Based_Breakdown:
 	photoA = []
 	comptonA = []
 	typeA = []
 	#photo,photocompt,other,compt = 2,1,0,-1.
-	with open(datadir+"electronProcess.txt") as f:
+	with open(Options.datadir+"electronProcess.txt") as f:
 		for line in f:
 			photo = 0
 			compton = 0

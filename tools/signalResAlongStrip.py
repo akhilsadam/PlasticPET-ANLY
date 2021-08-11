@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------------
-if Strip_Based_Reconstruction:
+if Options.Strip_Based_Reconstruction:
 	print("ERROR! needs True Reconstruction")
 	quit()
 else:
-	if SiPM_Based_Reconstruction:
+	if Options.SiPM_Based_Reconstruction:
 		ds_strip = SiPM_Downsample(strip)	
 		ds_recSignal = SiPM_Downsample(recSignal)
 		signalRatio = (ds_strip/ds_recSignal)
@@ -55,14 +55,14 @@ axs[1].text(0.99, 0.99, "color = negative interaction depth (distance penetrated
 fig.colorbar(cm.ScalarMappable(norm=mpt_col.Normalize(vmin=-UX,vmax=UX), cmap='Spectral'),ax=axs[1])
 
 plt.suptitle("Signal Amplitude actual/predicted ratio histogram")
-if SiPM_Based_Reconstruction:
+if Options.SiPM_Based_Reconstruction:
 	axs[0].set_title("Each SiPM pair vs z-position")
 	axs[1].set_title("Both side totals (by event)")
 	plt.tight_layout()
-	plt.savefig(plotDIR+'signalResolutionVSzpos_SiPM.png')
+	plt.savefig(Options.plotDIR+'signalResolutionVSzpos_SiPM.png')
 else: 
 	axs[0].set_title("Each strip vs z-position")
 	axs[1].set_title("Both side totals (by event)")
 	plt.tight_layout()
-	plt.savefig(plotDIR+'signalResolutionVSzpos.png')
+	plt.savefig(Options.plotDIR+'signalResolutionVSzpos.png')
 plt.show()

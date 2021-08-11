@@ -3,8 +3,8 @@ from tools.ML.ML_detRes import *
 import tqdm
 import torch
 from numba import jit
-def knntest(knn_neighbors):
-	drnet.setK(knn_neighbors)
+def knntest(Options.knn_neighbors):
+	drnet.setK(Options.knn_neighbors)
 	listset = list(range(length))
 	random.shuffle(listset)
 	dataInd,testInd = torch.split(torch.tensor(listset),splitList)
@@ -14,11 +14,11 @@ def knntest(knn_neighbors):
 	expectTensor = expectedTensor[testInd]
 	#dataTensorX,dataTensorY,inputTensor,expectTensor
 	out,outs = drnet(dataTensorX,dataTensorY,inptTensor)
-	ml_detRes_vis(out,expectTensor,knn_neighbors)
-	ml_detRes_vis2(out,expectTensor,knn_neighbors)
+	ml_detRes_vis(out,expectTensor,Options.knn_neighbors)
+	ml_detRes_vis2(out,expectTensor,Options.knn_neighbors)
 	return True
-def kvispp(knn_neighbors):
-	drnet.setK(knn_neighbors)
+def kvispp(Options.knn_neighbors):
+	drnet.setK(Options.knn_neighbors)
 	listset = list(range(length))
 	random.shuffle(listset)
 	dataInd,testInd = torch.split(torch.tensor(listset),splitList)
@@ -31,7 +31,7 @@ def kvispp(knn_neighbors):
 	
 	dlength = dataTensorY.shape[0]
 	kvals = dataTensorY[indxs]
-	nkvals = torch.ones((indxs.shape[0],dlength-knn_neighbors,4))
+	nkvals = torch.ones((indxs.shape[0],dlength-Options.knn_neighbors,4))
 	#print(dataTensorY.shape)
 	#print(nkvals.shape)
 	#print(indxs.shape)
@@ -45,11 +45,11 @@ def kvispp(knn_neighbors):
 	
 	return out,kvals,nkvals,expectTensor
 @jit
-def kvisppN(evt,knn_neighbors,dataTensorY,dataTensorYT,out,outs):
+def kvisppN(evt,Options.knn_neighbors,dataTensorY,dataTensorYT,out,outs):
 	indxs = outs
 	dlength = dataTensorY.shape[0]
 	kvals = dataTensorY[indxs]
-	nkvals = np.ones(shape = (indxs.shape[0],dlength-knn_neighbors,4))
+	nkvals = np.ones(shape = (indxs.shape[0],dlength-Options.knn_neighbors,4))
 	for evts in range(indxs.shape[0]):
 		# print(dataTensorY[~indxs[evts]].shape)
 		index = torch.ones(dlength, dtype=bool)
@@ -57,7 +57,7 @@ def kvisppN(evt,knn_neighbors,dataTensorY,dataTensorYT,out,outs):
 		nkvals[evts,:,:] = dataTensorY[index]
 		# print(nkvals[evts])
 	return out,kvals,nkvals,dataTensorYT
-	# nkvals = np.ones(shape = (indxs.shape[0],dlength-knn_neighbors,4))
+	# nkvals = np.ones(shape = (indxs.shape[0],dlength-Options.knn_neighbors,4))
     # for i in range(indxs.shape[0]):
     #     u = 0
     #     for j in range(dlength):
@@ -65,8 +65,8 @@ def kvisppN(evt,knn_neighbors,dataTensorY,dataTensorYT,out,outs):
     #             nkvals[i,u,:] = dataTensorY[j,:]
     #             u = u + 1
 
-def kerr(knn_neighbors):
-	out,kvals,nkvals,expectTensor = kvispp(knn_neighbors)
+def kerr(Options.knn_neighbors):
+	out,kvals,nkvals,expectTensor = kvispp(Options.knn_neighbors)
 	errs = torch.pow(torch.sum(torch.pow(out-expectTensor,2),dim = 1),0.5)
 	print(len(errs))
 	fig,axs = plt.subplots(2,2,tight_layout=True)	
@@ -83,8 +83,8 @@ def kerr(knn_neighbors):
 	plt.savefig(str(ML_PATH)+"/Models/detRes_KNN_ERRN.png")
 	plt.show()
 
-def kvisNP(evt,dataTensorY,dataTensorYT,out,outs,knn_neighbors):
-    outz,kvalsz,nkvalsz,expectTensorz = kvisppN(evt,knn_neighbors,dataTensorY.numpy(),dataTensorYT.numpy(),out.numpy(),outs.numpy())
+def kvisNP(evt,dataTensorY,dataTensorYT,out,outs,Options.knn_neighbors):
+    outz,kvalsz,nkvalsz,expectTensorz = kvisppN(evt,Options.knn_neighbors,dataTensorY.numpy(),dataTensorYT.numpy(),out.numpy(),outs.numpy())
     fig = plt.figure(figsize=(15,15),constrained_layout=True)
     ax0 = fig.add_subplot(2, 2, 1, projection='3d')
     ax1 = fig.add_subplot(2, 2, 2, projection='3d')
@@ -100,8 +100,8 @@ def kvisNP(evt,dataTensorY,dataTensorYT,out,outs,knn_neighbors):
     plt.savefig(str(ML_PATH)+"/Models/detRes_KNN_VISN.png")
     plt.close()#plt.show()
 
-def kvisN(knn_neighbors):
-	out,kvals,nkvals,expectTensor = kvispp(knn_neighbors)
+def kvisN(Options.knn_neighbors):
+	out,kvals,nkvals,expectTensor = kvispp(Options.knn_neighbors)
 
 	evt = 5
 	#plt.style.use('dark_background')

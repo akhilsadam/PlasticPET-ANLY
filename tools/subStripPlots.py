@@ -60,6 +60,6 @@ ax_histy.hist(YS, bins=ybins, orientation='horizontal')
 ax_histx.set_xlim(ax_scatter.get_xlim())
 ax_histy.set_ylim(ax_scatter.get_ylim())
 
-plt.savefig(plotDIR+"subStripInteraction")
+plt.savefig(Options.plotDIR+"subStripInteraction")
 plt.show()
 

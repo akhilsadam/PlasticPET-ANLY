@@ -100,3 +100,6 @@ opticalProcessList = np.array(["Undefined",
 "GroundTyvekAirReflection",
 "GroundVM2000AirReflection",
 "GroundVM2000GlueReflection"])
+#_-------------------------------------------=\----------------\
+def RSQ(data, model):
+	return 1-np.var(data-model)/np.var(data)

@@ -64,44 +64,20 @@ def ACTreconstruct(left,right,nEvents):
 def ACTreconstruct_time(left,right,nEvents,rec_Z):
 	# needs SiPM_Time_reconstruction first!
 	recPos = np.zeros(shape = (nEvents,3))
-	recSignal = np.zeros(shape = (nEvents,ny,nx))
 	sigMatrix = np.zeros(shape = (ny,nx))
-	zTensor = np.zeros(shape = (nEvents,ny,nx))
-	zMatrix = np.zeros(shape = (ny,nx))
 	for c in range(nEvents):
-		if((np.sum(left[c])!=0) and (np.sum(right[c])!=0)):
-			zMatrix.fill(rec_Z[c])
-			zTensor[c,:,:] = zMatrix
-
-			sigMatrix = 0.5*((right[c]*np.exp(zMatrix/att_len))+(left[c]*np.exp((LZ-zMatrix)/att_len)))
-			sigMatrix[~np.isfinite(sigMatrix)] = 0
-			recSignal[c] = sigMatrix
-			X = np.sum(stripPos[:,:,0]*sigMatrix)/np.sum(sigMatrix)
-			Y = np.sum(stripPos[:,:,1]*sigMatrix)/np.sum(sigMatrix)
-
-		else:
-			zMatrix[:,:] = np.nan
-			X,Y = np.nan,np.nan
-			recSignal[c,:,:] = np.nan
-			zTensor[c,:,:] = np.nan
-		#---Z only
-		if((np.sum(left[c])/np.sum(right[c]))!=0):
-			Z = (att_len/16)*math.log(np.sum(left[c])/np.sum(right[c])) + UZ
-		else:
-			Z = np.nan
-			
-			
-		recPos[c,:] = [X,Y,Z]
-		
-	return recPos,recSignal,zTensor
+		sigMatrix = left[c]+right[c]
+		X = np.sum(stripPos[:,:,0]*sigMatrix)/np.sum(sigMatrix)
+		Y = np.sum(stripPos[:,:,1]*sigMatrix)/np.sum(sigMatrix)
+		Z = rec_Z[c]
+		recPos[c,:] = X,Y,Z		
+	return recPos
 def TOF_GammaInteractRec(recPos,evtPos):
 	dist = np.power((UX-recPos[:,0]),2) + np.power((recPos[:,1]-evtPos[:,1]),2) + np.power((recPos[:,2]-evtPos[:,2]),2)
 	dist = np.power(dist,0.5)
 	time_I = ((UX-recPos[:,0])/1000)/(c_const/n_EJ208)
 	time_I = time_I/nanosec
 	return time_I
-def RSQ(data, model):
-	return 1-np.var(data-model)/np.var(data)
 #------------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------------

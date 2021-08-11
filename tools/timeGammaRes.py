@@ -81,17 +81,17 @@ axs.text(0.99, 0.84, "Gaussian: Error = +-%4.4f ns" %(0.5*FWHMC*param[1]),vertic
 axs.text(0.99, 0.79, "Gaussian: RSQ = %1.4f" %(RSQ(hist,pdf_g)),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes, fontsize=12)
 axs.text(0.99, 0.59, "t_0 - reconstructed t_I = t_D +- delta t_I",verticalalignment='top',horizontalalignment='right',transform=axs.transAxes, fontsize=12)
 axs.text(0.99, 0.54, "Mean ~= time to vertex,\n FWHM  = reconstruction error",verticalalignment='top',horizontalalignment='right',transform=axs.transAxes, fontsize=12)
-if Strip_Based_Reconstruction:
+if Options.Strip_Based_Reconstruction:
 	axs.set_title("Gamma TOF to Scintillator Interaction (Actual Strip Counts Rec): Time_D +- delta T_I")
 	plt.tight_layout()
-	plt.savefig(plotDIR+'TimeRes/gammaTOF_StripCounts.png')
+	plt.savefig(Options.plotDIR+'TimeRes/gammaTOF_StripCounts.png')
 else:
-	if SiPM_Based_Reconstruction:
+	if Options.SiPM_Based_Reconstruction:
 		axs.set_title("Gamma TOF to Scintillator Interaction (SiPM Rec): Time_D +- delta T_I")
 		plt.tight_layout()
-		plt.savefig(plotDIR+'TimeRes/gammaTOF_SiPM.png')
+		plt.savefig(Options.plotDIR+'TimeRes/gammaTOF_SiPM.png')
 	else: 
 		axs.set_title("Gamma TOF to Scintillator Interaction (Strip Endcount Rec): Time_D +- delta T_I")
 		plt.tight_layout()
-		plt.savefig(plotDIR+'TimeRes/gammaTOF_StripEndcounts.png')
+		plt.savefig(Options.plotDIR+'TimeRes/gammaTOF_StripEndcounts.png')
 plt.show()

@@ -19,25 +19,25 @@ with open(ML_PATH+'ML_detRes_preProcess.py') as f: exec(f.read()) # helper file 
 # from tools.ML.ML_detRes_preProcess import *
 print("KNNArrayNumber: ", ArrayNumber)
 inputTensor,expectedTensor = MLDRESpreprocess(photoLen,workers)
-if("PCA" in MLOPT):
+if("PCA" in Options.MLOPT):
 	PATH_OPT=PATH_OPT+"PCA"
 	pcaSTD = False
 	pcaMAHA = False
-if("STD" in MLOPT):
+if("STD" in Options.MLOPT):
 	PATH_OPT=PATH_OPT+"-STD"
 	pcaSTD = True
-if("MAHA" in MLOPT):
+if("MAHA" in Options.MLOPT):
 	PATH_OPT=PATH_OPT+"-MAHA"
 	pcaMAHA = True
-if("DISABLE-ZT" in MLOPT):
+if("DISABLE-ZT" in Options.MLOPT):
 	PATH_OPT=PATH_OPT+"-DISABLE-ZT"
 	inputTensor[:,2:4,:]=np.nan
 	
 #---
 print(":OPTIONS- ",PATH_OPT)
-if("PCA" in MLOPT):
+if("PCA" in Options.MLOPT):
 	with open(ML_PATH+'ML_PCA.py') as f: exec(f.read()) # helper file # PATH and vis
-elif("DISABLE-ZT" in MLOPT):
+elif("DISABLE-ZT" in Options.MLOPT):
 	inputTensor[:,2:4,:]=0
 #-------------------------------------------------------
 length = inputTensor.shape[0]
@@ -70,11 +70,11 @@ with open(ML_PATH+"ML_KNN_Functions.py") as f: exec(f.read())
 #TRAIN
 #torch.autograd.set_detect_anomaly(True)
 ML_showHIST = False
-if(KVIS=="VIS"):
-	kvis(knn_neighbors)
-elif(KVIS=="ERR"):
-	kerr(knn_neighbors)
-elif(KVIS=="OPTNUM"):
+if(Options.KVIS=="VIS"):
+	Options.KVIS(Options.knn_neighbors)
+elif(Options.KVIS=="ERR"):
+	kerr(Options.knn_neighbors)
+elif(Options.KVIS=="OPTNUM"):
 	rmseP = torch.zeros((veclen,4,epochs))
 	pltx = np.zeros((veclen,4,epochs))
 	nk=0
@@ -95,15 +95,15 @@ elif(KVIS=="OPTNUM"):
 			pltx[nk,:,jk] = [uik]*4
 		nk=nk+1
 	ml_detRes_vis_knn2(pltx,rmseP) #optimal number plot
-elif(KVIS=="RUN"):
+elif(Options.KVIS=="RUN"):
 	print("RUN")
 	with multiprocessing.Pool(processes=8) as pool:
 		lise = list(tqdm(pool.map(knntest,np.arange(initK,finalK,stepK)),total=veclen))
 	print("DONE")
-elif(KVIS=="RUNONE"):
+elif(Options.KVIS=="RUNONE"):
 	print("RUN")
-	knntest(knn_neighbors)
-elif(KVIS=="PICKLE"):
+	knntest(Options.knn_neighbors)
+elif(Options.KVIS=="PICKLE"):
 	print("Pickled")
 	print("DONE")
 

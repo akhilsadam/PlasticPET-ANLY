@@ -1,55 +1,22 @@
 import multiprocessing
-try: AnalyzeOptions
-except: AnalyzeOptions = True
-if(AnalyzeOptions):
-    #------------------------------------------------------------------------------------
-    PYTHONIOENCODING="UTF-8"  #sys.setdefaultencoding("ISO-8859-1")
-    #------------------------------------------------------------------------------------
-    try: datadir
-    except NameError: datadir = "../data/current/"
-    else: pass
-    try: plotDIR
-    except NameError: plotDIR = "../plot/current/"
-    else: pass
-    reflectplotDIR = plotDIR + "reflect/"
-    ML_PATH = "tools/ML/"
+class Options:
     #------------------------------------------------------------------------------------ CPU/GPU/TPU SETUP ------------->/v<--- ---------- ------- ------>------/  - - - - - |
     cpus = multiprocessing.cpu_count()
     print("CPU Count:",cpus)
-    if(cpus>16):
-        num_cores = 48 #48
-        MaxEventLimit = False
-        import matplotlib
-        matplotlib.use('AGG')
-    else:
-        num_cores = cpus
-        MaxEventLimit = False
-        import matplotlib
-        #matplotlib.use('AGG')
-    #----------------------------
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as mpt_col
-    from matplotlib.colors import ListedColormap,LinearSegmentedColormap
-    import matplotlib.cm as cm
-    import matplotlib.markers as mk
-    import matplotlib.ticker as mticker
+    num_cores = cpus
+    MaxEventLimit = False
     #------------------------------------------------------------------------------------ Event / Main SETUP ------------->^/<--- ---------- ------- ------>------/  - - - - - |
     MaxEventLimit = False #manual override
-    MaxEvents = 50 #int(input("Number of Events:"))
+    MaxEvents = 500 #int(input("Number of Events:"))
     #--------------------------
     COMPLETEDETECTOR = True
-    #--------------------------
-    firstPhoton = 0
-    try: photoLen
-    except NameError: photoLen = 5
-    else: pass
     # ------------------------------------------ RECONSTRUCTION SETUP ---->/=<--- ---------- ------- ------>------/  - - - - - |----------------------_|
     # - \---------------------------------
     Process_Based_Breakdown = False
     Strip_Based_Reconstruction = False #otherwise uses only endcount data
-    SiPMTime_Based_Reconstruction = False
+    SiPMTime_Based_Reconstruction = True
     SiPM_Based_Reconstruction = False #a binning method, massages data to use only binned SiPM counts #unrealistic!
-    ML_DRES = True #(turn off SiPMTime_Based_Reconstruction)
+    ML_DRES = False #(turn off SiPMTime_Based_Reconstruction)
 
     #--------------- --------- --------- -------- ML SETUP ------\\-->^/v<--- ---------- ------- ------>------/  - - - - - |
     DRES_Train = True #Train or Test/VIS?
@@ -72,9 +39,9 @@ if(AnalyzeOptions):
     Ropt = ""
     # SIPM TIMING Tests \---------------------------------
     # (number of photons to count in SiPM timing) (needs SiPMTime_Based_Reconstruction)
-    SiPMtimeRES = False
+    SiPMtimeRES = True
     SiPMtimeVSatt = False
-    SiPMtimePOSRES = False #multilateration style x,y,z positioning for visualization?.
+    SiPMtimePOSRES = True #multilateration style x,y,z positioning for visualization?.
 
     #--------------- --------- --------- -------- ADDITIONAL RESOLUTION PLOTS/HISTOGRAMS ------------->/=<--- ---------- ------- ------>------/  - - - - - |
     # Production/Detection Histograms \---------------------------------
@@ -93,4 +60,11 @@ if(AnalyzeOptions):
     #---------------
     TIMERES = False
     #------------------------------------------------------------------_|
-    AnalyzeOptions = False
+def initializeOptions():
+    if(Options.cpus>16):
+        Options.num_cores = 48 #48
+        Options.MaxEventLimit = False
+    else:
+        Options.num_cores = Options.cpus
+        Options.MaxEventLimit = False
+initializeOptions()

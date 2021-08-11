@@ -31,6 +31,6 @@ axs[1,1].set_ylim([0, 2])
 pltset(1,1)
 plt.suptitle(str(photoLen)+' photon residuals')
 plt.tight_layout()
-plt.savefig(plotDIR+str(photoLen)+'photon_sipmTimeVSattRECMethods.png',dpi=1600)
+plt.savefig(Options.plotDIR+str(photoLen)+'photon_sipmTimeVSattRECMethods.png',dpi=1600)
 plt.show()
 

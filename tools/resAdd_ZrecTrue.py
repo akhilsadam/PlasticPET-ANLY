@@ -41,14 +41,14 @@ axs[1].text(0.99, 0.99, "color = # of reconstructed photons (normalized)",vertic
 fig.colorbar(cm.ScalarMappable(norm=mpt_col.Normalize(vmin=0,vmax=400),cmap='Spectral'),ax=axs[1])
 
 plt.suptitle("Reconstructed Z-position vs True Z-position (Gamma Interaction Location)")
-if SiPM_Based_Reconstruction:
+if Options.SiPM_Based_Reconstruction:
 	axs[0].set_title("Each SiPM block vs average z-position")
 	axs[1].set_title("(by event)")
 	plt.tight_layout()
-	plt.savefig(plotDIR+'rec_zposVSzpos_SiPM.png')
+	plt.savefig(Options.plotDIR+'rec_zposVSzpos_SiPM.png')
 else: 
 	axs[0].set_title("Each strip block vs average z-position")
 	axs[1].set_title("(by event)")
 	plt.tight_layout()
-	plt.savefig(plotDIR+'rec_zposVSzpos.png')
+	plt.savefig(Options.plotDIR+'rec_zposVSzpos.png')
 plt.show()

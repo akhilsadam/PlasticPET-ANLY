@@ -31,7 +31,7 @@ PCA = False
 vis = True
 # ML processing
 ML_SPLIT_FRACTION = 0.75
-knn_neighbors = 4
+Options.knn_neighbors = 4
 # Filepaths
 ml_database_pkl = datadir+'ML_DATABASE_PICKLE_P'+str(photoLen)+'.pkl'
 ml_run_pkl = datadir+'ML_RUN_PICKLE_P'+str(photoLen)+'.pkl'
@@ -41,12 +41,12 @@ with open('tools/ML/ML.py') as f: exec(f.read())
 with open(ML_PATH+'ML_detRes.py') as f: exec(f.read())
 model_path = str(ML_PATH)+"Data/ML_DET_RES_KNN_"+str(photoLen)+"_Photo.pt"
 # with open('analyzeOptions.py') as f: exec(f.read())
-COMPLETEDETECTOR = True
+Options.COMPLETEDETECTOR = True
 datadir = "../data/current/"
-MaxEventLimit = False
-ReflectionTest = False
-SiPM_Based_Reconstruction = False
-Process_Based_Breakdown = False
+Options.MaxEventLimit = False
+Options.ReflectionTest = False
+Options.SiPM_Based_Reconstruction = False
+Options.Process_Based_Breakdown = False
 #---------------------------------------------|
 # dataOpen = True
 # with open('tools/data.py') as f: exec(f.read())
@@ -54,7 +54,7 @@ Process_Based_Breakdown = False
 # Pickling Individual Arrays:
 #--------------------------------------------|
 if rePickle:
-    KVIS = "PICKLE"
+    Options.KVIS = "PICKLE"
     regenerateMLPickles = True
     regeneratePickles = True
     for ArrayNumber in tqdm(range(nArray)):
@@ -131,14 +131,14 @@ drnet.eval()
 drnet._initialize_weights()
 print(drnet)
 #--------------------------------------------
-# Run KNN (note out is xyzt of gamma)
-drnet.setK(knn_neighbors)
+# Run Options.KNN (note out is xyzt of gamma)
+drnet.setK(Options.knn_neighbors)
 out,outs = drnet(dataTensorX,dataTensorY,dataTensorXT)
-ml_detRes_vis(out,dataTensorYT,knn_neighbors)
-ml_detRes_vis2(out,dataTensorYT,knn_neighbors)
+ml_detRes_vis(out,dataTensorYT,Options.knn_neighbors)
+ml_detRes_vis2(out,dataTensorYT,Options.knn_neighbors)
 #--------------------------------------------
 if vis == True :
     with open(ML_PATH+"ML_KNN_Functions.py") as f: exec(f.read())
-    kvisNP(10,dataTensorY,dataTensorYT,out,outs,knn_neighbors)
+    kvisNP(10,dataTensorY,dataTensorYT,out,outs,Options.knn_neighbors)
 #--------------------------------------------
 sorted, indices = torch.sort()

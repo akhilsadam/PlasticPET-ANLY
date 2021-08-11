@@ -3,7 +3,7 @@ photocomptonbreak = False
 byElectronProcess = False
 subfigs = False
 plot_opt = ""
-if "process_breakdown"  in STRIP_OPT:
+if "process_breakdown"  in Options.STRIP_OPT:
 	processbreak = True
 	# using photonCountTypes instead:
 	# [eventID,type,z,y,x], type = 0,1,2:compt,phot,other, z = 0,1: right,left
@@ -22,15 +22,15 @@ if "process_breakdown"  in STRIP_OPT:
 	types = 2*(phot>0) - 1*(compt>0) #photo,photocompt,other,compt = 2,1,0,-1.
 	typeProcess = (2*(evtType[:,1]>0)) - (evtType[:,0]>0)
 	alpha = 0.6
-if "photocompton_breakdown" in STRIP_OPT:
+if "photocompton_breakdown" in Options.STRIP_OPT:
 	photocomptonbreak = True
 	colormap = ["red","orange","gold","yellow","green","cyan","blue","indigo","violet","purple","grey","black"]
 	legend2 = tuplejoin(colormap,[":#C="],np.arange(1,13).astype(str).tolist())
 	notProductionOnly = False
-if "subfigures" in STRIP_OPT:
+if "subfigures" in Options.STRIP_OPT:
 	subfigs = True
 	linecolors = ["navy","lime","cadetblue","darkred"]
-if "electron_processes" in STRIP_OPT:
+if "electron_processes" in Options.STRIP_OPT:
 	byElectronProcess = True
 	typeProcess = typeA
 	plot_opt += "_electron"
@@ -44,7 +44,7 @@ binwidth = 20#20
 binwidth2 = 20#100
 #def pltDet(i):
 #def pltPD(i):
-if Creation:
+if Options.Creation:
 	#--- produced
 	fig,axs = plt.subplots(ny,nx,figsize=(10,10),sharex=True,sharey=True)
 	fig.suptitle("Created Photon Distributions")
@@ -56,7 +56,7 @@ if Creation:
 	#		if(mx>100):
 	#			axs[j,i].hist(counts,bins = int(mx/100),range = [1,mx])
 
-	#with multiprocessing.Pool(processes=num_cores-1) as pool:
+	#with multiprocessing.Pool(processes=Options.num_cores-1) as pool:
 	#    tqdm(pool.map(pltCreate,range(ny*nx)),total=(ny*nx))
 	for j in range(ny):
 		for i in range(nx):
@@ -70,7 +70,7 @@ if Creation:
 	axs[0,nx-1].text(.95,.90,"Total Events = %1.0f" %(nEvents),verticalalignment='top',horizontalalignment='right',transform=axs[0,nx-1].transAxes,fontsize=10)
 	plt.tight_layout()
 	plt.subplots_adjust(wspace=0,hspace=0)
-	plt.savefig(plotDIR+"Created Photon Distributions.png")
+	plt.savefig(Options.plotDIR+"Created Photon Distributions.png")
 	#plt.show()
 	plt.close()
 	mx=5000
@@ -84,10 +84,10 @@ if Creation:
 	axs.set_ylabel("Interacted Events")
 	axs.text(.95,.95,"Interacted Events = %1.0f" %(nEvents-uninteractedEvents),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
 	axs.text(.95,.90,"Total Events = %1.0f" %(nEvents),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
-	plt.savefig(plotDIR+"Created Photon Distributions_Total.png")
+	plt.savefig(Options.plotDIR+"Created Photon Distributions_Total.png")
 	#plt.show()
 	plt.close()
-if Detection:
+if Options.Detection:
 	mx=detMax
 	#--- produced
 	fig,axs = plt.subplots(ny,nx,figsize=(10,10),sharex=True,sharey=True)
@@ -117,7 +117,7 @@ if Detection:
 	axs[0,nx-1].text(.95,.25,"Binwidth = %1.0f" %(binwidth0),verticalalignment='top',horizontalalignment='right',transform=axs[0,nx-1].transAxes,fontsize=10)
 	plt.tight_layout()
 	plt.subplots_adjust(wspace=0,hspace=0)
-	plt.savefig(plotDIR+"Detected Photon Distributions"+plot_opt+".png", bbox_inches="tight")
+	plt.savefig(Options.plotDIR+"Detected Photon Distributions"+plot_opt+".png", bbox_inches="tight")
 	#plt.show()
 	plt.close()
 	mx=detSumMax
@@ -173,7 +173,7 @@ if Detection:
 				ax2.text(0.0,1.0,legend,verticalalignment='top',horizontalalignment='left',transform=ax2.transAxes,fontsize=8)
 				ax2.text(0.0,.95,"Breakdown of Gamma "+plotname[c]+" by Electron processes.",verticalalignment='top',horizontalalignment='left',transform=ax2.transAxes,fontsize=10)
 				ax2.text(0.0,.90,"Compton electrons are dashed, while photoelectrons are solid.",verticalalignment='top',horizontalalignment='left',transform=ax2.transAxes,fontsize=10)
-				fig2.savefig(plotDIR+"Detected Photon Distributions_"+plotname[c]+"_breakdown.png")
+				fig2.savefig(Options.plotDIR+"Detected Photon Distributions_"+plotname[c]+"_breakdown.png")
 				#ax2.close()
 		ax[1].hist(counts,bins = int(mx/binwidth),range = [0,mx], color = "black",alpha = 1)
 	else:
@@ -235,7 +235,7 @@ if Detection:
 		PHOTOPEAK_COUNT = np.nan
 		PHOTOPEAK_PROPORTION = np.nan
 		axs.text(.95,.80,"Energy Resolution Fit FAILED",verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
-	fig.savefig(plotDIR+"Detected Photon Distributions_Total"+plot_opt+".png", bbox_inches="tight")
+	fig.savefig(Options.plotDIR+"Detected Photon Distributions_Total"+plot_opt+".png", bbox_inches="tight")
 	#plt.show()
 	plt.close()
 	if(processbreak and photocomptonbreak):
@@ -277,9 +277,9 @@ if Detection:
 		axs.text(.95,.90,"Total Events = %1.0f" %(nEvents),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
 		axs.text(.95,.85,"Binwidth = %1.0f" %(binwidth2),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
 		axs.text(.95,.80,"PhotoCompton Events = %1.0f" %(pcEvents),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
-		plt.savefig(plotDIR+"Detected Photon Distributions_PC.png", bbox_inches="tight")
+		plt.savefig(Options.plotDIR+"Detected Photon Distributions_PC.png", bbox_inches="tight")
 		plt.close()
-if PD:
+if Options.PD:
 	#--- produced
 	mx = 1
 	fig,axs = plt.subplots(ny,nx,figsize=(10,10),sharex=True,sharey=True)
@@ -297,6 +297,6 @@ if PD:
 	axs[0,nx-1].text(.95,.90,"Interacted Events = %1.0f" %(nEvents),verticalalignment='top',horizontalalignment='right',transform=axs[0,nx-1].transAxes,fontsize=10)
 	plt.tight_layout()
 	plt.subplots_adjust(wspace=0,hspace=0)
-	plt.savefig(plotDIR+"Produced-Detected Ratio.png")
+	plt.savefig(Options.plotDIR+"Produced-Detected Ratio.png")
 	#plt.show()
 	plt.close()

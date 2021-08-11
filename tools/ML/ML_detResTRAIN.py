@@ -13,7 +13,7 @@ beta1 = 0.5
 beta2 = 0.999 #ADAM
 #-------------------------------------------------------------------------------
 #Model Definition
-if warmstart:
+if Options.warmstart:
 	with open(ML_PATH+'ML_Model_detRes_CNN2.py') as f: exec(f.read()) # helper file # model definition
 else:
 	with open(ML_PATH+'ML_Model_detRes_CNN.py') as f: exec(f.read()) # helper file # model definition
@@ -31,8 +31,8 @@ print(drnet)
 ML_showHIST = True
 
 losses = []
-if warmstart:
-	if(input("Do you wish to load warmstarted data? (y/n):") == ("y")):
+if Options.warmstart:
+	if(input("Do you wish to load Options.warmstarted data? (y/n):") == ("y")):
 		drnet.load_state_dict(torch.load(model_path0),strict=False) # LOAD
 	else:
 		drnet.load_state_dict(torch.load(model_path)) # LOAD

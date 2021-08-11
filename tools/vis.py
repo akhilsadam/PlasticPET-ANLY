@@ -121,7 +121,7 @@ def visTime(eventID):
 
 	ax.scatter(recPos[eventID,2],recPos[eventID,0],recPos[eventID,1],s=12,color='crimson')
 
-	if(SiPMTime_Based_Reconstruction):
+	if(Options.SiPMTime_Based_Reconstruction):
 		ax.scatter(recPosT[2],recPosT[0],recPosT[1],s=12,color='lime')
 
 	#photons

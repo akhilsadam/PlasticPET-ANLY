@@ -55,11 +55,11 @@ for eventID in tqdm(range(nEvents)):
     ##
     # DIFFERENT VISUALIZATIONS: SELECT AS PREFERRED
     #-----------------------------------------------------------------------------------
-    #visReflectBD(eventID,reflectData,kp,"Photon Boundary Absorption Interactions"+Ropt,"BoundaryKilled"+Ropt+".png",reflectplotDIR,L)
-    #visReflectBD(eventID,reflectData,rp,"Photon Boundary Reflection/Refraction Interactions"+Ropt,"BoundaryReflect"+Ropt+".png",reflectplotDIR,L)
-    #visReflectBRD(eventID,reflectData,"Photon Boundary Interactions"+Ropt,"BoundaryStatistics"+Ropt+".png",reflectplotDIR)
-    #visReflectAAK(rpC,kpC,reflectDataC,"Photon Boundary Angle-Alive/Killed Histogram"+Ropt,"AliveKilledHistogram"+Ropt+".png",reflectplotDIR,L)
-    #visReflectAA(rpC,reflectDataC,"Photon Boundary Incidence/Reflection Angle"+Ropt,"AliveAngles"+Ropt+".png",reflectplotDIR,L)
+    #visReflectBD(eventID,reflectData,kp,"Photon Boundary Absorption Interactions"+Options.Ropt,"BoundaryKilled"+Options.Ropt+".png",reflectplotDIR,L)
+    #visReflectBD(eventID,reflectData,rp,"Photon Boundary Reflection/Refraction Interactions"+Options.Ropt,"BoundaryReflect"+Options.Ropt+".png",reflectplotDIR,L)
+    #visReflectBRD(eventID,reflectData,"Photon Boundary Interactions"+Options.Ropt,"BoundaryStatistics"+Options.Ropt+".png",reflectplotDIR)
+    #visReflectAAK(rpC,kpC,reflectDataC,"Photon Boundary Angle-Alive/Killed Histogram"+Options.Ropt,"AliveKilledHistogram"+Options.Ropt+".png",reflectplotDIR,L)
+    #visReflectAA(rpC,reflectDataC,"Photon Boundary Incidence/Reflection Angle"+Options.Ropt,"AliveAngles"+Options.Ropt+".png",reflectplotDIR,L)
     #-----------------------------------------------------------------------------------
     #------------
     pr = reflect/(reflect+killed) #pr is probability of reflection/refraction at a boundary interaction
@@ -125,7 +125,7 @@ for eventID in tqdm(range(nEvents)):
     AbsorptionType = np.zeros(nPhotons)    # Absorbed how (0 - bound.abs., 1 - vol.abs.,2 - det.) by pid?
     #-------------
 
-    if(boundaryinteract):
+    if(Options.boundaryinteract):
 
         try: os.makedirs(reflectplotDIR)
         except: pass
@@ -232,7 +232,7 @@ for eventID in tqdm(range(nEvents)):
                 print("BounceTime Except")
     #-------------------------
 print("[STATUS] PLOTTING...")
-if boundaryinteract:
+if Options.boundaryinteract:
     fig,ax = plt.subplots()
     x = np.array(x)
     y = np.array(y)
@@ -250,8 +250,8 @@ if boundaryinteract:
     ax.set_xlim([0,50])
     ax.set_ylabel("Number of Boundary Interactions")
     ax.set_ylim([0,700])
-    ax.set_title("Number of Boundary Interactions vs Detection Time"+Ropt)
-    plt.savefig(reflectplotDIR+"BounceTimes"+Ropt+".png",dpi=600)
+    ax.set_title("Number of Boundary Interactions vs Detection Time"+Options.Ropt)
+    plt.savefig(reflectplotDIR+"BounceTimes"+Options.Ropt+".png",dpi=600)
     #-------------------------
     fig,ax = plt.subplots()
     z=np.array(z)
@@ -276,9 +276,9 @@ if boundaryinteract:
     ax.set_xlim([0,6])
     ax.set_ylabel("Number of Boundary Interactions")
     ax.set_ylim([0,50])
-    ax.set_title("Number of Boundary Interactions vs Detection Time (First 5 by Event)"+Ropt)
+    ax.set_title("Number of Boundary Interactions vs Detection Time (First 5 by Event)"+Options.Ropt)
     plt.colorbar(plot)
-    plt.savefig(reflectplotDIR+"BounceTimeFifth"+Ropt+".png",dpi=600)
+    plt.savefig(reflectplotDIR+"BounceTimeFifth"+Options.Ropt+".png",dpi=600)
     #-------------------------
     # figure & text
     fig,ax = plt.subplots(1)
@@ -330,8 +330,8 @@ if boundaryinteract:
     ax.set_xlabel("# of Interactions")
     ax.set_ylabel("Counts")
     ax.set_title("Event #"+str(eventID)+" shown, with averages computed over "+str(nPhotoEvents)+" events.")
-    plt.suptitle("Photon Boundary Interactions (Reflection\\Refraction)"+Ropt)
-    plt.savefig(reflectplotDIR+"BoundaryInteractionsTIR"+Ropt+".png",dpi=600)
+    plt.suptitle("Photon Boundary Interactions (Reflection\\Refraction)"+Options.Ropt)
+    plt.savefig(reflectplotDIR+"BoundaryInteractionsTIR"+Options.Ropt+".png",dpi=600)
     #-------------------------
     # figure & text
     fig,ax = plt.subplots(1,2)
@@ -343,7 +343,7 @@ if boundaryinteract:
     ax[1].set_ylabel("Counts")
     ax[1].set_xlim(critical,180)
     ax[0].set_xlim(0,critical)
-    plt.suptitle("Non-TIR / TIR interactions (5 degree bins)"+Ropt)
-    plt.savefig(reflectplotDIR+"BoundaryInteractionsHist"+Ropt+".png",dpi=600)
+    plt.suptitle("Non-TIR / TIR interactions (5 degree bins)"+Options.Ropt)
+    plt.savefig(reflectplotDIR+"BoundaryInteractionsHist"+Options.Ropt+".png",dpi=600)
     #-------------------------
     print("[STATUS] Done")

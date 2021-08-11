@@ -9,7 +9,7 @@ UL = [77.4,103.2,1000]
 import multiprocessing
 from itertools import repeat
 from functools import partial
-num_cores = multiprocessing.cpu_count()
+Options.num_cores = multiprocessing.cpu_count()
 
 def ACTTimeReconstruct():
 
@@ -28,28 +28,25 @@ def ACTTimeReconstruct():
 		#Bin Data into Strips
 		# ct estimator for x,y,z position.
 		point = [0,0,UZ,1]
-		for u in range(50):
-			for dr in range(0,3):
+		for _ in range(50):
+			for dr in range(3):
 				point[dr] = point[dr] - lr*drGrad(dr,point, photoLen, photonData)
-				if(point[2] <= UZ):
-					dist = point[2]
-				else:
-					dist = LZ-point[2]
+				dist = point[2] if (point[2] <= UZ) else LZ-point[2]
 				point[3] = fastestTime - (dist)*n_EJ208/(1000*c_const*nanosec)
-			#point[3] = point[3] - lrt*tGrad(point, photoLen, photonData)
-			#print(err[:,5])
+					#point[3] = point[3] - lrt*tGrad(point, photoLen, photonData)
+					#print(err[:,5])
 		#print(point)
-	
+
 
 		recPosT[c] = point
-		
+
 	return recPosT
 
 @lru_cache(maxsize=2000)
 def process_ACTZT(c):
 	photonDatas = photonSiPMData(c)
 	# print(photonDatas)
-	if(len(photonDatas)==0):
+	if (len(photonDatas)==0):
 		r_Z,r_T,readTime = np.nan,np.nan,np.nan
 	else:
 		# array filtering
@@ -58,7 +55,7 @@ def process_ACTZT(c):
 		photonDataL = np.transpose(photonArrayData[:,photonArrayData[2]>UZ])
 		photonDataR = np.transpose(photonArrayData[:,photonArrayData[2]<=UZ])
 		#print(photonDataL.shape)
-		if((len(photonDataL)==0) or (len(photonDataR)==0)):
+		if ((len(photonDataL)==0) or (len(photonDataR)==0)):
 			r_Z,r_T,readTime = np.nan,np.nan,np.nan
 		else:
 			photonDataL = np.transpose(sorted(photonDataL, key=lambda photonDataL: photonDataL[3]))
@@ -75,7 +72,7 @@ def process_ACTZT(c):
 				photonDataL = photonDataL[:,firstPhoton]
 			else:
 				photonDataR = photonDataR[:,firstPhoton]
-				
+
 			# print(photonDataL)
 			# print(photonDataR)
 			Ltimes = photonDataL[3] - ((photonDataL[2]-LZ)*n_EJ208/(1000*c_const*nanosec))
@@ -91,11 +88,7 @@ def process_ACTZT(c):
 			delTime = Ltimes[0:minlen]-Rtimes[0:minlen]
 			#print(delTime)
 			r_Z = np.average(0.5*(LZ - 1000*(c_const/n_EJ208)*(delTime*nanosec)))
-			if(r_Z <= UZ):
-				dist = r_Z
-			else:
-				dist = LZ-r_Z
-
+			dist = r_Z if (r_Z <= UZ) else LZ-r_Z
 			r_T = fastestTime - (dist)*n_EJ208/(1000*c_const*nanosec)
 	#pbar.update(1)
 	# print(r_Z,r_T,readTime,r_Z - actEvtPosN[c,2], r_T - time_I_N[c])
@@ -105,10 +98,10 @@ def ACTZTimeProcess(photoLen):
 	#results = np.zeros(shape=(nEvents,5))
 	#for c in range(nEvents):
 	#		results[c] = process_ACTZT(c,photoLen)
-	#results = Parallel(n_jobs=num_cores)(delayed(process_ACTZT)(c) for c in range(nEvents)
+	#results = Parallel(n_jobs=Options.num_cores)(delayed(process_ACTZT)(c) for c in range(nEvents)
 	#inpt = list(zip(range(nEvents), repeat(photoLen)))
 	#print(inpt)
-	with multiprocessing.Pool(num_cores-1) as pool:
+	with multiprocessing.Pool(Options.num_cores-1) as pool:
 		results = list(tqdm(pool.imap_unordered(process_ACTZT,range(nEvents)),total=nEvents)) #zip(range(nEvents), repeat(photoLen))
 	return np.transpose(results)
 

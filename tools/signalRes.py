@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------------
-if Strip_Based_Reconstruction:
+if Options.Strip_Based_Reconstruction:
 	print("ERROR! needs True Reconstruction")
 	quit()
 else:
-	if SiPM_Based_Reconstruction:
+	if Options.SiPM_Based_Reconstruction:
 		ds_strip = SiPM_Downsample(strip)	
 		ds_recSignal = SiPM_Downsample(recSignal)
 		signalRatio = (ds_strip/ds_recSignal)
@@ -78,7 +78,7 @@ s_sig = math.sqrt(np.sum(np.power((sparam[0]-factor),2))/(len(factor)-1))
 #print(param)
 #mu,var = stats.norm.fit(errorPos)
 axs.text(0.01, 0.99, "Total Events = %1.0f" %(nEvents),verticalalignment='top',horizontalalignment='left',transform=axs.transAxes, fontsize=12)
-if SiPM_Based_Reconstruction:
+if Options.SiPM_Based_Reconstruction:
 	axs.text(0.01, 0.94, "Total Event SiPM Pairs = %1.0f" %(sEvents),verticalalignment='top',horizontalalignment='left',transform=axs.transAxes, fontsize=12)
 	axs.text(0.01, 0.89, "Usable Event SiPM Pairs = %1.0f" %(len(factor)),verticalalignment='top',horizontalalignment='left',transform=axs.transAxes, fontsize=12)
 else:
@@ -97,12 +97,12 @@ axs.text(0.99, 0.94, "Gaussian: STD = %4.2f" %(param[1]),verticalalignment='top'
 axs.text(0.99, 0.89, "Gaussian: FWHM = %4.2f" %(FWHMC*param[1]),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes, fontsize=12)
 axs.text(0.99, 0.84, "Gaussian: Error = +-%4.2f" %(0.5*FWHMC*param[1]),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes, fontsize=12)
 axs.text(0.99, 0.79, "Gaussian: RSQ = %1.2f" %(RSQ(hist,pdf_g)),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes, fontsize=12)
-if SiPM_Based_Reconstruction:
+if Options.SiPM_Based_Reconstruction:
 	axs.set_title("Signal amplitude actual/predicted ratio histogram for each SiPM pair")
 	plt.tight_layout()
-	plt.savefig(plotDIR+'signalResolution_SiPM.png')
+	plt.savefig(Options.plotDIR+'signalResolution_SiPM.png')
 else: 
 	axs.set_title("Signal amplitude actual/predicted ratio histogram for each strip")
 	plt.tight_layout()
-	plt.savefig(plotDIR+'signalResolution.png')
+	plt.savefig(Options.plotDIR+'signalResolution.png')
 plt.show()

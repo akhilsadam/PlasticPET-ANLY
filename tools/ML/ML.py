@@ -23,7 +23,7 @@ from tqdm import tqdm
 torch.multiprocessing.set_sharing_strategy('file_system')
 ngpu = 1
 device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
-workers = num_cores - 1
+workers = Options.num_cores - 1
 #-------------------------------------------------------
 # Set random seed for reproducibility
 manualSeed = 999

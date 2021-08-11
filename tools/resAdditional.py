@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------------
-if Strip_Based_Reconstruction:
+if Options.Strip_Based_Reconstruction:
 	print("ERROR! needs True Reconstruction")
 	quit()
 else:
-	if SiPM_Based_Reconstruction:	
+	if Options.SiPM_Based_Reconstruction:	
 		ds_recSignal = SiPM_Downsample(recSignal)
 		signalRatio = (ds_recSignal)
 	else:

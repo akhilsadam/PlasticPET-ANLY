@@ -41,14 +41,14 @@ axs[1].text(0.99, 0.99, "color = negative interaction depth (distance penetrated
 fig.colorbar(cm.ScalarMappable(norm=mpt_col.Normalize(vmin=-UX,vmax=UX), cmap='Spectral'),ax=axs[1])
 
 plt.suptitle("Reconstructed Photon Count Histogram (vs Z-position)")
-if SiPM_Based_Reconstruction:
+if Options.SiPM_Based_Reconstruction:
 	axs[0].set_title("Each SiPM pair vs z-position")
 	axs[1].set_title("Both side totals (by event)")
 	plt.tight_layout()
-	plt.savefig(plotDIR+'reconstructedPhotVSzpos_SiPM.png')
+	plt.savefig(Options.plotDIR+'reconstructedPhotVSzpos_SiPM.png')
 else: 
 	axs[0].set_title("Each strip vs z-position")
 	axs[1].set_title("Both side totals (by event)")
 	plt.tight_layout()
-	plt.savefig(plotDIR+'reconstructedPhotVSzpos.png')
+	plt.savefig(Options.plotDIR+'reconstructedPhotVSzpos.png')
 plt.show()
