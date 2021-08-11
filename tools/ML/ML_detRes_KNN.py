@@ -16,7 +16,9 @@ beta2 = 0.999 #ADAM
 #-------------------------------------------------------------------------------
 #Preprocessing:
 with open(ML_PATH+'ML_detRes_preProcess.py') as f: exec(f.read()) # helper file # preprocessing
-inputTensor,expectedTensor = MLDRESpreprocess(photoLen)
+# from tools.ML.ML_detRes_preProcess import *
+print("KNNArrayNumber: ", ArrayNumber)
+inputTensor,expectedTensor = MLDRESpreprocess(photoLen,workers)
 if("PCA" in MLOPT):
 	PATH_OPT=PATH_OPT+"PCA"
 	pcaSTD = False
@@ -39,8 +41,9 @@ elif("DISABLE-ZT" in MLOPT):
 	inputTensor[:,2:4,:]=0
 #-------------------------------------------------------
 length = inputTensor.shape[0]
-frac = 0.75
-splitList = [int(length*frac),length - int(length*frac)]
+try: ML_SPLIT_FRACTION
+except: ML_SPLIT_FRACTION = 0.75
+splitList = [int(length*ML_SPLIT_FRACTION),length - int(length*ML_SPLIT_FRACTION)]
 initK = 2#4
 finalK = 40#80
 stepK = 5
@@ -50,130 +53,19 @@ epochs = 5
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #Model Definition:
-with open(ML_PATH+'ML_Model_detRes_KNN.py') as f: exec(f.read()) # helper file # model definition
+try: KNNOPENED
+except: KNNOPENED = False
+if(KNNOPENED):
+	pass
+else:
+	with open(ML_PATH+'ML_Model_detRes_KNN.py') as f: exec(f.read()) # helper file # model definition
+	KNNOPENED = True
 drnet = DRKNN()
 drnet.eval() #not train!
 drnet._initialize_weights()
 print(drnet)
 #-------------------------------------------------------------------------------
-def knntest(knn_neighbors):
-	drnet.setK(knn_neighbors)
-	listset = list(range(length))
-	random.shuffle(listset)
-	dataInd,testInd = torch.split(torch.tensor(listset),splitList)
-	dataTensorX = inputTensor[dataInd]
-	inptTensor = inputTensor[testInd]
-	dataTensorY = expectedTensor[dataInd]
-	expectTensor = expectedTensor[testInd]
-	#dataTensorX,dataTensorY,inputTensor,expectTensor
-	out,outs = drnet(dataTensorX,dataTensorY,inptTensor)
-	ml_detRes_vis(out,expectTensor,knn_neighbors)
-	ml_detRes_vis2(out,expectTensor,knn_neighbors)
-	return True
-def kvispp(knn_neighbors):
-	drnet.setK(knn_neighbors)
-	listset = list(range(length))
-	random.shuffle(listset)
-	dataInd,testInd = torch.split(torch.tensor(listset),splitList)
-	dataTensorX = inputTensor[dataInd]
-	inptTensor = inputTensor[testInd]
-	dataTensorY = expectedTensor[dataInd]
-	expectTensor = expectedTensor[testInd]
-	#dataTensorX,dataTensorY,inputTensor,expectTensor
-	out,indxs = drnet(dataTensorX,dataTensorY,inptTensor)
-	
-	dlength = dataTensorY.shape[0]
-	kvals = dataTensorY[indxs]
-	nkvals = torch.ones((indxs.shape[0],dlength-knn_neighbors,4))
-	#print(dataTensorY.shape)
-	#print(nkvals.shape)
-	#print(indxs.shape)
-	#print(dlength)
-	for i in range(indxs.shape[0]):
-		u = 0
-		for j in range(dlength):
-			if(j not in indxs[i]):
-				nkvals[i,u,:] = dataTensorY[j,:]
-				u = u + 1
-	
-	return out,kvals,nkvals,expectTensor
-
-def kerr(knn_neighbors):
-	out,kvals,nkvals,expectTensor = kvispp(knn_neighbors)
-	errs = torch.pow(torch.sum(torch.pow(out-expectTensor,2),dim = 1),0.5)
-	print(len(errs))
-	fig,axs = plt.subplots(2,2,tight_layout=True)	
-	for i in range(4):
-		ax = axs[int(i/2),i%2]
-		x,y = expectTensor[:,i], errs
-		ax.scatter(x,y)
-		ax.set_xlabel(NM[i] + ' [mm]')
-		ax.set_ylabel('Error [mm]')
-		if MarginalPLT:
-			marginalPLT2(ax,x.numpy(),y.numpy(),i)
-
-	plt.suptitle("KNN Output Space Error")
-	plt.savefig(str(ML_PATH)+"/Models/detRes_KNN_ERRN.png")
-	plt.show()
-
-def kvis(knn_neighbors):
-	out,kvals,nkvals,expectTensor = kvispp(knn_neighbors)
-
-	evt = 5
-	#plt.style.use('dark_background')
-	#plt.rcParams['axes.facecolor'] = 'black'
-	#plt.rcParams['savefig.facecolor'] = 'black'
-	fig = plt.figure(figsize=plt.figaspect(0.5),tight_layout=True)	
-	ax0 = fig.add_subplot(1, 2, 1, projection='3d')
-	ax1 = fig.add_subplot(1, 2, 2, projection='3d')
-	kvisplt(fig,ax0,evt,0,out,kvals,nkvals,expectTensor)
-	kvisplt(fig,ax1,evt,1,out,kvals,nkvals,expectTensor)
-
-	plt.suptitle("KNN Output Space Neighbor Visualization (Event="+str(evt)+")")
-	plt.savefig(str(ML_PATH)+"/Models/detRes_KNN_VISN.png")
-	plt.show()
-	#plt.close()
-
-	#print(nkvals[evt])
-
-	
-	#nkvals = dataTensorY[mask]
-	#print(nkvals.shape)
-	#ax.scatter(x,y,z,c=v, s=8) #neighbors (all but k)
-
-def kvisplt(fig,ax,evt,orient,out,kvals,nkvals,expectTensor):
-	# modified hsv in 256 color class
-	hsv_modified = cm.get_cmap('hsv', 256)# create new hsv colormaps in range of 0.3 (green) to 0.7 (blue)
-	newcmp = ListedColormap(hsv_modified(np.linspace(0.5, 1.0, 256)))# show figure
-
-	cmap=newcmp#'hsv'
-	xin = (0+orient)%4
-	yin = (1+orient)%4
-	zin = (2+orient)%4
-	tin = (3+orient)%4
-	norm=mpt_col.Normalize(vmin=LM[tin,0],vmax=LM[tin,1])
-	
-	ax.scatter(expectTensor[evt,zin],expectTensor[evt,xin],expectTensor[evt,yin],c=expectTensor[evt,tin], s=16, marker = "^",cmap=cmap,norm=norm) #neighbors (k)
-	ax.scatter(out[evt,zin],out[evt,xin],out[evt,yin],c=out[evt,tin], s=16, marker = "v",cmap=cmap,norm=norm) #neighbors (k)
-	ax.scatter(kvals[evt,:,zin],kvals[evt,:,xin],kvals[evt,:,yin],c=kvals[evt,:,tin], s=14, marker = "o",cmap=cmap,norm=norm) #neighbors (k)
-	ax.scatter(nkvals[evt,:,zin],nkvals[evt,:,xin],nkvals[evt,:,yin],c=nkvals[evt,:,tin], s=6, marker = ".",cmap=cmap,norm=norm) #neighbors (not k)
-	ax.set_xlabel(NM[zin] + ' [mm]')
-	ax.set_ylabel(NM[xin] + ' [mm]')
-	ax.set_zlabel(NM[yin] + ' [mm]')
-
-	cl = 0.98
-	ax.w_xaxis.set_pane_color((cl, cl, cl, 1.0))
-	ax.w_yaxis.set_pane_color((cl, cl, cl, 1.0))
-	ax.w_zaxis.set_pane_color((cl, cl, cl, 1.0))
-
-	cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap),ax=ax)
-	cbar.set_label(NM[tin] + ' [mm]', rotation=90)
-
-	visgrids(ax,orient,0.2)
-
-	ax.set_title("(orientation="+str(orient)+")")
-
-
+with open(ML_PATH+"ML_KNN_Functions.py") as f: exec(f.read())
 #-------------------------------------------------------------------------------
 #TRAIN
 #torch.autograd.set_detect_anomaly(True)
@@ -211,6 +103,8 @@ elif(KVIS=="RUN"):
 elif(KVIS=="RUNONE"):
 	print("RUN")
 	knntest(knn_neighbors)
+elif(KVIS=="PICKLE"):
+	print("Pickled")
 	print("DONE")
 
 #-------------------------------------------------------

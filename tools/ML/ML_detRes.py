@@ -1,9 +1,11 @@
+from analyzeOptions import *
 if warmstart:
 	model_path0 = str(ML_PATH)+"Data/ML_DET_RES_"+str(photoLen)+"_Photo.pt"
 	model_path = str(ML_PATH)+"Data/ML_DET_RES_"+str(photoLen)+"_Photo2.pt"
 else:
 	model_path = str(ML_PATH)+"Data/ML_DET_RES_"+str(photoLen)+"_Photo.pt"
 #-------------------------------------------------------
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 nbins=50
 #-------------------------------------------------------
 MarginalPLT = True
@@ -155,11 +157,11 @@ def ml_detRes_vis2(inpT,expT,pl):
 	if(KNN):
 		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual "+PATH_OPT)
 		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(pl)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
-		plt.show()
+		plt.close()#plt.show()
 	else:
 		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual "+PATH_OPT)
 		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_CNN_"+str(pl)+"."+PATH_OPT+"png",bbox_inches='tight',dpi=600)
-		plt.show()
+		plt.close()#plt.show()
 
 def ml_detRes_vis_knn(inpT,expT,uik,noplt):
 	length,types = inpT.shape

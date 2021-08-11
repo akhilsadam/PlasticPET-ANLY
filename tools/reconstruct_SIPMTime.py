@@ -48,11 +48,15 @@ def ACTTimeReconstruct():
 @lru_cache(maxsize=2000)
 def process_ACTZT(c):
 	photonDatas = photonSiPMData(c)
+	# print(photonDatas)
 	if(len(photonDatas)==0):
 		r_Z,r_T,readTime = np.nan,np.nan,np.nan
 	else:
-		photonDataL = np.transpose(photonDatas[:,photonDatas[2]>UZ])
-		photonDataR = np.transpose(photonDatas[:,photonDatas[2]<=UZ])
+		# array filtering
+		photonArrayData = photonDatas[:,(photonDatas[4]).astype(int)==ArrayNumber]
+		#print(photonArrayData)
+		photonDataL = np.transpose(photonArrayData[:,photonArrayData[2]>UZ])
+		photonDataR = np.transpose(photonArrayData[:,photonArrayData[2]<=UZ])
 		#print(photonDataL.shape)
 		if((len(photonDataL)==0) or (len(photonDataR)==0)):
 			r_Z,r_T,readTime = np.nan,np.nan,np.nan
@@ -60,25 +64,25 @@ def process_ACTZT(c):
 			photonDataL = np.transpose(sorted(photonDataL, key=lambda photonDataL: photonDataL[3]))
 			photonDataR = np.transpose(sorted(photonDataR, key=lambda photonDataR: photonDataR[3]))
 			#if lengths differ
-			minlen = min(photonDataL.shape[1],photonDataR.shape[1],photoLen)
+			minlen = min(photonDataL.shape[1],photonDataR.shape[1],firstPhoton+photoLen)
 			# print(photonDataL.shape)
 			# print(photoLen)
 			# print(minlen)
 			if (photonDataL.ndim>1) and (photonDataR.ndim>1):
-				photonDataL = photonDataL[:,0:minlen]
-				photonDataR = photonDataR[:,0:minlen]
+				photonDataL = photonDataL[:,firstPhoton:minlen]
+				photonDataR = photonDataR[:,firstPhoton:minlen]
 			elif (photonDataL.ndim>1):
-				photonDataL = photonDataL[:,0]
+				photonDataL = photonDataL[:,firstPhoton]
 			else:
-				photonDataR = photonDataR[:,0]
+				photonDataR = photonDataR[:,firstPhoton]
 				
-			#print(photonDataL)
-			#print(photonDataR)
+			# print(photonDataL)
+			# print(photonDataR)
 			Ltimes = photonDataL[3] - ((photonDataL[2]-LZ)*n_EJ208/(1000*c_const*nanosec))
 			Rtimes = photonDataR[3] + ((photonDataR[2])*n_EJ208/(1000*c_const*nanosec))
 
-			fastestTime = min(min(Ltimes),min(Rtimes))
-			slowestTime = max(max(Ltimes),max(Rtimes))
+			fastestTime =min(Ltimes[0],Rtimes[0])#min(min(Ltimes),min(Rtimes))
+			slowestTime =max(Ltimes[minlen-1],Rtimes[minlen-1])#max(max(Ltimes),max(Rtimes))
 			readTime = slowestTime-fastestTime
 			#if lengths differ
 			minlen = min(len(Ltimes),len(Rtimes),photoLen)
@@ -94,6 +98,7 @@ def process_ACTZT(c):
 
 			r_T = fastestTime - (dist)*n_EJ208/(1000*c_const*nanosec)
 	#pbar.update(1)
+	# print(r_Z,r_T,readTime,r_Z - actEvtPosN[c,2], r_T - time_I_N[c])
 	return r_Z,r_T,readTime,r_Z - actEvtPosN[c,2], r_T - time_I_N[c]
 #pbar = tqdm(total=nEvents)
 def ACTZTimeProcess(photoLen):

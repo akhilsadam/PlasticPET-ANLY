@@ -1,7 +1,11 @@
 import math
+import numpy as np
+import pickle
 from iminuit import Minuit
 from itertools import chain
-with open('tools/finite.py') as f: exec(f.read()) # helper file
+from tools.dimensions import *
+from tools.geo import *
+from tools.finite import *
 FWHMC = 2*pow(2*math.log(2),0.5)
 #------------------------------------------------------------------------------------
 def SiPM_Downsample(inarray):
@@ -9,7 +13,7 @@ def SiPM_Downsample(inarray):
 def flatten(listOfLists):
     "Flatten one level of nesting"
     return (chain.from_iterable(listOfLists))
-def reconstruct():
+def reconstruct(left,right,strip,nEvents):
 	recPos = np.zeros(shape = (nEvents,3))
 	for c in range(nEvents):
 		X = np.sum(stripPos[:,:,0]*strip[c])/np.sum(strip[c])
@@ -25,7 +29,7 @@ def reconstruct():
 		else: Z = np.nan
 		recPos[c,:] = [X,Y,Z]
 	return recPos
-def ACTreconstruct():
+def ACTreconstruct(left,right,nEvents):
 	recPos = np.zeros(shape = (nEvents,3))
 	recSignal = np.zeros(shape = (nEvents,ny,nx))
 	sigMatrix = np.zeros(shape = (ny,nx))
@@ -49,7 +53,7 @@ def ACTreconstruct():
 			zTensor[c,:,:] = np.nan
 		#---Z only
 		if((np.sum(left[c])/np.sum(right[c]))!=0):
-			Z = (att_len/16)*math.log(np.sum(left[c])/np.sum(right[c])) + UZ;
+			Z = (att_len/16)*math.log(np.sum(left[c])/np.sum(right[c])) + UZ
 		else:
 			Z = np.nan
 			
@@ -57,7 +61,40 @@ def ACTreconstruct():
 		recPos[c,:] = [X,Y,Z]
 		
 	return recPos,recSignal,zTensor
-def TOF_GammaInteractRec(recPos):
+def ACTreconstruct_time(left,right,nEvents,rec_Z):
+	# needs SiPM_Time_reconstruction first!
+	recPos = np.zeros(shape = (nEvents,3))
+	recSignal = np.zeros(shape = (nEvents,ny,nx))
+	sigMatrix = np.zeros(shape = (ny,nx))
+	zTensor = np.zeros(shape = (nEvents,ny,nx))
+	zMatrix = np.zeros(shape = (ny,nx))
+	for c in range(nEvents):
+		if((np.sum(left[c])!=0) and (np.sum(right[c])!=0)):
+			zMatrix.fill(rec_Z[c])
+			zTensor[c,:,:] = zMatrix
+
+			sigMatrix = 0.5*((right[c]*np.exp(zMatrix/att_len))+(left[c]*np.exp((LZ-zMatrix)/att_len)))
+			sigMatrix[~np.isfinite(sigMatrix)] = 0
+			recSignal[c] = sigMatrix
+			X = np.sum(stripPos[:,:,0]*sigMatrix)/np.sum(sigMatrix)
+			Y = np.sum(stripPos[:,:,1]*sigMatrix)/np.sum(sigMatrix)
+
+		else:
+			zMatrix[:,:] = np.nan
+			X,Y = np.nan,np.nan
+			recSignal[c,:,:] = np.nan
+			zTensor[c,:,:] = np.nan
+		#---Z only
+		if((np.sum(left[c])/np.sum(right[c]))!=0):
+			Z = (att_len/16)*math.log(np.sum(left[c])/np.sum(right[c])) + UZ
+		else:
+			Z = np.nan
+			
+			
+		recPos[c,:] = [X,Y,Z]
+		
+	return recPos,recSignal,zTensor
+def TOF_GammaInteractRec(recPos,evtPos):
 	dist = np.power((UX-recPos[:,0]),2) + np.power((recPos[:,1]-evtPos[:,1]),2) + np.power((recPos[:,2]-evtPos[:,2]),2)
 	dist = np.power(dist,0.5)
 	time_I = ((UX-recPos[:,0])/1000)/(c_const/n_EJ208)
@@ -66,15 +103,11 @@ def TOF_GammaInteractRec(recPos):
 def RSQ(data, model):
 	return 1-np.var(data-model)/np.var(data)
 #------------------------------------------------------------------------------------
-if Strip_Based_Reconstruction:
-	recPos = reconstruct()
-else:
-	recPos,recSignal,zTensor = ACTreconstruct()
-time_I_Rec = TOF_GammaInteractRec(recPos)
+
 #------------------------------------------------------------------------------------
 #reconstruction errors:
 #------------------------------------------------------------------------------------
-evtIC = evtInteract
+#print(evtIC)
 #get photo only indices
 #for evt in range(nEvents):
 #	allx = np.transpose(evtIC[evt])[0]
@@ -84,28 +117,54 @@ evtIC = evtInteract
 	#print(evtIC[evt])
 	#break
 #
-errorPosN = np.zeros(shape=(nEvents,3))
-errorPos = np.zeros(shape=(3),dtype = list)
-actEvtPosN = np.zeros(shape=(nEvents,3))
-actEvt = np.zeros(shape=(3),dtype = list)
-time_I_N = np.zeros(shape=(nEvents))
-uninteractedEvents = 0
-for evt in range(nEvents):
-	if(len(evtIC[evt])>0):
-		for i in range(3):
-			#actEvt[i] = np.average(np.transpose(evtInteract[evt])[i])
-			actEvt[i] = np.dot(np.transpose(evtIC[evt])[i],np.transpose(evtIC[evt])[3])/np.sum(np.transpose(evtIC[evt])[3])
-		errorPosN[evt] = recPos[evt]-actEvt#evtInteract[evt][0][0:3]
-		actEvtPosN[evt] = actEvt
-		time_I_N[evt] = np.dot(np.transpose(evtIC[evt])[4],np.transpose(evtIC[evt])[3])/np.sum(np.transpose(evtIC[evt])[3])
-	else:
-		uninteractedEvents = uninteractedEvents + 1
-		errorPosN[evt] = [np.nan,np.nan,np.nan]
-		actEvtPosN[evt] = [np.nan,np.nan,np.nan]
-		time_I_N[evt] = np.nan
+def gammaInteractPosition(evtInteract,nEvents, recPos):
+	evtIC = evtInteract
+	errorPosN = np.zeros(shape=(nEvents,3))
+	# errorPos = np.zeros(shape=(3),dtype = list)
+	actEvtPosN = np.zeros(shape=(nEvents,3))
+	actEvtG = np.zeros(shape=(3,3),dtype = list)
+	#actEvt = np.zeros(shape=(3),dtype = list)
+	time_I_N = np.zeros(shape=(nEvents))
+	time_I_G = np.zeros(shape=(3))
+	photonCut = 10
+	uninteractedEvents = 0
+	for evt in range(nEvents):
+		if(len(evtIC[evt])>0):
+			allIC = np.asarray(evtIC[evt])
+			for gam in range(3):
+				# print(allIC)
+				ICVT = allIC[(allIC[:,5]).astype(int)==gam,:]
+				# print(ICVT)
+				for i in range(3):
+					#actEvt[i] = np.average(np.transpose(evtInteract[evt])[i])
+					totPhot = np.sum(np.transpose(ICVT)[3])
+					if(totPhot>photonCut):
+						actEvtG[gam,i] = np.dot(np.transpose(ICVT)[i],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])
+					else:
+						actEvtG[gam,i] = np.nan
+				time_I_G[gam] = np.dot(np.transpose(ICVT)[4],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])
+			try:
+				indv = np.nanargmin(np.sum(np.power(actEvtG[:,0:2],2),axis=1))
+			except:
+				uninteractedEvents = uninteractedEvents + 1
+				errorPosN[evt] = [np.nan,np.nan,np.nan]
+				actEvtPosN[evt] = [np.nan,np.nan,np.nan]
+				time_I_N[evt] = np.nan
+			else:
+				errorPosN[evt] = recPos[evt]-actEvtG[indv] #evtInteract[evt][0][0:3]
+				actEvtPosN[evt] = actEvtG[indv]
+				time_I_N[evt] = time_I_G[indv]
+				# print(actEvtG)
+				# print(actEvtG[indv])
+			# if(np.any(actEvtG[indv]==np.nan)):
+			# 	print("[ERROR] EVT INTERACT IO FAIL")
+		else:
+			uninteractedEvents = uninteractedEvents + 1
+			errorPosN[evt] = [np.nan,np.nan,np.nan]
+			actEvtPosN[evt] = [np.nan,np.nan,np.nan]
+			time_I_N[evt] = np.nan
+		# print("[STATUS] Uninteracted Event")
+	return uninteractedEvents,errorPosN,actEvtPosN,time_I_N
+
 #------------------------------------------------------------------------------------
-if(SiPMTime_Based_Reconstruction):
-	with open('tools/reconstruct_SIPMTime.py') as f: exec(f.read()) # helper file
-	ZrecPosT,err_ZrecPosT = ACTZTimeReconstruct(photoLen)
-	if(SiPMtimePOSRES):
-		recPosT = ACTTimeReconstruct() #need to complete implementation - at present only useful for vis2
+

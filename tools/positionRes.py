@@ -22,7 +22,7 @@ for i in range(3):
 	bins = bin_edges[0:(len(bin_edges)-1)] + 0.5*(L[i]/nbins)
 	#axs[i].plot(bins,hist)
 
-	lnspc = np.linspace(xmin,xmax,nbins-1)
+	lnspc = np.linspace(xmin,xmax,len(hist))
 	def pdf(x,m,s):
 		#return	(1/(math.sqrt(2*math.pi)*s))*np.exp(-0.5*((x-m)**2)/(s**2)) #- enable if density=true
 		return	(nbins/dbins)*len(errorPos)*(L[i]/nbins)*(1/(math.sqrt(2*math.pi)*s))*np.exp(-0.5*((x-m)**2)/(s**2))

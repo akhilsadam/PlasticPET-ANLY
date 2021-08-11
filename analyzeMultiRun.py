@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import numpy as np
 import pandas as pd
 import math
@@ -19,7 +20,7 @@ import matplotlib.pyplot as plt
 # For general run metrics; will create plots based upon the variables used in the filenames!
 # At present only supports exactly two axes!
 #-------------------------------------------------------
-with open('tools/finite.py') as f: exec(f.read()) # helper file
+from tools.finite import *
 #-------------------------------------------------------
 #photoLen=5
 filenames=join(["BounceTime1_"],["0","1","2","3"])
@@ -97,4 +98,4 @@ else:
         try: os.makedirs(plotDIR)
         except: pass
         datadir=datadirs[i]
-        with open('analyze.py') as f: exec(f.read()) # helper file
+        with open('analyzeSingleArray.py') as f: exec(f.read()) # helper file

@@ -1,4 +1,6 @@
-
+import numpy as np
+import math
+#------------------------------------------------------------------------------------
 att_len = 4000
 c_const = 299792458.0 #define as double
 n_EJ208 = 1.58
@@ -10,10 +12,17 @@ FWHM = 2*math.sqrt(2*math.log(2))
 #------------------------------------------------------------------------------------
 nx = 3
 ny = 16
+nz = 3
+px = 8
+py = 2
+npx = nx*px
+npy = ny*py
 Ox = 0.0
 Oy = 8.0
 Sx = 1 #length in Strips
 Sy = 4
+nArray = 24
+theta = 2*np.pi/nArray
 
 LX = 77.4
 LY = 103.2
@@ -23,6 +32,7 @@ UX = LX/2
 UY = LY/2
 UZ = LZ/2
 U = [UX,UY,UZ]
+Radius = 396.0890847+(0.5*LX)
 
 unitList = ["mm","mm", "mm", "ns", "degrees"]
 typeList = ["X-Resid (mm)","Y-Resid (mm)", "Z-Resid (mm)", "T-Resid (ns)", "Angle (deg)"]
@@ -38,10 +48,12 @@ TC_SiPM_X = (((LZ/1000)*n_EJ208)/c_const)/nanosec #time limit for SiPM
 
 stripx = 25.4
 stripy = 6.2
+ppx = stripx/px
+ppy = stripy/py
 stripWx= stripx+2*VKT # strip plus individual VK
 stripWy= stripy+2*VKT # strip plus individual VK
-binx = LX/nx	      #--25.8 (stripWx+2*VKT)
-biny = LY/ny          #--6.45 - approximately correct
+binx = LX/(nx*px)     #--25.8/8 (stripWx+2*VKT)
+biny = LY/(ny*py)     #--6.45/2 - approximately correct
 binz = 1000
 
 stdG=[binx,biny,binz]
