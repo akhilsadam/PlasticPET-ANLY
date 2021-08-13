@@ -21,13 +21,13 @@ def train(length,folds, num_epochs, batch_size, n):
 		# Test
 		ind = foldL[i]
 		n=len(ind)
-		XT = inputTensor[ind].reshape(n,4,2*photoLen)
+		XT = inputTensor[ind].reshape(n,4,2*Options.photoLen)
 		YT = expectedTensor[ind].reshape(n,4)
 		# Train
 		exclude_set = {i}
 		indT = list(flatten([foldL[num] for num in range(folds) if num not in exclude_set]))
 		n=len(indT)
-		X = inputTensor[indT].reshape(n,4,2*photoLen)
+		X = inputTensor[indT].reshape(n,4,2*Options.photoLen)
 		Y = expectedTensor[indT].reshape(n,4)
 		#BAR
 		pbar = tqdm(total=num_epochs)
@@ -38,7 +38,7 @@ def train(length,folds, num_epochs, batch_size, n):
 			#for b in range(batch_size):
 			#	u = folded[b]
 			#	print(len(u))
-			#	xb = X[u].reshape(batch_size,4,2*photoLen)
+			#	xb = X[u].reshape(batch_size,4,2*Options.photoLen)
 			#	yb = Y[u].reshape(batch_size,4)
 
 			#	y_pred = drnet(xb)			
@@ -50,7 +50,7 @@ def train(length,folds, num_epochs, batch_size, n):
 			#loss = torch.mean(b_losses)
 
 			u = folded
-			xb = X[u].reshape(batch_size,4,2*photoLen)
+			xb = X[u].reshape(batch_size,4,2*Options.photoLen)
 			yb = Y[u].reshape(batch_size,4)
 			y_pred = drnet(xb)			
 			loss = loss_fn(y_pred,yb)
@@ -87,7 +87,7 @@ def train(length,folds, num_epochs, batch_size, n):
 		drnet.eval()
 		y_test = drnet(XT)
 		TestLoss[i] = loss_fn(y_test,YT)
-		if(ML_showHIST): ml_detRes_vis(y_test,YT,photoLen)
+		if(ML_showHIST): ml_detRes_vis(y_test,YT,Options.photoLen)
 		tqdm.write("TestLoss["+str(i)+"] = "+str(TestLoss[i])+".")
 	tqdm.write("Training Complete.")
 	#fig, axs = plt.subplots(folds)
@@ -99,11 +99,11 @@ def train(length,folds, num_epochs, batch_size, n):
 def test(net):
 	net.eval()
 	predictTensor = net(inputTensor)
-	ml_detRes_vis(predictTensor,expectedTensor,photoLen)
-	ml_detRes_vis2(predictTensor,expectedTensor,photoLen)
+	ml_detRes_vis(predictTensor,expectedTensor,Options.photoLen)
+	ml_detRes_vis2(predictTensor,expectedTensor,Options.photoLen)
 #-------------------------------------------------------
 def MLDraw(lossList,folds):
 	plt.plot(list(flatten(lossList)))
-	plt.savefig(str(ML_PATH)+"/Models/detRes_Loss_CNN_"+str(photoLen)+".png",dpi=600)
+	plt.savefig(str(ML_PATH)+"/Models/detRes_Loss_CNN_"+str(Options.photoLen)+".png",dpi=600)
 	#plt.show()
 	plt.close()

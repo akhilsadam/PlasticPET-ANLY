@@ -1,3 +1,4 @@
+import numpy as np
 #------------------------------------------------------------------------------------
 #Data Setup
 try: Options.COMPLETEDETECTOR
@@ -47,7 +48,7 @@ def photonSiPMData(evt):
 
 	#textLines = [photonSiPMFile.readline().rstrip('\n').split('|') for evt in range(0,nEvents)]
 	textLine = textLines[evt]
-	for idv in range(0,len(textLine)-1):
+	for idv in range(len(textLine)-1):
 		photonData = np.asarray(textLine[idv].split(" "))[0:6].astype(float)
 		photonList.append(photonData)
 	#photonData = float(textLines[evt][idv].split(" ")[0:5]);
@@ -56,16 +57,11 @@ def photonSiPMData(evt):
 	#print(t-time.time())		
 	return np.asarray(photonList).T #np.transpose(photonList) #np.asarray(photonList).T'
 #//---------\\ PhotonCounts // photon counts for left, right SiPMs and EJ208 strips
-print(ArrayNumber)
+print("DATALOAD ARRAY:",Options.ArrayNumber)
 if Options.COMPLETEDETECTOR:
 	beamData = np.load(Options.datadir+"beamData.npy")
 
-	if Options.MaxEventLimit:
-		nEvents = Options.MaxEvents
-	else:
-		nEvents = len(beamData)
-	
-
+	nEvents = Options.MaxEvents if Options.MaxEventLimit else len(beamData)
 	evtPos = beamData[0:nEvents,0,:] # - first index is event #
 	evtDir = beamData[0:nEvents,1,:]
 
@@ -76,7 +72,7 @@ if Options.COMPLETEDETECTOR:
 	# for i in tqdm(range(nArray)):
 	# 	completePhotonDATA[i,:,:,:] = np.load(Options.datadir+"photonCounts"+str(i)+".npy")
 
-	photonCounts = np.load(Options.datadir+"photonCounts"+str(ArrayNumber)+".npy")
+	photonCounts = np.load(Options.datadir+"photonCounts"+str(Options.ArrayNumber)+".npy")
 	left = photonCounts[0:3*nEvents:3,:,:] #left,strip,right photons - indices:evt#,y,x
 	strip = photonCounts[1:3*nEvents:3,:,:]
 	right = photonCounts[2:3*nEvents:3,:,:]
@@ -96,7 +92,7 @@ else:
 		nEvents = Options.MaxEvents
 	else:
 		nEvents = int(len(photonCounts)/3)
-	
+
 	left = left[0:nEvents]
 	strip = strip[0:nEvents]
 	right = right[0:nEvents]
@@ -107,7 +103,7 @@ else:
 if Options.ReflectionTest:
 	volumeCounts = np.loadtxt(Options.datadir+"volProcess.txt").astype(int)
 
-	
+
 
 
 if Options.SiPM_Based_Reconstruction:
@@ -125,50 +121,90 @@ evtDir = beamData[0:nEvents,1,:]
 #print(evtDir)
 #//---------\\ BeamInteract // interaction positions by compton/photoelectric effect
 def beamInteraction():
-	beamInteract = open(Options.datadir+"beamInteract.txt")
+	with open(Options.datadir+"beamInteract.txt") as beamInteract:
+		evtPhotoInteractG = []
+		evtComptonInteractG = []
+		evtInteractG = []
+		pos = [] # x,y,z
+		for i in range(nEvents):
+			for _ in range(3):
+				line = beamInteract.readline()
+				splits = line.rstrip(' \n').split(' ')
+				#print(splits)
+				pos.append([float(var) for var in splits if (len(var)>0)])
+			pI = np.transpose(pos)
+			evtPhotoInteractG.append(pI)
+			pos = []
+			for _ in range(3):
+				line = beamInteract.readline()
+				splits = line.rstrip(' \n').split(' ')
+				pos.append([float(var) for var in splits if (len(var)>0)])
+			cI = np.transpose(pos)
+			evtComptonInteractG.append(cI)
+			pos = []# x,y,z,PhotonCount,t,gammaID
+			for _ in range(6):
+				line = beamInteract.readline()
+				splits = line.rstrip(' \n').split(' ')
+				pos.append([float(var) for var in splits if (len(var)>0)])
+			tI = np.transpose(pos)
+			evtInteractG.append(tI)
+			pos = []
+			line = beamInteract.readline()
+			# photonmask = tI[:,3]>0
+			# comptonmap = np.where(np.isin(tI[:,0],cI[:,0]))
+			# photomap = np.where(np.isin(tI[:,0],pI[:,0]))
+			# n_Compt = int(np.sum(photonmask[comptonmap]))
+			# n_Photo = int(np.sum(photonmask[photomap]))
+			# evtType[i,:] = [n_Compt,n_Photo]
+			# evtType2[i,:] = [len(cI),len(pI)] 
+	return evtPhotoInteractG,evtComptonInteractG,evtInteractG
+
+def localizeBeam(nEvents,evtPhotoInteractG, evtComptonInteractG,evtInteractG):
 	evtType = np.zeros((nEvents,2),dtype=int) # nCompton, nPhoto (number of interactions for gamma by event)
 	evtType2 = np.zeros((nEvents,2),dtype=int) # nCompton, nPhoto (number of interactions for gamma by event, regardless of photon production)
 	evtPhotoInteract = []
 	evtComptonInteract = []
 	evtInteract = []
-	pos = [] # x,y,z
+
 	for i in range(nEvents):
-		for j in range(3):
-			line = beamInteract.readline()
-			splits = line.rstrip(' \n').split(' ')
-			#print(splits)
-			pos.append([float(var) for var in splits if (len(var)>0)])
-		pI = np.transpose(GlobalToArray(pos,ArrayNumber))
+		p0 = evtPhotoInteractG[i]
+		c0 = evtComptonInteractG[i]
+		t0 = evtInteractG[i]
+
+		pI = np.array([np.transpose(GlobalToArray(p0[j],Options.ArrayNumber)).tolist() for j in range(len(p0))])
 		evtPhotoInteract.append(pI)
-		pos = []
-		for j in range(3):
-			line = beamInteract.readline()
-			splits = line.rstrip(' \n').split(' ')
-			pos.append([float(var) for var in splits if (len(var)>0)])
-		cI = np.transpose(GlobalToArray(pos,ArrayNumber))
+		cI = np.array([np.transpose(GlobalToArray(c0[j],Options.ArrayNumber)).tolist() for j in range(len(c0))])
 		evtComptonInteract.append(cI)
-		pos = []# x,y,z,PhotonCount,t,gammaID
-		for j in range(6):
-			line = beamInteract.readline()
-			splits = line.rstrip(' \n').split(' ')
-			pos.append([float(var) for var in splits if (len(var)>0)])
-		tI = np.transpose(GlobalToArrayM(pos,ArrayNumber))
+		tI = np.array([np.transpose(GlobalToArrayM(t0[j],Options.ArrayNumber)).tolist() for j in range(len(t0))])
 		evtInteract.append(tI)
-		pos = []
-		line = beamInteract.readline()
-		#print(pI[:,0])
-		#print(cI[:,0])
-		#print(tI[:,0])
-		photonmask = tI[:,3]>0
-		comptonmap = np.where(np.isin(tI[:,0],cI[:,0]))
-		photomap = np.where(np.isin(tI[:,0],pI[:,0]))
-		n_Compt = int(np.sum(photonmask[comptonmap]))
-		n_Photo = int(np.sum(photonmask[photomap]))
-		evtType[i,:] = [n_Compt,n_Photo] 
-		evtType2[i,:] = [len(cI),len(pI)] 
-		#print(evtType[i,:])
-	beamInteract.close()
-	return evtPhotoInteract, evtComptonInteract,evtInteract,photonmask,comptonmap,photomap,n_Compt,n_Photo,evtType,evtType2
+		# print(tI)
+
+		if ((len(tI)>0) and (len(cI)>0) and (len(pI)>0)) :
+			photonmask = tI[:,3]>0
+			comptonmap = np.where(np.isin(tI[:,0],cI[:,0]))
+			photomap = np.where(np.isin(tI[:,0],pI[:,0]))
+			n_Compt = int(np.sum(photonmask[comptonmap]))
+			n_Photo = int(np.sum(photonmask[photomap]))
+			evtType[i,:] = [n_Compt,n_Photo]
+			evtType2[i,:] = [len(cI),len(pI)] 
+		elif ((len(tI)>0) and (len(cI)>0)) :
+			photonmask = tI[:,3]>0
+			comptonmap = np.where(np.isin(tI[:,0],cI[:,0]))
+			n_Compt = int(np.sum(photonmask[comptonmap]))
+			evtType[i,:] = [n_Compt,0]
+			evtType2[i,:] = [len(cI),0] 
+		elif ((len(tI)>0) and (len(pI)>0)) :
+			photonmask = tI[:,3]>0
+			photomap = np.where(np.isin(tI[:,0],pI[:,0]))
+			n_Photo = int(np.sum(photonmask[photomap]))
+			evtType[i,:] = [0,n_Photo]
+			evtType2[i,:] = [0,len(pI)] 
+		else:
+			evtType[i,:] = [0,0]
+			evtType2[i,:] = [0,0] 
+
+	return evtPhotoInteract,evtComptonInteract,evtInteract,evtType,evtType2
+
 #-------------
 
 #-------------
@@ -236,9 +272,9 @@ if Options.Process_Based_Breakdown:
 				print("ERROR")
 			for word in split:
 				if (word.startswith("phot")):
-					photo = photo + 1
+					photo += 1
 				if (word.startswith("compt")):
-					compton = compton + 1    
+					compton += 1
 			photoA.append(photo)
 			comptonA.append(compton)
 			if(photo > 0):

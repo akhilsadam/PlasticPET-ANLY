@@ -33,12 +33,12 @@ def process_MLDRESinput(c):
 				#if lengths differ
 				#print(photonDataL.shape)
 				minlen = min(photonDataL.shape[1],photonDataR.shape[1])
-				if (minlen < firstPhoton+photoLen):
+				if (minlen < Options.firstPhoton+Options.photoLen):
 					print("[WARNING] minlen = {}, not totalLen(10)".format(minlen))
 					return None
 				if (photonDataL.ndim>1) and (photonDataR.ndim>1):
-					photonDataL = photonDataL[:,firstPhoton:firstPhoton+photoLen]
-					photonDataR = photonDataR[:,firstPhoton:firstPhoton+photoLen]
+					photonDataL = photonDataL[:,Options.firstPhoton:Options.firstPhoton+Options.photoLen]
+					photonDataR = photonDataR[:,Options.firstPhoton:Options.firstPhoton+Options.photoLen]
 				else:
 					print("[WARNING] ndim < 1")
 					return None
@@ -49,8 +49,8 @@ def process_MLDRESinput(c):
 				#if lengths differ
 				# print(fastestTime)
 				minlen = min(len(Ltimes),len(Rtimes))
-				if(minlen != photoLen):
-					print("[WARNING] minlen = {}, not photoLen(5)".format(minlen))
+				if(minlen != Options.photoLen):
+					print("[WARNING] minlen = {}, not Options.photoLen(5)".format(minlen))
 					return None
 				photonDataL[3] = Ltimes - fastestTime
 				photonDataR[3] = Rtimes - fastestTime
@@ -76,13 +76,13 @@ def process_MLDRESinput(c):
 					# print(ETZ)
 					return None
 				
-				TZ = torch.zeros(4,2*photoLen+1)
-				TZ[:,0:2*photoLen:2] = torch.from_numpy(photonDataL)
+				TZ = torch.zeros(4,2*Options.photoLen+1)
+				TZ[:,0:2*Options.photoLen:2] = torch.from_numpy(photonDataL)
 				#print(torch.from_numpy(photonDataL))
-				TZ[:,1:2*photoLen:2] = torch.from_numpy(photonDataR)
+				TZ[:,1:2*Options.photoLen:2] = torch.from_numpy(photonDataR)
 
 				# print(ETZ)
-				TZ[:,2*photoLen] = ETZ
+				TZ[:,2*Options.photoLen] = ETZ
 				#print(TZ)
 				TZ[3] = 1000*(TZ[3]*nanosec)*(c_const/n_EJ208) #UNIT CONVERSION from ns to mm
 				#print(TZ)
@@ -92,24 +92,24 @@ def process_MLDRESinput(c):
 		print(e)
 		return None
 
-def MLDRESpreprocess(photoLen,workers):
+def MLDRESpreprocess(workers):
 	print(ArrayNumber)
 	try:
-		if(regenerateMLPickles):
+		if(Options.regenerateMLPickles):
 			raise ValueError('[NotAnERROR] Regenerating ML Pickles')
 		with open(ml_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
 			inputTensor,expecTensor,eventIDS = pickle.load(f)
 	except:
 		with multiprocessing.Pool(workers) as pool:
-			inptL = list(tqdm(pool.imap_unordered(process_MLDRESinput,range(nEvents)),total=nEvents))
+			inptL = list(tqdm(pool.imap(process_MLDRESinput,range(nEvents)),total=nEvents))
 			print(len(inptL))
 			tList = [i for i in inptL if type(i)==torch.Tensor]
 			print(len(tList))
 			eventIDS = [i for i in range(nEvents) if type(inptL[i])==torch.Tensor]
 			#print(tList)
 			trainTensor = torch.stack(tList)
-			inputTensor = trainTensor[:,:,0:2*photoLen]
-			expecTensor = trainTensor[:,:,2*photoLen]
+			inputTensor = trainTensor[:,:,0:2*Options.photoLen]
+			expecTensor = trainTensor[:,:,2*Options.photoLen]
 		with open(ml_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
 			pickle.dump([inputTensor,expecTensor,eventIDS], f)
 	return inputTensor,expecTensor

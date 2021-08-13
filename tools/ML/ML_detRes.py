@@ -1,9 +1,9 @@
 from analyzeOptions import *
 if Options.warmstart:
-	model_path0 = str(ML_PATH)+"Data/ML_DET_RES_"+str(photoLen)+"_Photo.pt"
-	model_path = str(ML_PATH)+"Data/ML_DET_RES_"+str(photoLen)+"_Photo2.pt"
+	model_path0 = str(Options.ML_PATH)+"Data/ML_DET_RES_"+str(Options.photoLen)+"_Photo.pt"
+	model_path = str(Options.ML_PATH)+"Data/ML_DET_RES_"+str(Options.photoLen)+"_Photo2.pt"
 else:
-	model_path = str(ML_PATH)+"Data/ML_DET_RES_"+str(photoLen)+"_Photo.pt"
+	model_path = str(Options.ML_PATH)+"Data/ML_DET_RES_"+str(Options.photoLen)+"_Photo.pt"
 #-------------------------------------------------------
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 nbins=50
@@ -84,7 +84,7 @@ def ml_detRes_vis(inpT,expT,pl):
 		plt.close()
 	else:
 		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual "+PATH_OPT)
-		plt.savefig(str(ML_PATH)+"/Models/detRes_training_CNN_"+str(photoLen)+PATH_OPT+".png",dpi=600)
+		plt.savefig(str(ML_PATH)+"/Models/detRes_training_CNN_"+str(Options.photoLen)+PATH_OPT+".png",dpi=600)
 		#plt.show()
 		plt.close()
 

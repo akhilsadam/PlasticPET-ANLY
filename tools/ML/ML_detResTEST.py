@@ -10,7 +10,7 @@ else:
 #-------------------------------------------------------------------------------
 #Preprocessing:
 with open(ML_PATH+'ML_detRes_preProcess.py') as f: exec(f.read()) # helper file # preprocessing
-inputTensor,expectedTensor = MLDRESpreprocess(photoLen)
+inputTensor,expectedTensor = MLDRESpreprocess(workers)
 #-------------------------------------------------------
 with open(ML_PATH+'ML_detRes_LOOP.py') as f: exec(f.read()) # helper file # training loop
 #-------------------------------------------------------
@@ -56,7 +56,7 @@ pts = pts[pts[:,0].argsort()]
 plt.plot(pts[:,0],pts[:,1],color='black')
 plt.ylabel("Loss")
 plt.xlabel("Adjusted Hilbert (LN2) Distance")
-plt.savefig(str(ML_PATH)+"/Models/detRes_VIS_CNN_"+str(photoLen)+".png",dpi=600)
+plt.savefig(str(ML_PATH)+"/Models/detRes_VIS_CNN_"+str(Options.photoLen)+".png",dpi=600)
 plt.close()
 #test(net)
 #-------------------------------------------------------------------------------

@@ -1,5 +1,11 @@
 import multiprocessing
 class Options:
+    plotDIR = "../plot/current/"
+    datadir = "../data/current/"
+    reflectplotDIR = plotDIR + "reflect/"
+    ML_PATH = "tools/ML/"
+    photoLen = 5
+    firstPhoton = 5
     #------------------------------------------------------------------------------------ CPU/GPU/TPU SETUP ------------->/v<--- ---------- ------- ------>------/  - - - - - |
     cpus = multiprocessing.cpu_count()
     print("CPU Count:",cpus)

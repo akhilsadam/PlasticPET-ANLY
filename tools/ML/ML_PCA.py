@@ -9,9 +9,9 @@ targetshape=flatinput.shape
 #standardize -------------------------------------------------------
 #Workaround for Z-values:
 #print(targetshape[1])
-if(targetshape[1]==4*2*photoLen):
+if(targetshape[1]==4*2*Options.photoLen):
     #print("Z-workaround")
-    d = int(2*photoLen)
+    d = int(2*Options.photoLen)
     flatinput[:,(2*d):(3*d)] = np.nan
 #Zero valuing
 # remove all nan/zero columns in Tensor

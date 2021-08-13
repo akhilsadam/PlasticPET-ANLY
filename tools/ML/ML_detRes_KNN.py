@@ -3,7 +3,7 @@
 with open(ML_PATH+'ML.py') as f: exec(f.read()) # helper file # import and setup
 with open(ML_PATH+'ML_detRes.py') as f: exec(f.read()) # helper file # PATH and vis
 #OVERWRITE PATH
-model_path = str(ML_PATH)+"Data/ML_DET_RES_KNN_"+str(photoLen)+"_Photo.pt"
+model_path = str(ML_PATH)+"Data/ML_DET_RES_KNN_"+str(Options.photoLen)+"_Photo.pt"
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 folds = 5
@@ -18,7 +18,7 @@ beta2 = 0.999 #ADAM
 with open(ML_PATH+'ML_detRes_preProcess.py') as f: exec(f.read()) # helper file # preprocessing
 # from tools.ML.ML_detRes_preProcess import *
 print("KNNArrayNumber: ", ArrayNumber)
-inputTensor,expectedTensor = MLDRESpreprocess(photoLen,workers)
+inputTensor,expectedTensor = MLDRESpreprocess(workers)
 if("PCA" in Options.MLOPT):
 	PATH_OPT=PATH_OPT+"PCA"
 	pcaSTD = False

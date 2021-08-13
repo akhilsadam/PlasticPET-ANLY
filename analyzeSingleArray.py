@@ -20,24 +20,12 @@ import sys
 PYTHONIOENCODING="UTF-8"  #sys.setdefaultencoding("ISO-8859-1")
 #------------------------------------------------------------------------------------
 from analyzeOptions import *
-try: datadir
-except NameError: datadir = "../data/current/"
-Options.datadir = datadir
-try: plotDIR
-except NameError: plotDIR = "../plot/current/"
-Options.plotDIR = plotDIR
-reflectplotDIR = plotDIR + "reflect/"
+reflectplotDIR = Options.plotDIR + "reflect/"
 ML_PATH = "tools/ML/"
 #--------------------------
-firstPhoton = 0
-try: photoLen
-except NameError: photoLen = 5
-else: pass
-try: ArrayNumber
-except NameError: ArrayNumber = 0
-else: pass
+#Options.ArrayNumber = 1
 #----------------------------
-print("SINGLEArray Number:",ArrayNumber)
+print("Single Array Number:",Options.ArrayNumber)
 #----------------------------
 import matplotlib
 matplotlib.use('AGG')
@@ -51,21 +39,20 @@ import matplotlib.ticker as mticker
 from tools.geo import *
 from tools.reconstruct import *
 #------------------------------------------------------------------------------------
-try: regeneratePickles
-except: regeneratePickles = False
-else: pass
-try: regenerateMLPickles
-except: regenerateMLPickles = False
-else: pass
+try: Options.regeneratePickles
+except: Options.regeneratePickles = False
+try: Options.regenerateGlobalPickles
+except: Options.regenerateGlobalPickles = False
+try: Options.regenerateMLPickles
+except: Options.regenerateMLPickles = False
 try: dataOpen
 except: dataOpen = False
-else: pass
 if(not dataOpen):
 	with open('tools/data.py') as f: exec(f.read()) # helper file
 
 # with open('tools/reconstruct.py') as f: exec(f.read()) # helper file
-pickles = ['beamInteraction.pkl','gammaInteractPosition.pkl']
-ml_pkl = datadir+'ML_DATA_PICKLE_AR'+str(ArrayNumber)+'_P'+str(photoLen)+'.pkl'
+pickles = ['beamInteraction.pkl','localBeam_AR'+str(Options.ArrayNumber)+'.pkl','gammaInteractPosition_AR'+str(Options.ArrayNumber)+'.pkl']
+ml_pkl = Options.datadir+'ML_DATA_PICKLE_AR'+str(Options.ArrayNumber)+'_P'+str(Options.photoLen)+'.pkl'
 
 if Options.Strip_Based_Reconstruction:
 	recPos = reconstruct(left,right,strip,nEvents)
@@ -73,24 +60,45 @@ else:
 	recPos,recSignal,zTensor = ACTreconstruct(left,right,nEvents)
 time_I_Rec = TOF_GammaInteractRec(recPos,evtPos)
 
+# print("Options.regenerateGlobalPickles",Options.regenerateGlobalPickles)
+
 try:
-	if(regeneratePickles):
-		raise ValueError('[NotAnERROR] Regenerating Pickles')
-	with open(datadir+pickles[0], 'rb') as f:  # Python 3: open(..., 'wb')
-		evtPhotoInteract, evtComptonInteract,evtInteract,photonmask,comptonmap,photomap,n_Compt,n_Photo,evtType,evtType2 = pickle.load(f)
-	with open(datadir+pickles[1],'rb') as f:  # Python 3: open(..., 'rb')
-   		uninteractedEvents,errorPosN,actEvtPosN,time_I_N = pickle.load(f)
-except:
-	evtPhotoInteract, evtComptonInteract,evtInteract,photonmask,comptonmap,photomap,n_Compt,n_Photo,evtType,evtType2 = beamInteraction()
-	uninteractedEvents,errorPosN,actEvtPosN,time_I_N = gammaInteractPosition(evtInteract, nEvents, recPos)
+	if(Options.regenerateGlobalPickles):
+		raise ValueError('[NotAnERROR] Regenerating Global Pickles')
+	with open(Options.datadir+pickles[0], 'rb') as f:  # Python 3: open(..., 'wb')
+		print("[OPENING]")
+		evtPhotoInteractG, evtComptonInteractG,evtInteractG = pickle.load(f)
+except ValueError as VALERIN:
+	print(VALERIN)
+	print("[REGENERATION] Global Pickling...")
+	evtPhotoInteractG, evtComptonInteractG,evtInteractG = beamInteraction()
 	with open(datadir+pickles[0], 'wb') as f:  # Python 3: open(..., 'wb')
-		pickle.dump([evtPhotoInteract, evtComptonInteract,evtInteract,photonmask,comptonmap,photomap,n_Compt,n_Photo,evtType,evtType2], f)
-	with open(datadir+pickles[1], 'wb') as f:  # Python 3: open(..., 'wb')
+		pickle.dump([evtPhotoInteractG, evtComptonInteractG,evtInteractG], f)
+
+try:
+	if(Options.regeneratePickles):
+		raise ValueError('[NotAnERROR] Regenerating Pickles')
+	with open(Options.datadir+pickles[1], 'rb') as f:  # Python 3: open(..., 'wb')
+		print("[OPENING]")
+		evtPhotoInteract, evtComptonInteract,evtInteract,evtType,evtType2 = pickle.load(f)
+	with open(Options.datadir+pickles[2],'rb') as f:  # Python 3: open(..., 'rb')
+		print("[OPENING]")
+		uninteractedEvents,errorPosN,actEvtPosN,time_I_N = pickle.load(f)
+except ValueError as VALERIN:
+	print(VALERIN)
+	print("[REGENERATION] Local Pickling...")
+	evtPhotoInteract, evtComptonInteract,evtInteract,evtType,evtType2 = localizeBeam(nEvents,evtPhotoInteractG,evtComptonInteractG,evtInteractG)
+	uninteractedEvents,errorPosN,actEvtPosN,time_I_N = gammaInteractPosition(evtInteract, nEvents, recPos)
+	with open(Options.datadir+pickles[1], 'wb') as f:  # Python 3: open(..., 'wb')
+		pickle.dump([evtPhotoInteract, evtComptonInteract,evtInteract,evtType,evtType2], f)
+	with open(Options.datadir+pickles[2], 'wb') as f:  # Python 3: open(..., 'wb')
 		pickle.dump([uninteractedEvents,errorPosN,actEvtPosN,time_I_N], f)
+
+
 
 if(Options.SiPMTime_Based_Reconstruction):
 	with open('tools/reconstruct_SIPMTime.py') as f: exec(f.read()) # helper file
-	ZrecPosT,err_ZrecPosT = ACTZTimeReconstruct(photoLen)
+	ZrecPosT,err_ZrecPosT = ACTZTimeReconstruct()
 	if(Options.SiPMtimePOSRES):
 		recPosT = ACTTimeReconstruct() #need to complete implementation - at present only useful for vis2
 
@@ -106,10 +114,7 @@ with open('tools/vis.py') as f: exec(f.read()) # helper file
 #---\
 try: MODE
 except NameError: MODE="MANUAL"
-else: pass
-if MODE=="MANUAL":
-	pass
-else:
+if MODE != "MANUAL":
 	print("\n[STATUS] IN AUTOMATIC MODE\n")
 #------------------------------------------ 
 #Strip Histogram Plots
@@ -136,17 +141,14 @@ if Options.RES_ADD:
 if Options.SIGRES:
 	#with open('tools/signalRes.py') as f: exec(f.read()) # helper file
 	with open('tools/signalResAlongStrip.py') as f: exec(f.read()) # helper file
-#------------------------------------------
-#ML - Detector Unit Gamma Interaction Time Resolution
 if Options.ML_DRES:
-	if(Options.KNN):
+	if Options.KNN:
 		with open(ML_PATH+'ML_detRes_KNN.py') as f: exec(f.read()) # Options.KNN instead?
+	elif Options.DRES_Train:
+		with open(ML_PATH+'ML_detResTRAIN.py') as f: exec(f.read()) # helper file
+
 	else:
-		if Options.DRES_Train:
-			with open(ML_PATH+'ML_detResTRAIN.py') as f: exec(f.read()) # helper file
-			
-		else:
-			with open(ML_PATH+'ML_detResTEST.py') as f: exec(f.read()) # helper file
+		with open(ML_PATH+'ML_detResTEST.py') as f: exec(f.read()) # helper file
 #------------------------------------------ 
 #Sub-strip interaction location plots
 if Options.SUBSTRIP:

@@ -49,7 +49,7 @@ while(True):
 		#-------------------------------------------------------------------------------
 		#Preprocessing:
 		with open(ML_PATH+'ML_detRes_preProcess.py') as f: exec(f.read()) # helper file # preprocessing
-		inputTensor,expectedTensor = MLDRESpreprocess(photoLen)
+		inputTensor,expectedTensor = MLDRESpreprocess(workers)
 		#-------------------------------------------------------
 		length = inputTensor.shape[0]
 		n = int(length/folds)

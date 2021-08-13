@@ -105,7 +105,7 @@ def gammaInteractPosition(evtInteract,nEvents, recPos):
 	photonCut = 10
 	uninteractedEvents = 0
 	for evt in range(nEvents):
-		if(len(evtIC[evt])>0):
+		if (len(evtIC[evt])>0):
 			allIC = np.asarray(evtIC[evt])
 			for gam in range(3):
 				# print(allIC)
@@ -114,15 +114,16 @@ def gammaInteractPosition(evtInteract,nEvents, recPos):
 				for i in range(3):
 					#actEvt[i] = np.average(np.transpose(evtInteract[evt])[i])
 					totPhot = np.sum(np.transpose(ICVT)[3])
-					if(totPhot>photonCut):
-						actEvtG[gam,i] = np.dot(np.transpose(ICVT)[i],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])
+					if (totPhot>photonCut):
+						act = np.dot(np.transpose(ICVT)[i],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])
+						actEvtG[gam,i] = act if withinLimitXYZ(act,i) else np.nan
 					else:
 						actEvtG[gam,i] = np.nan
 				time_I_G[gam] = np.dot(np.transpose(ICVT)[4],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])
 			try:
 				indv = np.nanargmin(np.sum(np.power(actEvtG[:,0:2],2),axis=1))
 			except:
-				uninteractedEvents = uninteractedEvents + 1
+				uninteractedEvents += 1
 				errorPosN[evt] = [np.nan,np.nan,np.nan]
 				actEvtPosN[evt] = [np.nan,np.nan,np.nan]
 				time_I_N[evt] = np.nan
@@ -132,14 +133,14 @@ def gammaInteractPosition(evtInteract,nEvents, recPos):
 				time_I_N[evt] = time_I_G[indv]
 				# print(actEvtG)
 				# print(actEvtG[indv])
-			# if(np.any(actEvtG[indv]==np.nan)):
-			# 	print("[ERROR] EVT INTERACT IO FAIL")
+					# if(np.any(actEvtG[indv]==np.nan)):
+					# 	print("[ERROR] EVT INTERACT IO FAIL")
 		else:
-			uninteractedEvents = uninteractedEvents + 1
+			uninteractedEvents += 1
 			errorPosN[evt] = [np.nan,np.nan,np.nan]
 			actEvtPosN[evt] = [np.nan,np.nan,np.nan]
 			time_I_N[evt] = np.nan
-		# print("[STATUS] Uninteracted Event")
+			# print("[STATUS] Uninteracted Event")
 	return uninteractedEvents,errorPosN,actEvtPosN,time_I_N
 
 #------------------------------------------------------------------------------------

@@ -59,7 +59,7 @@ for i in range(3):
 	axs[i].text(0.99, 0.39, "Error = +-%4.2f" %(0.5*FWHMC*param[1]),verticalalignment='top',horizontalalignment='right',transform=axs[i].transAxes, fontsize=12)
 	axs[i].text(0.99, 0.19, "RSQ = %1.2f" %(RSQ(hist,pdf_g)),verticalalignment='top',horizontalalignment='right',transform=axs[i].transAxes, fontsize=12)
 
-	axs[i].set_title(str(photoLen)+" photon " +axes[i])
+	axs[i].set_title(str(Options.photoLen)+" photon " +axes[i])
 	axs[i].set_xlabel(units[i])
 
 	print("MU  =", param[0])
@@ -73,5 +73,5 @@ else:
 	if Options.SiPM_Based_Reconstruction:
 		pass#plt.savefig(Options.plotDIR+'PositionResolution_SiPMCounts_True.png')
 	else:
-		plt.savefig(Options.plotDIR+'SiPM_TimeRes_'+str(photoLen)+'.png')
+		plt.savefig(Options.plotDIR+'SiPM_TimeRes_'+str(Options.photoLen)+'_AR_'+str(Options.ArrayNumber)+'.png')
 plt.close()

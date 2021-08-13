@@ -1,4 +1,5 @@
 from itertools import cycle, islice
+from tools.dimensions import *
 
 def nonzeroData(x,y):
 	nonzero = np.nonzero(y)
@@ -25,6 +26,9 @@ def YcutDatas(x,z,y):
 def gauss(x, *p):
     A, mu, sigma = p
     return A*np.exp(-(x-mu)**2/(2.*sigma**2))
+
+def withinLimitXYZ(post,i):
+	return ~(LM[i, 0] > post or LM[i, 1] < post)
 
 
 # coerce lists

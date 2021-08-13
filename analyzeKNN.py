@@ -23,7 +23,7 @@ from tools.reconstruct import *
 #--------------------------------------------/
 from analyzeOptions import *
 # rePickle single arrays
-rePickle = False
+rePickle = True
 # createDatabase
 createDatabase = True
 PCA = False
@@ -33,16 +33,15 @@ vis = True
 ML_SPLIT_FRACTION = 0.75
 Options.knn_neighbors = 4
 # Filepaths
-ml_database_pkl = datadir+'ML_DATABASE_PICKLE_P'+str(photoLen)+'.pkl'
-ml_run_pkl = datadir+'ML_RUN_PICKLE_P'+str(photoLen)+'.pkl'
+ml_database_pkl = Options.datadir+'ML_DATABASE_PICKLE_P'+str(Options.photoLen)+'.pkl'
+ml_run_pkl = Options.datadir+'ML_RUN_PICKLE_P'+str(Options.photoLen)+'.pkl'
 #---------------------------------------------|
 # from tools.ML import *
 with open('tools/ML/ML.py') as f: exec(f.read())
-with open(ML_PATH+'ML_detRes.py') as f: exec(f.read())
-model_path = str(ML_PATH)+"Data/ML_DET_RES_KNN_"+str(photoLen)+"_Photo.pt"
+with open(Options.ML_PATH+'ML_detRes.py') as f: exec(f.read())
+model_path = str(Options.ML_PATH)+"Data/ML_DET_RES_KNN_"+str(Options.photoLen)+"_Photo.pt"
 # with open('analyzeOptions.py') as f: exec(f.read())
 Options.COMPLETEDETECTOR = True
-datadir = "../data/current/"
 Options.MaxEventLimit = False
 Options.ReflectionTest = False
 Options.SiPM_Based_Reconstruction = False
@@ -55,10 +54,12 @@ Options.Process_Based_Breakdown = False
 #--------------------------------------------|
 if rePickle:
     Options.KVIS = "PICKLE"
-    regenerateMLPickles = True
-    regeneratePickles = True
+    Options.regenerateGlobalPickles = False
+    Options.regenerateMLPickles = False
+    Options.regeneratePickles = False
     for ArrayNumber in tqdm(range(nArray)):
         print(ArrayNumber)
+        Options.ArrayNumber = ArrayNumber
         with open('analyzeSingleArray.py') as f: exec(f.read())
 #--------------------------------------------\
 if createDatabase:
@@ -121,11 +122,9 @@ except:
 #Model Definition:
 try: KNNOPENED
 except: KNNOPENED = False
-if(KNNOPENED):
-	pass
-else:
-	with open(ML_PATH+'ML_Model_detRes_KNN.py') as f: exec(f.read()) # helper file # model definition
-	KNNOPENED = True
+if not (KNNOPENED):
+    with open(ML_PATH+'ML_Model_detRes_KNN.py') as f: exec(f.read()) # helper file # model definition
+    KNNOPENED = True
 drnet = DRKNN()
 drnet.eval()
 drnet._initialize_weights()
@@ -137,8 +136,8 @@ out,outs = drnet(dataTensorX,dataTensorY,dataTensorXT)
 ml_detRes_vis(out,dataTensorYT,Options.knn_neighbors)
 ml_detRes_vis2(out,dataTensorYT,Options.knn_neighbors)
 #--------------------------------------------
-if vis == True :
+if vis:
     with open(ML_PATH+"ML_KNN_Functions.py") as f: exec(f.read())
     kvisNP(10,dataTensorY,dataTensorYT,out,outs,Options.knn_neighbors)
 #--------------------------------------------
-sorted, indices = torch.sort()
+#sorted, indices = torch.sort()
