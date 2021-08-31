@@ -8,7 +8,7 @@ y=[]
 z=[]
 n=0
 
-for eventID in tqdm(range(nEvents)):
+for eventID in tqdm(range(Options.nEvents)):
     #eventID = 2
     (nPhotons,reflectData) = photonReflectData(eventID)
 
@@ -255,8 +255,8 @@ if Options.boundaryinteract:
     #-------------------------
     fig,ax = plt.subplots()
     z=np.array(z)
-    xyz=np.zeros(shape=(nEvents,3,1))
-    for zval in tqdm(range(nEvents)):
+    xyz=np.zeros(shape=(Options.nEvents,3,1))
+    for zval in tqdm(range(Options.nEvents)):
         inds = [i for i in range(len(x)) if z[i]==zval]
         x1=x[inds]
         y1=y[inds]
@@ -269,7 +269,7 @@ if Options.boundaryinteract:
 
     plot=ax.scatter(xyz[:,0,:],xyz[:,1,:],c=xyz[:,2,:],s=6,cmap='nipy_spectral')
     # ax.scatter(x,y)
-    ax.text(0.1,0.95,"NEvents = "+str(nEvents)+".",transform=ax.transAxes)
+    ax.text(0.1,0.95,"NEvents = "+str(Options.nEvents)+".",transform=ax.transAxes)
     #ax.text(0.1,0.90,"First 5 Times = {}".format(x_sort[0:5]),transform=ax.transAxes)
     #ax.text(0.1,0.85,"First 5 # = {}".format(y_sort[0:5]),transform=ax.transAxes)
     ax.set_xlabel("Detection Time [ns]")

@@ -77,7 +77,7 @@ s_sig = math.sqrt(np.sum(np.power((sparam[0]-factor),2))/(len(factor)-1))
 #param,cov = curve_fit(pdf,bins,hist, p0=[0,guess_std*stdG[i]])
 #print(param)
 #mu,var = stats.norm.fit(errorPos)
-axs.text(0.01, 0.99, "Total Events = %1.0f" %(nEvents),verticalalignment='top',horizontalalignment='left',transform=axs.transAxes, fontsize=12)
+axs.text(0.01, 0.99, "Total Events = %1.0f" %(Options.nEvents),verticalalignment='top',horizontalalignment='left',transform=axs.transAxes, fontsize=12)
 if Options.SiPM_Based_Reconstruction:
 	axs.text(0.01, 0.94, "Total Event SiPM Pairs = %1.0f" %(sEvents),verticalalignment='top',horizontalalignment='left',transform=axs.transAxes, fontsize=12)
 	axs.text(0.01, 0.89, "Usable Event SiPM Pairs = %1.0f" %(len(factor)),verticalalignment='top',horizontalalignment='left',transform=axs.transAxes, fontsize=12)

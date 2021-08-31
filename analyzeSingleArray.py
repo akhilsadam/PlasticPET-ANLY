@@ -23,7 +23,7 @@ from analyzeOptions import *
 reflectplotDIR = Options.plotDIR + "reflect/"
 ML_PATH = "tools/ML/"
 #--------------------------
-#Options.ArrayNumber = 1
+# Options.ArrayNumber = 1
 #----------------------------
 print("Single Array Number:",Options.ArrayNumber)
 #----------------------------
@@ -39,8 +39,8 @@ import matplotlib.ticker as mticker
 from tools.geo import *
 from tools.reconstruct import *
 #------------------------------------------------------------------------------------
-try: Options.regeneratePickles
-except: Options.regeneratePickles = False
+try: Options.regenerateLocalPickles
+except: Options.regenerateLocalPickles = False
 try: Options.regenerateGlobalPickles
 except: Options.regenerateGlobalPickles = False
 try: Options.regenerateMLPickles
@@ -51,56 +51,74 @@ if(not dataOpen):
 	with open('tools/data.py') as f: exec(f.read()) # helper file
 
 # with open('tools/reconstruct.py') as f: exec(f.read()) # helper file
-pickles = ['beamInteraction.pkl','localBeam_AR'+str(Options.ArrayNumber)+'.pkl','gammaInteractPosition_AR'+str(Options.ArrayNumber)+'.pkl']
+pickles = ['beamInteraction.pkl','localBeam_AR'+str(Options.ArrayNumber)+'.pkl','gammaInteractPosition_AR'+str(Options.ArrayNumber)+'.pkl','reco_0_AR'+str(Options.ArrayNumber)+'.pkl']
+sauerkraut = ['reco_0_opt_AR'+str(Options.ArrayNumber)+'.pkl'] # optional pickles
 ml_pkl = Options.datadir+'ML_DATA_PICKLE_AR'+str(Options.ArrayNumber)+'_P'+str(Options.photoLen)+'.pkl'
 
-if Options.Strip_Based_Reconstruction:
-	recPos = reconstruct(left,right,strip,nEvents)
-else:
-	recPos,recSignal,zTensor = ACTreconstruct(left,right,nEvents)
-time_I_Rec = TOF_GammaInteractRec(recPos,evtPos)
-
+sauerkrautOPT = (not Options.SiPMTime_Based_Reconstruction) and (not Options.Strip_Based_Reconstruction)
 # print("Options.regenerateGlobalPickles",Options.regenerateGlobalPickles)
-
+print(pickles)
 try:
 	if(Options.regenerateGlobalPickles):
-		raise ValueError('[NotAnERROR] Regenerating Global Pickles')
+		raise FileNotFoundError('[NotAnERROR] Regenerating Global Pickles')
 	with open(Options.datadir+pickles[0], 'rb') as f:  # Python 3: open(..., 'wb')
 		print("[OPENING]")
 		evtPhotoInteractG, evtComptonInteractG,evtInteractG = pickle.load(f)
-except ValueError as VALERIN:
+except FileNotFoundError as VALERIN:
 	print(VALERIN)
 	print("[REGENERATION] Global Pickling...")
 	evtPhotoInteractG, evtComptonInteractG,evtInteractG = beamInteraction()
-	with open(datadir+pickles[0], 'wb') as f:  # Python 3: open(..., 'wb')
+	with open(Options.datadir+pickles[0], 'wb') as f:  # Python 3: open(..., 'wb')
 		pickle.dump([evtPhotoInteractG, evtComptonInteractG,evtInteractG], f)
 
+
 try:
-	if(Options.regeneratePickles):
-		raise ValueError('[NotAnERROR] Regenerating Pickles')
+	if(Options.regenerateLocalPickles):
+		raise FileNotFoundError('[NotAnERROR] Regenerating Local Pickles')
 	with open(Options.datadir+pickles[1], 'rb') as f:  # Python 3: open(..., 'wb')
 		print("[OPENING]")
 		evtPhotoInteract, evtComptonInteract,evtInteract,evtType,evtType2 = pickle.load(f)
 	with open(Options.datadir+pickles[2],'rb') as f:  # Python 3: open(..., 'rb')
 		print("[OPENING]")
 		uninteractedEvents,errorPosN,actEvtPosN,time_I_N = pickle.load(f)
-except ValueError as VALERIN:
+	with open(Options.datadir+pickles[3],'rb') as f: 
+		print("[OPENING]")
+		recPos,ZrecPosT,err_ZrecPosT,errorPosN = pickle.load(f)
+	if sauerkrautOPT:
+		with open(Options.datadir+sauerkraut[0], 'rb') as f:  # Python 3: open(..., 'wb')
+			recSignal,zTensor,time_I_Rec = pickle.load(f)
+except FileNotFoundError as VALERIN:
 	print(VALERIN)
 	print("[REGENERATION] Local Pickling...")
-	evtPhotoInteract, evtComptonInteract,evtInteract,evtType,evtType2 = localizeBeam(nEvents,evtPhotoInteractG,evtComptonInteractG,evtInteractG)
-	uninteractedEvents,errorPosN,actEvtPosN,time_I_N = gammaInteractPosition(evtInteract, nEvents, recPos)
+	evtPhotoInteract, evtComptonInteract,evtInteract,evtType,evtType2 = localizeBeam(evtPhotoInteractG,evtComptonInteractG,evtInteractG)
+	uninteractedEvents,actEvtPosN,time_I_N = gammaInteractPosition(evtInteract)
+	left,strip,right = photonNPYLoad()
+
+	if Options.SiPMTime_Based_Reconstruction:
+		print("[STATUS] SIPM TIME RECONSTRUCT")
+		with open('tools/reconstruct_SIPMTime.py') as f: exec(f.read()) # helper file
+		ZrecPosT,err_ZrecPosT = ACTZTimeReconstruct()
+		recPos = ACTreconstruct_time(left,right,ZrecPosT[0,:]) # this seems to be the issue!
+	elif Options.Strip_Based_Reconstruction:
+		recPos = reconstruct(left,right,strip)
+	else:
+		recPos,recSignal,zTensor = ACTreconstruct(left,right)
+		time_I_Rec = TOF_GammaInteractRec(recPos,evtPos)
+
+	errorPosN = recalculate_errorPos(recPos,actEvtPosN)
+
 	with open(Options.datadir+pickles[1], 'wb') as f:  # Python 3: open(..., 'wb')
 		pickle.dump([evtPhotoInteract, evtComptonInteract,evtInteract,evtType,evtType2], f)
 	with open(Options.datadir+pickles[2], 'wb') as f:  # Python 3: open(..., 'wb')
 		pickle.dump([uninteractedEvents,errorPosN,actEvtPosN,time_I_N], f)
+	with open(Options.datadir+pickles[3], 'wb') as f:  # Python 3: open(..., 'wb')
+		pickle.dump([recPos,ZrecPosT,err_ZrecPosT,errorPosN], f)
+	if sauerkrautOPT:
+		with open(Options.datadir+sauerkraut[0], 'wb') as f:  # Python 3: open(..., 'wb')
+			pickle.dump([recSignal,zTensor,time_I_Rec], f)
 
-
-
-if(Options.SiPMTime_Based_Reconstruction):
-	with open('tools/reconstruct_SIPMTime.py') as f: exec(f.read()) # helper file
-	ZrecPosT,err_ZrecPosT = ACTZTimeReconstruct()
-	if(Options.SiPMtimePOSRES):
-		recPosT = ACTTimeReconstruct() #need to complete implementation - at present only useful for vis2
+	# 	print("[WARNING] SIPM TIME POSRES - NOT IMPLEMENTED YET")
+	# 	recPosT = ACTTimeReconstruct() #need to complete implementation - at present only useful for vis2
 
 with open('tools/vis.py') as f: exec(f.read()) # helper file
 #------------------------------------------------------------------------------------
@@ -125,17 +143,15 @@ if Options.STRIPHIST:
 if Options.POSRES:
 	# with open('tools/positionRes.py') as f: exec(f.read()) # helper file
 	from tools.positionRes import xyzResolution
-	xyzResolution(nEvents,errorPosN)
+	xyzResolution(errorPosN,uninteractedEvents)
 if Options.SiPMtimeRES:
 	with open('tools/sipmTimeRes.py') as f: exec(f.read()) # helper file
 if Options.SiPMtimeVSatt:
 	with open('tools/sipmTimeVsAtt.py') as f: exec(f.read())
 if Options.SiPMtimePOSRES:
 	# with open('tools/positionRes_Time.py') as f: exec(f.read()) #implementation not complete 
-	from tools.positionRes_Time import recalculate_errorPos
 	from tools.positionRes import xyzResolution
-	errorPosN_time = recalculate_errorPos(left,right,nEvents,ZrecPosT,actEvtPosN)
-	xyzResolution(nEvents,errorPosN_time,uninteractedEvents)
+	xyzResolution(errorPosN,uninteractedEvents)
 if Options.RES_ADD:
 	with open('tools/resAdditional.py') as f: exec(f.read()) # helper file
 if Options.SIGRES:

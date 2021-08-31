@@ -26,7 +26,7 @@ theta = 2*np.pi/nArray
 
 LX = 77.4
 LY = 103.2
-LZ = 1000
+LZ = 1000.0
 L = [LX,LY,LZ]
 UX = LX/2
 UY = LY/2

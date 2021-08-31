@@ -8,7 +8,7 @@ sipmTimeplots = [err_ZrecPosT[0],err_ZrecPosT[1],ZrecPosT[2]]
 for i in range(3):
 	errorPos = sipmTimeplots[i]
 	errorPos = errorPos[np.isfinite(errorPos)]
-	print("-------------------\n" ,i,"- axis events: ",len(errorPos)," NaN events: ",(nEvents-len(errorPos)))
+	print("-------------------\n" ,i,"- axis events: ",len(errorPos)," NaN events: ",(Options.nEvents-len(errorPos)))
 
 	xmin,xmax = TL[i]#np.min(errorPos),np.max(errorPos)
 	axs[i].set_xlim(xmin/2,xmax/2)
@@ -47,10 +47,10 @@ for i in range(3):
 	axs[i].plot(lnspc, pdf_g, label = 'Norm')
 
 
-	axs[i].text(0.01, 0.99, "Total Events = %1.0f " %(nEvents),verticalalignment='top',horizontalalignment='left',transform=axs[i].transAxes, fontsize=12)
-	axs[i].text(0.01, 0.79, "Interacted Events = %1.0f " %(nEvents-uninteractedEvents),verticalalignment='top',horizontalalignment='left',transform=axs[i].transAxes, fontsize=12)
+	axs[i].text(0.01, 0.99, "Total Events = %1.0f " %(Options.nEvents),verticalalignment='top',horizontalalignment='left',transform=axs[i].transAxes, fontsize=12)
+	axs[i].text(0.01, 0.79, "Interacted Events = %1.0f " %(Options.nEvents-uninteractedEvents),verticalalignment='top',horizontalalignment='left',transform=axs[i].transAxes, fontsize=12)
 	axs[i].text(0.01, 0.59, "Usable Events = %1.0f " %(len(errorPos)),verticalalignment='top',horizontalalignment='left',transform=axs[i].transAxes, fontsize=12)
-	axs[i].text(0.01, 0.39, "NaN Events = %1.0f " %(nEvents-len(errorPos)-uninteractedEvents),verticalalignment='top',horizontalalignment='left',transform=axs[i].transAxes, fontsize=12)
+	axs[i].text(0.01, 0.39, "NaN Events = %1.0f " %(Options.nEvents-len(errorPos)-uninteractedEvents),verticalalignment='top',horizontalalignment='left',transform=axs[i].transAxes, fontsize=12)
 	axs[i].text(0.01, 0.19, "Bin Size = %1.2f" %(displayBinsMM[i]),verticalalignment='top',horizontalalignment='left',transform=axs[i].transAxes, fontsize=12)
 
 	axs[i].text(0.99, 0.99, "Mean = %4.2f" %(param[0]),verticalalignment='top',horizontalalignment='right',transform=axs[i].transAxes, fontsize=12)

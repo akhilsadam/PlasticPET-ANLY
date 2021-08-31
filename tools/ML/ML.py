@@ -19,10 +19,12 @@ from itertools import repeat
 from functools import partial
 import pandas as pd
 from tqdm import tqdm
+from analyzeOptions import *
 #-------------------------------------------------------
 torch.multiprocessing.set_sharing_strategy('file_system')
 ngpu = 1
 device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
+Options.device = device
 workers = Options.num_cores - 1
 #-------------------------------------------------------
 # Set random seed for reproducibility

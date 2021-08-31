@@ -16,8 +16,8 @@ def ACTTimeReconstruct():
 
 	#Options.photoLen = 5 # set parameter
 	photonData = np.zeros(shape=(5,Options.photoLen))
-	recPosT = np.zeros(shape=(nEvents,4))
-	for c in range(3,4):#nEvents
+	recPosT = np.zeros(shape=(Options.nEvents,4))
+	for c in range(3,4):#Options.nEvents
 		photonDatas = np.transpose(photonSiPMData(c))
 		photonData = np.transpose(sorted(photonDatas, key=lambda photonDatas: photonDatas[3]))[:,0:Options.photoLen]
 
@@ -98,23 +98,23 @@ def process_ACTZT(c):
 	#pbar.update(1)
 	# print(r_Z,r_T,readTime,r_Z - actEvtPosN[c,2], r_T - time_I_N[c])
 	return r_Z,r_T,readTime,r_Z - actEvtPosN[c,2], r_T - time_I_N[c]
-#pbar = tqdm(total=nEvents)
+#pbar = tqdm(total=Options.nEvents)
 def ACTZTimeProcess():
-	#results = np.zeros(shape=(nEvents,5))
-	#for c in range(nEvents):
+	#results = np.zeros(shape=(Options.nEvents,5))
+	#for c in range(Options.nEvents):
 	#		results[c] = process_ACTZT(c,Options.photoLen)
-	#results = Parallel(n_jobs=Options.num_cores)(delayed(process_ACTZT)(c) for c in range(nEvents)
-	#inpt = list(zip(range(nEvents), repeat(Options.photoLen)))
+	#results = Parallel(n_jobs=Options.num_cores)(delayed(process_ACTZT)(c) for c in range(Options.nEvents)
+	#inpt = list(zip(range(Options.nEvents), repeat(Options.photoLen)))
 	#print(inpt)
 	with multiprocessing.Pool(Options.num_cores-1) as pool:
-		results = list(tqdm(pool.imap(process_ACTZT,range(nEvents)),total=nEvents)) #zip(range(nEvents), repeat(Options.photoLen))
+		results = list(tqdm(pool.imap(process_ACTZT,range(Options.nEvents)),total=Options.nEvents)) #zip(range(Options.nEvents), repeat(Options.photoLen))
 	return np.transpose(results)
 
 def ACTZTimeReconstruct():
 
 	#Options.photoLen = 5 # set parameter
-	ZrecPosT = np.zeros(shape=(nEvents,3))
-	err_ZrecPosT = np.zeros(shape=(nEvents,2))
+	ZrecPosT = np.zeros(shape=(Options.nEvents,3))
+	err_ZrecPosT = np.zeros(shape=(Options.nEvents,2))
 	results = ACTZTimeProcess()
 	ZrecPosT=results[0:3]
 	err_ZrecPosT=results[3:5]

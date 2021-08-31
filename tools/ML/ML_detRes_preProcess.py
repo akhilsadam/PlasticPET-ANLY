@@ -10,83 +10,88 @@ from tqdm import tqdm
 import multiprocessing
 from numba import jit
 import sys
+from tools.dimensions import *
 @lru_cache(maxsize=2000)
 def process_MLDRESinput(c):
 	try:
 		photonDatas = photonSiPMData(c)
-		if(len(photonDatas)==0):
+		if (len(photonDatas)==0):
 			# print(photonDatas)
 			# print("[STATUS] length = 0 - an uninteracted event")
 			return None
+		# array filtering
+		# print(photonDatas[4][0])
+		photonArrayData = photonDatas[:,photonDatas[4]==ArrayNumber]
+		photonDataL = np.transpose(photonArrayData[:,photonArrayData[2]>UZ])
+		photonDataR = np.transpose(photonArrayData[:,photonArrayData[2]<=UZ])
+		if ((len(photonDataL)==0) or (len(photonDataR)==0)):
+			# print("[STATUS] THIS ARRAY - length = 0 - event on another array")
+			return None
+		photonDataL = np.transpose(sorted(photonDataL, key=lambda photonDataL: photonDataL[3]))
+		photonDataR = np.transpose(sorted(photonDataR, key=lambda photonDataR: photonDataR[3]))
+		#if lengths differ
+		#print(photonDataL.shape)
+		minlen = min(photonDataL.shape[1],photonDataR.shape[1])
+		if (minlen < Options.firstPhoton+Options.photoLen):
+			print("[WARNING] minlen = {}, not totalLen(10)".format(minlen))
+			return None
+		if (photonDataL.ndim>1) and (photonDataR.ndim>1):
+			photonDataL = photonDataL[:,Options.firstPhoton:Options.firstPhoton+Options.photoLen]
+			photonDataR = photonDataR[:,Options.firstPhoton:Options.firstPhoton+Options.photoLen]
 		else:
-			# array filtering
-			# print(photonDatas[4][0])
-			photonArrayData = photonDatas[:,photonDatas[4]==ArrayNumber]
-			photonDataL = np.transpose(photonArrayData[:,photonArrayData[2]>UZ])
-			photonDataR = np.transpose(photonArrayData[:,photonArrayData[2]<=UZ])
-			if((len(photonDataL)==0) or (len(photonDataR)==0)):
-				# print("[STATUS] THIS ARRAY - length = 0 - event on another array")
-				return None
-			else:
-				photonDataL = np.transpose(sorted(photonDataL, key=lambda photonDataL: photonDataL[3]))
-				photonDataR = np.transpose(sorted(photonDataR, key=lambda photonDataR: photonDataR[3]))
-				#if lengths differ
-				#print(photonDataL.shape)
-				minlen = min(photonDataL.shape[1],photonDataR.shape[1])
-				if (minlen < Options.firstPhoton+Options.photoLen):
-					print("[WARNING] minlen = {}, not totalLen(10)".format(minlen))
-					return None
-				if (photonDataL.ndim>1) and (photonDataR.ndim>1):
-					photonDataL = photonDataL[:,Options.firstPhoton:Options.firstPhoton+Options.photoLen]
-					photonDataR = photonDataR[:,Options.firstPhoton:Options.firstPhoton+Options.photoLen]
-				else:
-					print("[WARNING] ndim < 1")
-					return None
-					
-				Ltimes = photonDataL[3] - ((photonDataL[2]-LZ)*n_EJ208/(1000*c_const*nanosec))
-				Rtimes = photonDataR[3] + ((photonDataR[2])*n_EJ208/(1000*c_const*nanosec))
-				fastestTime = min(Ltimes[0],Rtimes[0]) #min(min(Ltimes),min(Rtimes))
-				#if lengths differ
-				# print(fastestTime)
-				minlen = min(len(Ltimes),len(Rtimes))
-				if(minlen != Options.photoLen):
-					print("[WARNING] minlen = {}, not Options.photoLen(5)".format(minlen))
-					return None
-				photonDataL[3] = Ltimes - fastestTime
-				photonDataR[3] = Rtimes - fastestTime
-				photonDataL[2]=LZ
-				photonDataR[2]=0
-				photonDataL = photonDataL[0:4]
-				photonDataR = photonDataR[0:4]
-				
-				#BIN X,Y:
-				photonDataL[0] = binx*np.floor(photonDataL[0]/binx)
-				photonDataR[0] = binx*np.floor(photonDataR[0]/binx)
-				photonDataL[1] = biny*np.floor(photonDataL[1]/biny)
-				photonDataR[1] = biny*np.floor(photonDataR[1]/biny)
-				#--
+			print("[WARNING] ndim < 1")
+			return None
 
-				ETZ = torch.zeros(4)
-				ETZ[0:3] = torch.from_numpy(actEvtPosN[c])
-				ETZ[3] = (time_I_N[c]-fastestTime)
-	 
-				if (dataNotWithinLimits(ETZ)): 
-					# why is this so prevalent??
-					# print("[ERROR] data not within limits")
-					# print(ETZ)
-					return None
-				
-				TZ = torch.zeros(4,2*Options.photoLen+1)
-				TZ[:,0:2*Options.photoLen:2] = torch.from_numpy(photonDataL)
-				#print(torch.from_numpy(photonDataL))
-				TZ[:,1:2*Options.photoLen:2] = torch.from_numpy(photonDataR)
+		Ltimes = photonDataL[3] - ((photonDataL[2]-LZ)*n_EJ208/(1000*c_const*nanosec))
+		Rtimes = photonDataR[3] + ((photonDataR[2])*n_EJ208/(1000*c_const*nanosec))
+		fastestTime = min(Ltimes[0],Rtimes[0]) #min(min(Ltimes),min(Rtimes))
+		#if lengths differ
+		# print(fastestTime)
+		minlen = min(len(Ltimes),len(Rtimes))
+		if(minlen != Options.photoLen):
+			print("[WARNING] minlen = {}, not Options.photoLen(5)".format(minlen))
+			return None
+		photonDataL[3] = Ltimes - fastestTime
+		photonDataR[3] = Rtimes - fastestTime
+		photonDataL[2]=LZ
+		photonDataR[2]=0
+		photonDataL = photonDataL[0:4]
+		photonDataR = photonDataR[0:4]
 
-				# print(ETZ)
-				TZ[:,2*Options.photoLen] = ETZ
-				#print(TZ)
-				TZ[3] = 1000*(TZ[3]*nanosec)*(c_const/n_EJ208) #UNIT CONVERSION from ns to mm
-				#print(TZ)
+		#BIN X,Y:
+		photonDataL[0] = binx*np.floor(photonDataL[0]/binx)
+		photonDataR[0] = binx*np.floor(photonDataR[0]/binx)
+		photonDataL[1] = biny*np.floor(photonDataL[1]/biny)
+		photonDataR[1] = biny*np.floor(photonDataR[1]/biny)
+		#--
 
+		ETZ = torch.zeros(4)
+		ETZ[0:3] = torch.from_numpy(actEvtPosN[c])
+		ETZ[3] = (time_I_N[c]-fastestTime)
+
+		#LOG TRANSFORMATION: 
+		if "LOGX" in Options.MLOPT:
+			photonDataL[0] = np.log(300+photonDataL[0])
+			photonDataR[0] = np.log(300+photonDataR[0])
+		elif "LOG-SCALEX" in Options.MLOPT:
+			photonDataL[0] = np.log(1+(photonDataL[0])/LX)
+			photonDataR[0] = np.log(1+(photonDataR[0])/LX)
+
+		if (dataNotWithinLimits(ETZ)): 
+			# why is this so prevalent??
+			# print("[ERROR] data not within limits")
+			# print(ETZ)
+			return None
+
+		TZ = torch.zeros(4,2*Options.photoLen+1)
+		TZ[:,0:2*Options.photoLen:2] = torch.from_numpy(photonDataL)
+		#print(torch.from_numpy(photonDataL))
+		TZ[:,1:2*Options.photoLen:2] = torch.from_numpy(photonDataR)
+
+		# print(ETZ)
+		TZ[:,2*Options.photoLen] = ETZ
+		#print(TZ)
+		TZ[3] = 1000*(TZ[3]*nanosec)*(c_const/n_EJ208) #UNIT CONVERSION from ns to mm
 		return TZ
 	except Exception as e:
 		print(e)
@@ -101,11 +106,11 @@ def MLDRESpreprocess(workers):
 			inputTensor,expecTensor,eventIDS = pickle.load(f)
 	except:
 		with multiprocessing.Pool(workers) as pool:
-			inptL = list(tqdm(pool.imap(process_MLDRESinput,range(nEvents)),total=nEvents))
+			inptL = list(tqdm(pool.imap(process_MLDRESinput,range(Options.nEvents)),total=Options.nEvents))
 			print(len(inptL))
 			tList = [i for i in inptL if type(i)==torch.Tensor]
 			print(len(tList))
-			eventIDS = [i for i in range(nEvents) if type(inptL[i])==torch.Tensor]
+			eventIDS = [i for i in range(Options.nEvents) if type(inptL[i])==torch.Tensor]
 			#print(tList)
 			trainTensor = torch.stack(tList)
 			inputTensor = trainTensor[:,:,0:2*Options.photoLen]

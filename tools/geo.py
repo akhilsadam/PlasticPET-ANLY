@@ -5,6 +5,10 @@
 import numpy as np
 from numba import jit
 from tools.dimensions import *
+import multiprocessing
+from tqdm import tqdm
+import torch
+from analyzeOptions import Options
 @jit(nopython=True, parallel=True)
 def stripPosGenerate():
 	stripPos = np.zeros(shape=(ny,nx,nz))
@@ -50,6 +54,28 @@ def GlobalToArrayM(pos,A):
 	pos[0:3] = GlobalToArrayCoordinates(pos[0],pos[1],pos[2],A)[0:3]
 	return pos
 
+def ArrayToGlobalM(*params):
+	pos = list(params)
+	# expect input x,y,z,t,A
+	pos[0:3] = ArrayToGlobalCoordinates(pos[0],pos[1],pos[2],pos[4])[0:3]
+	return pos
+
+# @jit(nopython=True, parallel=True)
+def ArrayToGlobalMT(pos,A):
+	if(Options.device=="cpu"):
+		A_np = A.detach().numpy()
+		pos_np = pos.detach().numpy()
+	else:
+		A_np = A.detach().cpu().numpy()
+		pos_np = pos.detach().cpu().numpy()
+
+	dataP = np.zeros(shape = (pos_np.shape[0],pos_np.shape[1]+1))
+	dataP[:,0:pos_np.shape[1]] = pos_np
+	dataP[:,pos_np.shape[1]] = A_np
+
+	with multiprocessing.Pool(Options.workers) as pool:
+		outG = np.array(list(pool.starmap(ArrayToGlobalM,dataP)))
+	return outG
 # @jit(nopython=True)
 # def ArrayToBinCoordinates(x,y,z,A):
 # 	  TO BE IMPLEMENTED

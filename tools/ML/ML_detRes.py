@@ -1,4 +1,15 @@
 from analyzeOptions import *
+from tools.ML import *
+
+import matplotlib
+matplotlib.use('AGG')
+import matplotlib.pyplot as plt
+import matplotlib.colors as mpt_col
+from matplotlib.colors import ListedColormap,LinearSegmentedColormap
+import matplotlib.cm as cm
+import matplotlib.markers as mk
+import matplotlib.ticker as mticker
+
 if Options.warmstart:
 	model_path0 = str(Options.ML_PATH)+"Data/ML_DET_RES_"+str(Options.photoLen)+"_Photo.pt"
 	model_path = str(Options.ML_PATH)+"Data/ML_DET_RES_"+str(Options.photoLen)+"_Photo2.pt"
@@ -48,7 +59,7 @@ def ml_detRes_vis(inpT,expT,pl):
 
 	fig, axs = plt.subplots(types,constrained_layout=True)
 	plt.suptitle("ML - Det. Res. Residuals (Errors)")
-	if(device=="cpu"):
+	if(Options.device=="cpu"):
 		data = resid.detach()#.numpy()
 	else:
 		data = resid.detach().cpu()#.numpy()
@@ -79,12 +90,12 @@ def ml_detRes_vis(inpT,expT,pl):
 	
 	if(Options.KNN):
 		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual "+PATH_OPT)
-		plt.savefig(str(ML_PATH)+"/Models/detRes_training_KNN_"+str(pl)+PATH_OPT+".png",dpi=600)
+		plt.savefig(str(Options.ML_PATH)+"/Models/detRes_training_KNN_"+str(pl)+PATH_OPT+".png",dpi=600)
 		#plt.show()
 		plt.close()
 	else:
 		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual "+PATH_OPT)
-		plt.savefig(str(ML_PATH)+"/Models/detRes_training_CNN_"+str(Options.photoLen)+PATH_OPT+".png",dpi=600)
+		plt.savefig(str(Options.ML_PATH)+"/Models/detRes_training_CNN_"+str(Options.photoLen)+PATH_OPT+".png",dpi=600)
 		#plt.show()
 		plt.close()
 
@@ -96,7 +107,7 @@ def ml_detRes_vis2(inpT,expT,pl):
 
 	typeList = ["X (mm)","Y (mm)", "Z (mm)", "T (ns)"]
 	fig, axs = plt.subplots(2,2, constrained_layout=True)
-	if(device=="cpu"):
+	if(Options.device=="cpu"):
 		inpTS = inpT.detach().numpy()
 		expTS = expT.detach().numpy()
 	else:
@@ -120,7 +131,7 @@ def ml_detRes_vis2(inpT,expT,pl):
 		res = model.fit()
 		intercept, slope = res.params
 		st, data, ss2 = summary_table(res, alpha=0.05)	
-	
+
 		x_arr = np.zeros(shape=(len(x),1))
 		x_arr[:,0] = x
 		datas = np.hstack((x_arr,data))
@@ -154,14 +165,14 @@ def ml_detRes_vis2(inpT,expT,pl):
 		if MarginalPLT:
 			marginalPLT(ax,x,y,i)
 
-	if(Options.KNN):
+	if Options.KNN:
 		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual "+PATH_OPT)
-		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(pl)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
-		plt.close()#plt.show()
+		plt.savefig(str(Options.ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(pl)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
 	else:
 		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual "+PATH_OPT)
-		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_CNN_"+str(pl)+"."+PATH_OPT+"png",bbox_inches='tight',dpi=600)
-		plt.close()#plt.show()
+		plt.savefig(str(Options.ML_PATH)+"/Models/detRes_Predictions_CNN_"+str(pl)+"."+PATH_OPT+"png",bbox_inches='tight',dpi=600)
+
+	plt.close()#plt.show()
 
 def ml_detRes_vis_knn(inpT,expT,uik,noplt):
 	length,types = inpT.shape
@@ -169,7 +180,7 @@ def ml_detRes_vis_knn(inpT,expT,uik,noplt):
 		print("ERROR = type shape not equal. Quitting.")
 		quit()
 
-	if(device=="cpu"):
+	if(Options.device=="cpu"):
 		inpTS = inpT.detach().numpy()
 		expTS = expT.detach().numpy()
 	else:
@@ -226,7 +237,7 @@ def ml_detRes_vis_knn(inpT,expT,uik,noplt):
 				marginalPLT(ax,x,y,i)
 
 		plt.suptitle("MLKNN (K="+str(uik)+") - Det. Res. Predicted vs Actual "+PATH_OPT)
-		plt.savefig(str(ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(uik)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
+		plt.savefig(str(Options.ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(uik)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
 		plt.close()
 		return rmseL
 		#plt.show()
@@ -239,5 +250,5 @@ def ml_detRes_vis_knn2(pltx,rmseP):
 		ax.set_xlabel("k-neighbors")
 		ax.set_ylabel("RMSE in "+typeList[i])
 	plt.suptitle("KNN RMSE by K-value - optimal # of neighbors "+PATH_OPT)
-	plt.savefig(str(ML_PATH)+"/Models/detRes_KNN_OptimalNeighbors"+PATH_OPT+".png")
+	plt.savefig(str(Options.ML_PATH)+"/Models/detRes_KNN_OptimalNeighbors"+PATH_OPT+".png")
 	plt.close()

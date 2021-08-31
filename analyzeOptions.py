@@ -1,4 +1,14 @@
 import multiprocessing
+# import importlib
+# def mplImports():
+#     import matplotlib
+#     matplotlib.use('AGG')
+#     import matplotlib.pyplot as plt
+#     import matplotlib.colors as mpt_col
+#     from matplotlib.colors import ListedColormap,LinearSegmentedColormap
+#     import matplotlib.cm as cm
+#     import matplotlib.markers as mk
+#     import matplotlib.ticker as mticker
 class Options:
     plotDIR = "../plot/current/"
     datadir = "../data/current/"
@@ -10,6 +20,7 @@ class Options:
     cpus = multiprocessing.cpu_count()
     print("CPU Count:",cpus)
     num_cores = cpus
+    workers = num_cores - 1
     MaxEventLimit = False
     #------------------------------------------------------------------------------------ Event / Main SETUP ------------->^/<--- ---------- ------- ------>------/  - - - - - |
     MaxEventLimit = False #manual override
@@ -30,11 +41,11 @@ class Options:
     warmstart=True # warmstart the CNN
     #---KNN
     KNN = True #using KNN OR CNN ? 
-    MLOPT = [] #options "PCA" "STD" "MAHA" "DISABLE-ZT" (note MAHA,STD requires PCA)
+    MLOPT = ["LOG-SCALEX"] #options "PCA" "STD" "MAHA" "DISABLE-ZT" "LOGX", "LOG-SCALEX" (note MAHA,STD requires PCA)
     #options "RUNONE" "RUN" "OPTNUM" "ERR" "VIS" "False" "PICKLE" #nearest neighbor output visualization?
     try: KVIS
     except: KVIS = "PICKLE"
-
+    
     knn_neighbors = 4 #set value
 
     #--------------- --------- --------- -------- TESTS ------------->^/v<--- ---------- ------- ------>------/  - - - - - |
@@ -45,15 +56,15 @@ class Options:
     Ropt = ""
     # SIPM TIMING Tests \---------------------------------
     # (number of photons to count in SiPM timing) (needs SiPMTime_Based_Reconstruction)
-    SiPMtimeRES = True
+    SiPMtimeRES = False
     SiPMtimeVSatt = False
-    SiPMtimePOSRES = True #multilateration style x,y,z positioning for visualization?.
+    SiPMtimePOSRES = False #multilateration style x,y,z positioning for visualization?.
 
     #--------------- --------- --------- -------- ADDITIONAL RESOLUTION PLOTS/HISTOGRAMS ------------->/=<--- ---------- ------- ------>------/  - - - - - |
     # Production/Detection Histograms \---------------------------------
-    STRIPHIST = False
+    STRIPHIST = True
     #subdefines - needs striphist, Process_Based_Breakdown True and SiPM_Based_Reconstruction False
-    STRIP_OPT = ["process_breakdown","electron_processes"] #options "process_breakdown" "photocompton_breakdown" "electron_processes" "subfigures" (#2 requires #1) (#3 - default is gamma_processes) (#4 ~requires #3)
+    STRIP_OPT = ["DOI"] #options "process_breakdown" "photocompton_breakdown" "electron_processes" "subfigures" (#2 requires #1) (#3 - default is gamma_processes) (#4 ~requires #3)
     Creation = True
     Detection = True
     PD = False
@@ -66,11 +77,34 @@ class Options:
     #---------------
     TIMERES = False
     #------------------------------------------------------------------_|
+    # PICKLENAMES:
+    ml_database_pkl = datadir+'ML_DATABASE_PICKLE_P'+str(photoLen)+'.pkl'
+    ml_run_pkl = datadir+'ML_RUN_PICKLE_P'+str(photoLen)+'.pkl'
+    knn_pkl = datadir+'ML_OUT_PICKLE_P'+str(photoLen)+'.pkl'
+    renderaddinfo_pkl = datadir+'RENDER_ADDINFO.pkl'
+    render_pkl = datadir+'RENDER.pkl'
+    #------------------------------------------------------------------_|
+    # other
+    fontsize = 12
+#------------------------------------------------------------------_|
+class blenderOptions:
+    unitScale = 0.1
+#------------------------------------------------------------------_|
 def initializeOptions():
-    if(Options.cpus>16):
-        Options.num_cores = 48 #48
-        Options.MaxEventLimit = False
+    Options.num_cores = 48 if (Options.cpus>16) else Options.cpus
+    Options.MaxEventLimit = False
+def regenerateGlobalPickle(tfv):
+    Options.regenerateGlobalPickles = tfv
+def regenerateLocalPickle(tfv):
+    Options.regenerateLocalPickles = tfv
+def regenerateMLPickle(tfv):
+    if(tfv):
+        Options.regenerateMLPickles = True
+        Options.ML_DRES = True
+        Options.DRES_Train = True
+        Options.KNN = True #using KNN OR CNN ? 
+        Options.KVIS = "PICKLE"
     else:
-        Options.num_cores = Options.cpus
-        Options.MaxEventLimit = False
+        Options.regenerateMLPickles = False
+#------------------------------------------------------------------_|   
 initializeOptions()

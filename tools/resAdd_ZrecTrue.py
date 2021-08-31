@@ -6,7 +6,7 @@ axs[0].set_ylabel("Z-reconstructed position")
 X=[]
 Y=[]
 Z=[]
-for evt in range(nEvents):
+for evt in range(Options.nEvents):
 	Y.append(zTensor[evt].tolist())
 	X.append([actEvtPosN[evt,2]]*(nx*ny))
 	Z.append(recSignal[evt].tolist())
@@ -23,7 +23,7 @@ fig.colorbar(cm.ScalarMappable(norm=mpt_col.Normalize(vmin=0,vmax=400),cmap='Spe
 X=[]
 Y=[]
 Z=[]
-for evt in range(nEvents):
+for evt in range(Options.nEvents):
 	R=recSignal[evt]
 	RS=np.sum(R[np.isfinite(R)])
 	Y.append(recPos[evt,2])

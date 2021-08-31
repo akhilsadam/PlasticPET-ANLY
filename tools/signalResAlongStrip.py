@@ -18,7 +18,7 @@ axs[0].set_ylabel("Ratio")
 X=[]
 Y=[]
 Z=[]
-for evt in range(nEvents):
+for evt in range(Options.nEvents):
 	Y.append(signalRatio[evt].tolist())
 	X.append([actEvtPosN[evt,2]]*(nx*ny))
 	Z.append([actEvtPosN[evt,0]]*(nx*ny))
@@ -35,7 +35,7 @@ fig.colorbar(cm.ScalarMappable(norm=mpt_col.Normalize(vmin=-UX,vmax=UX), cmap='S
 X=[]
 Y=[]
 Z=[]
-for evt in range(nEvents):
+for evt in range(Options.nEvents):
 	S=strip[evt]
 	R=recSignal[evt]
 	SS=np.sum(S[np.isfinite(S)])

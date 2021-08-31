@@ -2,7 +2,7 @@ stripPosX = stripPos[0,:,0]
 stripPosY = stripPos[:,0,1]
 XS,YS=[],[]
 Xval,Yval=[],[]
-for evt in range(nEvents):
+for evt in range(Options.nEvents):
 	actEvtPos = recPos[evt]
 	if(False in np.isfinite(actEvtPos)):
 		continue
