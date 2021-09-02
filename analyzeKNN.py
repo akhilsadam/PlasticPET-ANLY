@@ -24,17 +24,26 @@ from tools.ML import *
 #--------------------------------------------/
 from analyzeOptions import *
 # rePickle single arrays
-rePickle = False
-if(rePickle):
+if not Options.TACC:
+    rePickle = False
+    if(rePickle):
+        regenerateGlobalPickle(False)
+        regenerateMLPickle(True)
+        regenerateLocalPickle(False)
+else: 
+    rePickle = True
     regenerateGlobalPickle(False)
     regenerateMLPickle(True)
-    regenerateLocalPickle(False)
+    regenerateLocalPickle(True)
 
 # createDatabase
-createDatabase = False
+if not Options.TACC:
+    createDatabase = True
+else:
+    createDatabase = True
 #KNN
 use_KNN = True # also needed for reconstruction
-reKNN = False
+reKNN = True
 PCA = False
 # visualization
 vis = False
@@ -42,7 +51,7 @@ vis = False
 ML_SPLIT_FRACTION = 0.75
 Options.knn_neighbors = 4
 # Reconstruction
-remake_listmode = False
+remake_listmode = True
 # Filepaths
 # Options.ml_database_pkl = Options.datadir+'ML_DATABASE_PICKLE_P'+str(Options.photoLen)+'.pkl'
 # Options.ml_run_pkl = Options.datadir+'ML_RUN_PICKLE_P'+str(Options.photoLen)+'.pkl'
@@ -99,7 +108,7 @@ if createDatabase:
         pcaMAHA = False
         with open(Options.ML_PATH+'ML_PCA.py') as f: exec(f.read())
     #--------------------------------------------\
-    # Get Random 75% split...
+    # Get Random 75% split... NEED TO SORT BY EVENT NOT OTHERWISE!!!
     length = len(ArrayIDTensor)
     splitList = [int(length*ML_SPLIT_FRACTION),length - int(length*ML_SPLIT_FRACTION)]
     listset = list(range(length))

@@ -1,0 +1,56 @@
+from tools.energyResolution.histogramOptions import *
+from utils.simpleimport import *
+
+def pltCreation(strip,uninteractedEvents):
+	#--- produced
+	fig,axs = plt.subplots(ny,nx,figsize=(10,10),sharex=True,sharey=True)
+	fig.suptitle("Created Photon Distributions")
+	for j in range(ny):
+		for i in range(nx):
+			counts = strip[:,j,i]
+			mx = max(counts)
+			if(mx>100):
+				axs[j,i].hist(counts,bins = int(mx/100),range = [1,mx])
+	axs[ny-1,int(nx/2)].set_xlabel("Photons in an interacted Event")
+	axs[int(ny/2),0].set_ylabel("Interacted Events")
+	axs[0,nx-1].text(.95,.95,"Interacted Events = %1.0f" %(Options.nEvents-uninteractedEvents),verticalalignment='top',horizontalalignment='right',transform=axs[0,nx-1].transAxes,fontsize=10)
+	axs[0,nx-1].text(.95,.90,"Total Events = %1.0f" %(Options.nEvents),verticalalignment='top',horizontalalignment='right',transform=axs[0,nx-1].transAxes,fontsize=10)
+	plt.tight_layout()
+	plt.subplots_adjust(wspace=0,hspace=0)
+	plt.savefig(Options.plotDIR+"Created Photon Distributions.png")
+	#plt.show()
+	plt.close()
+	mx=5000
+	#--- produced
+	fig,axs = plt.subplots(1,1)
+	fig.suptitle("Created Photon Distributions (Left + Right)")
+	counts = [np.sum(strip[i]) for i in range(Options.nEvents)]
+	#counts = counts[np.nonzero(counts)]
+	axs.hist(counts,bins = int(mx/10),range = [0,mx])
+	axs.set_xlabel("Left+Right Photons in an interacted Event")
+	axs.set_ylabel("Interacted Events")
+	axs.text(.95,.95,"Interacted Events = %1.0f" %(Options.nEvents-uninteractedEvents),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
+	axs.text(.95,.90,"Total Events = %1.0f" %(Options.nEvents),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
+	plt.savefig(Options.plotDIR+"Created Photon Distributions_Total.png")
+	plt.close()
+	
+def pltPD(left,strip,right,uninteractedEvents):
+	#--- produced
+	mx = 1
+	fig,axs = plt.subplots(ny,nx,figsize=(10,10),sharex=True,sharey=True)
+	fig.suptitle("Produced-Detected Ratio")
+	for j in range(ny):
+		for i in range(nx):
+			counts = left[:,j,i]+right[:,j,i]
+			strp = strip[:,j,i]
+			idc = np.nonzero(strp)
+			axs[j,i].scatter(strp[idc],counts[idc]/strp[idc])
+			axs[j,i].set_ylim(0,mx)
+	axs[ny-1,int(nx/2)].set_xlabel("Photons in an interacted Event")
+	axs[int(ny/2),0].set_ylabel("Interacted Events")
+	axs[0,nx-1].text(.95,.95,"Interacted Events = %1.0f" %(Options.nEvents-uninteractedEvents),verticalalignment='top',horizontalalignment='right',transform=axs[0,nx-1].transAxes,fontsize=10)
+	axs[0,nx-1].text(.95,.90,"Interacted Events = %1.0f" %(Options.nEvents),verticalalignment='top',horizontalalignment='right',transform=axs[0,nx-1].transAxes,fontsize=10)
+	plt.tight_layout()
+	plt.subplots_adjust(wspace=0,hspace=0)
+	plt.savefig(Options.plotDIR+"Produced-Detected Ratio.png")
+	plt.close()

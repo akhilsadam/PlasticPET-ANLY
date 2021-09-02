@@ -1,14 +1,5 @@
 import multiprocessing
-# import importlib
-# def mplImports():
-#     import matplotlib
-#     matplotlib.use('AGG')
-#     import matplotlib.pyplot as plt
-#     import matplotlib.colors as mpt_col
-#     from matplotlib.colors import ListedColormap,LinearSegmentedColormap
-#     import matplotlib.cm as cm
-#     import matplotlib.markers as mk
-#     import matplotlib.ticker as mticker
+
 class Options:
     plotDIR = "../plot/current/"
     datadir = "../data/current/"
@@ -22,6 +13,7 @@ class Options:
     num_cores = cpus
     workers = num_cores - 1
     MaxEventLimit = False
+    TACC = False
     #------------------------------------------------------------------------------------ Event / Main SETUP ------------->^/<--- ---------- ------- ------>------/  - - - - - |
     MaxEventLimit = False #manual override
     MaxEvents = 500 #int(input("Number of Events:"))
@@ -65,7 +57,7 @@ class Options:
     STRIPHIST = True
     #subdefines - needs striphist, Process_Based_Breakdown True and SiPM_Based_Reconstruction False
     STRIP_OPT = ["DOI"] #options "process_breakdown" "photocompton_breakdown" "electron_processes" "subfigures" (#2 requires #1) (#3 - default is gamma_processes) (#4 ~requires #3)
-    Creation = True
+    Creation = False
     Detection = True
     PD = False
     #------------------------------------------------------------------_|
@@ -93,6 +85,9 @@ class blenderOptions:
 def initializeOptions():
     Options.num_cores = 48 if (Options.cpus>16) else Options.cpus
     Options.MaxEventLimit = False
+    if Options.num_cores == 48: 
+        Options.TACC = True
+        print("[STATUS] RUNNING ON TACC!")
 def regenerateGlobalPickle(tfv):
     Options.regenerateGlobalPickles = tfv
 def regenerateLocalPickle(tfv):

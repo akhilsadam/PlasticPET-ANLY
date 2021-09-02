@@ -1,21 +1,5 @@
 #!/usr/bin/env python3
-import numpy as np
-import pandas as pd
-import math
-import os
-import io
-os.environ['MPLCONFIGDIR'] = "/home/Desktop/mplib/graph"
-from functools import lru_cache
-from scipy import stats
-from scipy import signal
-from scipy.optimize import curve_fit
-from scipy.interpolate import make_interp_spline
-from tqdm import tqdm
-import multiprocessing
-from numba import jit
-import cv2
-import sys
-
+from utils.simpleimport import *
 #------------------------------------------------------------------------------------
 PYTHONIOENCODING="UTF-8"  #sys.setdefaultencoding("ISO-8859-1")
 #------------------------------------------------------------------------------------
@@ -23,20 +7,13 @@ from analyzeOptions import *
 reflectplotDIR = Options.plotDIR + "reflect/"
 ML_PATH = "tools/ML/"
 #--------------------------
-# Options.ArrayNumber = 1
+try: Options.ArrayNumber
+except: Options.ArrayNumber = 0
 #----------------------------
 print("Single Array Number:",Options.ArrayNumber)
 #----------------------------
-import matplotlib
-matplotlib.use('AGG')
-import matplotlib.pyplot as plt
-import matplotlib.colors as mpt_col
-from matplotlib.colors import ListedColormap,LinearSegmentedColormap
-import matplotlib.cm as cm
-import matplotlib.markers as mk
-import matplotlib.ticker as mticker
+from utils.mplimport import *
 #------------------------------------------------------------------------------------ Geometry / DATA SETUP ------------->^/v<--- ---------- ------ ------>------/  - - - - - |
-from tools.geo import *
 from tools.reconstruct import *
 #------------------------------------------------------------------------------------
 try: Options.regenerateLocalPickles
@@ -75,6 +52,8 @@ except FileNotFoundError as VALERIN:
 try:
 	if(Options.regenerateLocalPickles):
 		raise FileNotFoundError('[NotAnERROR] Regenerating Local Pickles')
+	if(Options.STRIPHIST):
+		left,strip,right = photonNPYLoad() # other semi-necessary loads
 	with open(Options.datadir+pickles[1], 'rb') as f:  # Python 3: open(..., 'wb')
 		print("[OPENING]")
 		evtPhotoInteract, evtComptonInteract,evtInteract,evtType,evtType2 = pickle.load(f)
@@ -84,6 +63,8 @@ try:
 	with open(Options.datadir+pickles[3],'rb') as f: 
 		print("[OPENING]")
 		recPos,ZrecPosT,err_ZrecPosT,errorPosN = pickle.load(f)
+	with open(ml_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
+		inptTensor,expTensor,eventIDs = pickle.load(f)
 	if sauerkrautOPT:
 		with open(Options.datadir+sauerkraut[0], 'rb') as f:  # Python 3: open(..., 'wb')
 			recSignal,zTensor,time_I_Rec = pickle.load(f)
@@ -98,7 +79,7 @@ except FileNotFoundError as VALERIN:
 		print("[STATUS] SIPM TIME RECONSTRUCT")
 		with open('tools/reconstruct_SIPMTime.py') as f: exec(f.read()) # helper file
 		ZrecPosT,err_ZrecPosT = ACTZTimeReconstruct()
-		recPos = ACTreconstruct_time(left,right,ZrecPosT[0,:]) # this seems to be the issue!
+		recPos = ACTreconstruct_time(left,right,ZrecPosT[0,:]) # this was an issue in the recent past...
 	elif Options.Strip_Based_Reconstruction:
 		recPos = reconstruct(left,right,strip)
 	else:
@@ -137,7 +118,7 @@ if MODE != "MANUAL":
 #------------------------------------------ 
 #Strip Histogram Plots
 if Options.STRIPHIST:
-	with open('tools/stripHistograms.py') as f: exec(f.read()) # helper file
+	with open('tools/energyResolution/stripHistograms.py') as f: exec(f.read()) # helper file
 #------------------------------------------ 
 #Position Resolution Plots
 if Options.POSRES:
