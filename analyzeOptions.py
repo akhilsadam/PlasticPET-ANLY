@@ -1,8 +1,8 @@
 import multiprocessing
 
 class Options:
-    plotDIR = "../plot/RSPointSource_nolock0/"
-    datadir = "../data/RSPointSource_nolock0/"#"../data/current/"
+    plotDIR = "../plot/current/"
+    datadir = "../data/current/"
     reflectplotDIR = plotDIR + "reflect/"
     ML_PATH = "tools/ML/"
     photoLen = 5
