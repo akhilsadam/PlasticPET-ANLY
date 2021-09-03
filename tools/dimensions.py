@@ -32,7 +32,7 @@ UX = LX/2
 UY = LY/2
 UZ = LZ/2
 U = [UX,UY,UZ]
-Radius = 396.0890847+(0.5*LX)
+Radius = (784/2)+(0.5*LX) # old value: 396.0890847
 
 unitList = ["mm","mm", "mm", "ns", "degrees"]
 typeList = ["X-Resid (mm)","Y-Resid (mm)", "Z-Resid (mm)", "T-Resid (ns)", "Angle (deg)"]

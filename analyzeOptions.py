@@ -1,8 +1,8 @@
 import multiprocessing
 
 class Options:
-    plotDIR = "../plot/current/"
-    datadir = "../data/current/"
+    plotDIR = "../plot/RSPointSource_nolock0/"
+    datadir = "../data/RSPointSource_nolock0/"#"../data/current/"
     reflectplotDIR = plotDIR + "reflect/"
     ML_PATH = "tools/ML/"
     photoLen = 5
@@ -50,7 +50,7 @@ class Options:
     # (number of photons to count in SiPM timing) (needs SiPMTime_Based_Reconstruction)
     SiPMtimeRES = False
     SiPMtimeVSatt = False
-    SiPMtimePOSRES = False #multilateration style x,y,z positioning for visualization?.
+    SiPMtimePOSRES = True #multilateration style x,y,z positioning for visualization?.
 
     #--------------- --------- --------- -------- ADDITIONAL RESOLUTION PLOTS/HISTOGRAMS ------------->/=<--- ---------- ------- ------>------/  - - - - - |
     # Production/Detection Histograms \---------------------------------
