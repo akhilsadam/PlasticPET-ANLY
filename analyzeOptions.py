@@ -21,7 +21,7 @@ class Options:
     COMPLETEDETECTOR = True
     # ------------------------------------------ RECONSTRUCTION SETUP ---->/=<--- ---------- ------- ------>------/  - - - - - |----------------------_|
     # - \---------------------------------
-    Process_Based_Breakdown = False
+    Process_Based_Breakdown = True
     Strip_Based_Reconstruction = False #otherwise uses only endcount data
     SiPMTime_Based_Reconstruction = True
     SiPM_Based_Reconstruction = False #a binning method, massages data to use only binned SiPM counts #unrealistic!
@@ -50,13 +50,14 @@ class Options:
     # (number of photons to count in SiPM timing) (needs SiPMTime_Based_Reconstruction)
     SiPMtimeRES = False
     SiPMtimeVSatt = False
-    SiPMtimePOSRES = True #multilateration style x,y,z positioning for visualization?.
+    SiPMtimePOSRES = False #multilateration style x,y,z positioning for visualization?.
 
     #--------------- --------- --------- -------- ADDITIONAL RESOLUTION PLOTS/HISTOGRAMS ------------->/=<--- ---------- ------- ------>------/  - - - - - |
     # Production/Detection Histograms \---------------------------------
     STRIPHIST = True
-    #subdefines - needs striphist, Process_Based_Breakdown True and SiPM_Based_Reconstruction False
-    STRIP_OPT = ["DOI"] #options "process_breakdown" "photocompton_breakdown" "electron_processes" "subfigures" (#2 requires #1) (#3 - default is gamma_processes) (#4 ~requires #3)
+    #subdefines - needs striphist, Process_Based_Breakdown True and SiPM_Based_Reconstruction False\
+    # note process breakdown does not work for complete scanner!
+    STRIP_OPT = ["process_breakdown","electron_processes"] #options "process_breakdown" "photocompton_breakdown" "electron_processes" "subfigures" "DOI" (#2 requires #1) (#3 - default is gamma_processes) (#4 ~requires #3)
     Creation = False
     Detection = True
     PD = False
@@ -81,6 +82,7 @@ class Options:
 #------------------------------------------------------------------_|
 class blenderOptions:
     unitScale = 0.1
+    maxVert = 100000
 #------------------------------------------------------------------_|
 def initializeOptions():
     Options.num_cores = 48 if (Options.cpus>16) else Options.cpus

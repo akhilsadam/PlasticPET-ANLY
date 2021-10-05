@@ -37,13 +37,11 @@ def fold(length,n,folds):
 	random.shuffle(x)
 	return [x[i:i + n] for i in range(0, length, n)]
 def batch(batch_size,length):
-	return [random.randint(0,length-1) for i in range(0,batch_size)]
+	return [random.randint(0,length-1) for i in range(batch_size)]
 #-------------------------------------------------------
 def dataNotWithinLimits(post):
-	for i in range(4):
-		if ~(((LM[i,0] <= post[i]) and (LM[i,1] >= post[i]))):
 			#print("f", LM[i,0],LM[i,1])
-			return True
-	return False
+	return any(
+	    ~(((LM[i, 0] <= post[i]) and (LM[i, 1] >= post[i]))) for i in range(4))
 #-------------------------------------------------------
 PATH_OPT=""

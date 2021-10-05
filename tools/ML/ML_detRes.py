@@ -1,5 +1,7 @@
 from analyzeOptions import *
 from tools.ML import *
+from tools.dimensions import *
+import torch
 
 import matplotlib
 matplotlib.use('AGG')
@@ -90,12 +92,12 @@ def ml_detRes_vis(inpT,expT,pl):
 	
 	if(Options.KNN):
 		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual "+PATH_OPT)
-		plt.savefig(str(Options.ML_PATH)+"/Models/detRes_training_KNN_"+str(pl)+PATH_OPT+".png",dpi=600)
+		plt.savefig(str(Options.plotDIR)+"detRes_training_KNN_"+str(pl)+PATH_OPT+".png",dpi=600)
 		#plt.show()
 		plt.close()
 	else:
 		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual "+PATH_OPT)
-		plt.savefig(str(Options.ML_PATH)+"/Models/detRes_training_CNN_"+str(Options.photoLen)+PATH_OPT+".png",dpi=600)
+		plt.savefig(str(Options.plotDIR)+"detRes_training_CNN_"+str(Options.photoLen)+PATH_OPT+".png",dpi=600)
 		#plt.show()
 		plt.close()
 
@@ -167,10 +169,10 @@ def ml_detRes_vis2(inpT,expT,pl):
 
 	if Options.KNN:
 		plt.suptitle("MLKNN (K="+str(pl)+") - Det. Res. Predicted vs Actual "+PATH_OPT)
-		plt.savefig(str(Options.ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(pl)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
+		plt.savefig(str(Options.plotDIR)+"detRes_Predictions_KNN_"+str(pl)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
 	else:
 		plt.suptitle("MLCNN - Det. Res. Predicted vs Actual "+PATH_OPT)
-		plt.savefig(str(Options.ML_PATH)+"/Models/detRes_Predictions_CNN_"+str(pl)+"."+PATH_OPT+"png",bbox_inches='tight',dpi=600)
+		plt.savefig(str(Options.plotDIR)+"detRes_Predictions_CNN_"+str(pl)+"."+PATH_OPT+"png",bbox_inches='tight',dpi=600)
 
 	plt.close()#plt.show()
 
@@ -237,7 +239,7 @@ def ml_detRes_vis_knn(inpT,expT,uik,noplt):
 				marginalPLT(ax,x,y,i)
 
 		plt.suptitle("MLKNN (K="+str(uik)+") - Det. Res. Predicted vs Actual "+PATH_OPT)
-		plt.savefig(str(Options.ML_PATH)+"/Models/detRes_Predictions_KNN_"+str(uik)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
+		plt.savefig(str(Options.plotDIR)+"detRes_Predictions_KNN_"+str(uik)+"_"+PATH_OPT+".png",bbox_inches='tight',dpi=600)
 		plt.close()
 		return rmseL
 		#plt.show()
@@ -250,5 +252,5 @@ def ml_detRes_vis_knn2(pltx,rmseP):
 		ax.set_xlabel("k-neighbors")
 		ax.set_ylabel("RMSE in "+typeList[i])
 	plt.suptitle("KNN RMSE by K-value - optimal # of neighbors "+PATH_OPT)
-	plt.savefig(str(Options.ML_PATH)+"/Models/detRes_KNN_OptimalNeighbors"+PATH_OPT+".png")
+	plt.savefig(str(Options.plotDIR)+"detRes_KNN_OptimalNeighbors"+PATH_OPT+".png")
 	plt.close()

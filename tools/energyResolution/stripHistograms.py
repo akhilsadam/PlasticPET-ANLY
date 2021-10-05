@@ -3,6 +3,41 @@ from utils.simpleimport import *
 from tools.energyResolution.plotHistograms import *
 from tools.energyResolution.doiHistograms import *
 
+# if Options.COMPLETEDETECTOR and "process_breakdown"  in Options.STRIP_OPT:
+# 	raise("EXCEPTION: Electron Process Breakdown does not work with Complete Detector ... Neither does Gamma Breakdown (but that should never be used).")
+
+# Optimization to use all events
+# leftc=left
+# rightc=right
+# stripc=strip
+
+arL = np.zeros(shape=(4,nArray),dtype=object)
+if (Options.ArrayNumber == 0):
+	for array in range(nArray):
+		l,s,r = photonNPYLoad(array)
+		arL[0,array]=l
+		arL[1,array]=s
+		arL[2,array]=r
+		with open(Options.datadir+'gammaInteractPosition_AR'+str(array)+'.pkl','rb') as f: 
+			_,_,acvt,_ = pickle.load(f)
+		arL[3,array]=acvt[:,2]
+		# print("Summing UP --")
+l0 = np.sum(arL[0,:],axis=0)
+r0 = np.sum(arL[2,:],axis=0)
+count0 = np.sum( l0 + r0 ,axis=(1,2))
+uninteractedEvents = sum( count0 <= 0 )
+if "DOI" in Options.STRIP_OPT:
+	leftc = np.concatenate(arL[0,:],axis=0)
+	stripc = np.concatenate(arL[1,:],axis=0)
+	rightc = np.concatenate(arL[2,:],axis=0)
+	gammaZ = np.concatenate(arL[3,:],axis=0)
+	countdoi = np.sum(leftc + rightc,axis=(1,2))
+else:
+	leftc = l0
+	stripc = np.sum(arL[1,:],axis=0)
+	rightc = r0
+# print(leftc.shape)
+
 if "process_breakdown"  in Options.STRIP_OPT:
 	histogramOptions.processBreak = True
 	# using photonCountTypes instead:
@@ -12,20 +47,22 @@ if "process_breakdown"  in Options.STRIP_OPT:
 	names = ["Compton","Other","Photo & Compton","Photoelectric Only"]
 	plotname = ["Compton","Other","PhotoCompton","Photo"]
 	legend = tuplejoin(names,[" : "],colors)
-	print(photonCountTypes.shape)
-	compt = np.sum(comptCounts, axis = (1,2,3)).astype(int)
-	phot = np.sum(photCounts, axis = (1,2,3)).astype(int)
-	other = np.sum(otherCounts, axis = (1,2,3)).astype(int)
-	#print(compt)
-	#print(phot)
-	#print(other)
-	types = 2*(phot>0) - 1*(compt>0) #photo,photocompt,other,compt = 2,1,0,-1.
+
 	alpha = 0.6
 	if "electron_processes" in Options.STRIP_OPT:
 		histogramOptions.byElectronProcess = True
 		typeProcess = typeA
 		histogramOptions.plot_opt += "_electron"
 	else:
+
+		print(photonCountTypes.shape)
+		compt = np.sum(comptCounts, axis = (1,2,3)).astype(int)
+		phot = np.sum(photCounts, axis = (1,2,3)).astype(int)
+		other = np.sum(otherCounts, axis = (1,2,3)).astype(int)
+		#print(compt)
+		#print(phot)
+		#print(other)
+		types = 2*(phot>0) - 1*(compt>0) #photo,photocompt,other,compt = 2,1,0,-1.
 		typeProcess = (2*(evtType[:,1]>0)) - (evtType[:,0]>0)
 		histogramOptions.plot_opt += "_gamma"
 	if "photocompton_breakdown" in Options.STRIP_OPT:
@@ -38,8 +75,8 @@ if "process_breakdown"  in Options.STRIP_OPT:
 		linecolors = ["navy","lime","cadetblue","darkred"]
 elif "DOI" in Options.STRIP_OPT:
 		doibreak = True
-		colormap = ["red","gold","yellow","green","blue","indigo","violet","black"]
-		legend2 = tuplejoin(colormap,[":#C="],np.arange(1,9).astype(str).tolist())
+		colormap = ["grey","darkred","red","crimson","green","blue","navy","indigo","black","black"]
+		legend2 = join(colormap,[":"])
 
 #def pltDet(i):
 #def pltPD(i):
@@ -49,10 +86,10 @@ if Options.Detection:
 	#--- produced
 	fig,axs = plt.subplots(ny,nx,figsize=(10,10),sharex=True,sharey=True)
 	fig.suptitle("Detected Photon Distributions"+histogramOptions.plot_opt)
-	if(histogramOptions.processBreak):
+	if(histogramOptions.processBreak and not histogramOptions.byElectronProcess):
 		for j in range(ny):
 			for i in range(nx):
-				counts = left[:,j,i]+right[:,j,i]
+				counts = leftc[:,j,i]+rightc[:,j,i]
 				#print(counts)
 				#cases
 				for c in range(4):
@@ -64,9 +101,9 @@ if Options.Detection:
 	else:
 		for j in range(ny):
 			for i in range(nx):
-				counts = left[:,j,i]+right[:,j,i]
-				counts = counts[np.nonzero(counts)]
-				axs[j,i].hist(counts,bins = int(mx/histogramOptions.binwidth_0),range = [0,mx])
+				counts = leftc[:,j,i]+rightc[:,j,i]
+				countps = counts[np.nonzero(counts)]
+				axs[j,i].hist(countps,bins = int(mx/histogramOptions.binwidth_0),range = [0,mx])
 	axs[ny-1,int(nx/2)].set_xlabel("Left+Right Photons in an interacted Event")
 	axs[int(ny/2),0].set_ylabel("Interacted Events")
 	axs[0,nx-1].text(.95,.95,"Interacted Events = %1.0f" %(Options.nEvents-uninteractedEvents),verticalalignment='top',horizontalalignment='right',transform=axs[0,nx-1].transAxes,fontsize=10)
@@ -86,7 +123,11 @@ if Options.Detection:
 	fig.suptitle("Detected Photon Distributions (Left + Right)"+histogramOptions.plot_opt)
 
 	if(histogramOptions.processBreak):
-		counts = compt+phot+other
+		if not histogramOptions.byElectronProcess:
+			counts = compt+phot+other
+		else:
+			counts = np.sum(leftc + rightc,axis=(1,2))
+			print(counts.shape)
 		for c in range(4):
 			countp = counts[typeProcess==(c-1)]
 			countp = countp[np.nonzero(countp)]
@@ -134,14 +175,15 @@ if Options.Detection:
 				#ax2.close()
 		ax[1].hist(counts,bins = int(mx/histogramOptions.binwidth_1),range = [0,mx], color = "black",alpha = 1)
 	elif doibreak:
-		counts = np.sum(left + right,axis=(1,2))
-		gammaZ = ZrecPosT[0,:]#[eventIDs]
-		pltDOI(counts,gammaZ,axs,colormap,legend2,0.05,.95)
+		counts = countdoi
+		pltDOI(counts,gammaZ,axs,colormap,legend2,0.05,.99)
 	else:
-		counts = np.sum(left + right,axis=(1,2))
+		counts = count0
 		axs.hist(counts,bins = int(mx/histogramOptions.binwidth_1),range = [0,mx], color = "black",alpha = 1)
 	# Energy Resolution Fitting
-	counts = counts[counts>histogramOptions.binwidth_1] # used to be non-zero, now we are cutting out the first bin
+	print(count0)
+	print(histogramOptions.binwidth_1)
+	counts = count0[count0>histogramOptions.binwidth_1] # used to be non-zero, now we are cutting out the first bin
 	mx2 = np.max(counts)
 	hist, bin_edges = np.histogram(counts,bins=int(mx2/histogramOptions.binwidth_1))
 	bin_centres = (bin_edges[:-1] + bin_edges[1:])/2
@@ -250,6 +292,6 @@ if Options.Detection:
 		plt.close()
 
 if Options.Creation:
-	pltCreation(strip,uninteractedEvents)
+	pltCreation(stripc,uninteractedEvents)
 if Options.PD:
-	pltPD(left,strip,right,uninteractedEvents)
+	pltPD(leftc,stripc,rightc,uninteractedEvents)

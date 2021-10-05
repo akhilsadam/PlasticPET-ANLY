@@ -53,7 +53,7 @@ try:
 	if(Options.regenerateLocalPickles):
 		raise FileNotFoundError('[NotAnERROR] Regenerating Local Pickles')
 	if(Options.STRIPHIST):
-		left,strip,right = photonNPYLoad() # other semi-necessary loads
+		left,strip,right = photonNPYLoad(Options.ArrayNumber) # other semi-necessary loads
 	with open(Options.datadir+pickles[1], 'rb') as f:  # Python 3: open(..., 'wb')
 		print("[OPENING]")
 		evtPhotoInteract, evtComptonInteract,evtInteract,evtType,evtType2 = pickle.load(f)
@@ -73,7 +73,7 @@ except FileNotFoundError as VALERIN:
 	print("[REGENERATION] Local Pickling...")
 	evtPhotoInteract, evtComptonInteract,evtInteract,evtType,evtType2 = localizeBeam(evtPhotoInteractG,evtComptonInteractG,evtInteractG)
 	uninteractedEvents,actEvtPosN,time_I_N = gammaInteractPosition(evtInteract)
-	left,strip,right = photonNPYLoad()
+	left,strip,right = photonNPYLoad(Options.ArrayNumber)
 
 	if Options.SiPMTime_Based_Reconstruction:
 		print("[STATUS] SIPM TIME RECONSTRUCT")

@@ -1,10 +1,10 @@
 from tools.energyResolution.histogramOptions import *
 from utils.simpleimport import *
 
-def fitPlt(counts_in,axs,color,x,y,alignment):
+def fitPlt(counts_in,axs,color,x,y,alignment,legend):
     mx=histogramOptions.detSumMax
-    mx2 = np.max(counts_in)
-    hist, bin_edges = np.histogram(counts_in,bins=int(mx2/histogramOptions.binwidth_1))
+    # mx2 = np.max(counts_in)
+    hist, bin_edges = np.histogram(counts_in,bins=int(mx/histogramOptions.binwidth_1),range=(0,mx))
     bin_centres = (bin_edges[:-1] + bin_edges[1:])/2
 
     xs = bin_centres[np.where(hist == np.max(hist))]
@@ -17,7 +17,7 @@ def fitPlt(counts_in,axs,color,x,y,alignment):
         print("FIT FAILED")
     if fitted:
         hist_fit = gauss(bin_centres, *coeff)
-        print(max(hist_fit))
+        # print(max(hist_fit))
         fwhm = coeff[2]*FWHM
         Mean = coeff[1]
         amplitude = coeff[0]
@@ -42,13 +42,13 @@ def fitPlt(counts_in,axs,color,x,y,alignment):
         #     fontsize=10,
         # )
         # axs.text(.95,.75,"Mean = %4.4f" %(Mean),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
-        axs.text(x,y,"Energy Resolution = %4.4f" %(ENERGYRESOLUTION),verticalalignment='top',horizontalalignment=alignment,transform=axs.transAxes,fontsize=10)
+        axs.text(x+.1,y,"RES = %4.4f" %(ENERGYRESOLUTION),verticalalignment='top',horizontalalignment=alignment,transform=axs.transAxes,fontsize=10)
     else:
         ENERGYRESOLUTION = np.nan
         PHOTOPEAK_SHARPNESS = np.nan
         PHOTOPEAK_FWHM = np.nan
         PHOTOPEAK_COUNT = np.nan
         PHOTOPEAK_PROPORTION = np.nan
-        axs.text(.95,.80,"Energy Resolution Fit FAILED",verticalalignment='top',horizontalalignment=alignment,transform=axs.transAxes,fontsize=10)
-
+        axs.text(x+.1,y,"Fit FAILED",verticalalignment='top',horizontalalignment=alignment,transform=axs.transAxes,fontsize=10)
+    axs.text(x-.04,y,legend,verticalalignment='top',horizontalalignment=alignment,transform=axs.transAxes,fontsize=10)
     return [ENERGYRESOLUTION,PHOTOPEAK_SHARPNESS,PHOTOPEAK_FWHM,PHOTOPEAK_COUNT,PHOTOPEAK_PROPORTION]

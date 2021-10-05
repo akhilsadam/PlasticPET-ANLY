@@ -30,8 +30,8 @@ def photonSiPMDataLoad():
 	
 textLines = []
 
-def photonNPYLoad():
-	photonCounts = np.load(Options.datadir+"photonCounts"+str(Options.ArrayNumber)+".npy")
+def photonNPYLoad(array):
+	photonCounts = np.load(Options.datadir+"photonCounts"+str(array)+".npy")
 	left = photonCounts[0:3*Options.nEvents:3,:,:] #left,strip,right photons - indices:evt#,y,x
 	strip = photonCounts[1:3*Options.nEvents:3,:,:]
 	right = photonCounts[2:3*Options.nEvents:3,:,:]
@@ -182,6 +182,7 @@ def localizeBeam(evtPhotoInteractG, evtComptonInteractG,evtInteractG):
 		# print(tI)
 
 		if ((len(tI)>0) and (len(cI)>0) and (len(pI)>0)) :
+			# print(tI)
 			photonmask = tI[:,3]>0
 			comptonmap = np.where(np.isin(tI[:,0],cI[:,0]))
 			photomap = np.where(np.isin(tI[:,0],pI[:,0]))

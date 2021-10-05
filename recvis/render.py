@@ -7,11 +7,16 @@ from analyzeOptions import *
 from tools.dimensions import *
 from tools.geo import *
 import pickle
+import os
 def render():
     p = np.loadtxt(Options.datadir+"pointdata.txt")
-    with open(Options.renderaddinfo_pkl, 'rb') as f:  # Python 3: open(..., 'rb')
-        print("OPENING")
-        a,b,c = pickle.load(f)
+    try:
+        with open(Options.renderaddinfo_pkl, 'rb') as f:  # Python 3: open(..., 'rb')
+            print("OPENING")
+            a,b,c = pickle.load(f)
+    except:
+        a,b,c = blenderOptions.maxVert,blenderOptions.maxVert,blenderOptions.maxVert
+        print("FAILED TO OPEN PICKLE; Name : RenderAdditionalInformation")
     Options.nRTotalEvents,Options.nREvents,Options.nREventLimit = a,b,c
 
     det = np.array([
@@ -48,7 +53,7 @@ def render():
     ax2 = fig.add_subplot(122, projection='3d')
     ax = [ax1,ax2]
     for i in tqdm(range(2)):
-        ax[i].scatter(xyz[i%3],xyz[(i+1)%3],xyz[(i+2)%3], c=z,s=6,alpha = 0.2,cmap="nipy_spectral")
+        img = ax[i].scatter(xyz[i%3],xyz[(i+1)%3],xyz[(i+2)%3], c=z,s=2,alpha = 0.7,cmap="bwr")
         ax[i].set_xlim(lim[i%3,0],lim[i%3,1])
         ax[i].set_ylim(lim[(i+1)%3,0],lim[(i+1)%3,1])
         ax[i].set_zlim(lim[(i+2)%3,0],lim[(i+2)%3,1])
@@ -58,11 +63,15 @@ def render():
         ax[i].set_box_aspect((1,1,1))
         for A in range(nArray):
             detpoint = det[A]
-            print(detpoint)
+            # print(detpoint)
             ax[i].plot(detpoint[i%3,:],detpoint[(i+1)%3,:],detpoint[(i+2)%3,:],c='b',linestyle='-.',alpha = 0.5)
+    cax = plt.axes([0.4875, 0.1, 0.025, 0.8])
+    cbar = plt.colorbar(img,cax=cax)
+    cbar.set_alpha(1)
+    cbar.draw_all()
     plt.figtext(0.45,0.96,'Total Single Events: '+str(Options.nRTotalEvents),fontsize = Options.fontsize)
     plt.figtext(0.45,0.94,'Total Coincidence Events: '+str(Options.nREvents),fontsize = Options.fontsize)
     plt.suptitle("Complete Reconstruction [mm] via KNN")
-    fig.savefig(os.getcwd()+Options.plotDIR+"renderI.png")
+    fig.savefig(os.getcwd()+"/"+Options.plotDIR+"renderI.png")
     plt.show()
     return xyz

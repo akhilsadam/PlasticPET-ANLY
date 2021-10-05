@@ -19,16 +19,19 @@ from tools.dimensions import *
 from tools.geo import *
 from tools.reconstruct import *
 from tools.ML import *
+import random
+import gc
+ngpu = 1
 #---------------------------------------------|
 # OPTIONS
 #--------------------------------------------/
 from analyzeOptions import *
 # rePickle single arrays
 if not Options.TACC:
-    rePickle = False
+    rePickle = True
     if(rePickle):
         regenerateGlobalPickle(False)
-        regenerateMLPickle(True)
+        regenerateMLPickle(False) # make sure to turn this off if doing single array analysis
         regenerateLocalPickle(False)
 else: 
     rePickle = True
@@ -37,10 +40,10 @@ else:
     regenerateLocalPickle(True)
 
 # createDatabase
-if not Options.TACC:
-    createDatabase = True
-else:
-    createDatabase = True
+# if not Options.TACC:
+#     recreateDatabase = False
+# else:
+recreateDatabase = False
 #KNN
 use_KNN = True # also needed for reconstruction
 reKNN = True
@@ -80,66 +83,83 @@ if rePickle:
         Options.ArrayNumber = ArrayNumber
         with open('analyzeSingleArray.py') as f: exec(f.read())
 #--------------------------------------------\
-if createDatabase:
-    # Read In Data
-    inputTensorL = []
-    expectTensorL = []
-    ArrayIDTensorL = []
-    EventIDTensorL = []
-    for ArrayNumber in (range(nArray)):
-        ml_pkl = Options.datadir+'ML_DATA_PICKLE_AR'+str(ArrayNumber)+'_P'+str(Options.photoLen)+'.pkl'
-        with open(ml_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
-            inptTensor,expTensor,eventIDs = pickle.load(f)
-            inputTensorL.append(inptTensor)
-            expectTensorL.append(expTensor)
-            ArrayIDTensorL.append(torch.Tensor([ArrayNumber]*(len(inptTensor))))
-            EventIDTensorL.append(torch.Tensor(eventIDs))
-    inputTensor = torch.cat(inputTensorL, dim=0)
-    expectTensor = torch.cat(expectTensorL, dim=0)
-    ArrayIDTensor = torch.cat(ArrayIDTensorL, dim=0)
-    EventIDTensor = torch.cat(EventIDTensorL, dim=0)
-    # print(inputTensor.shape)
-    # print(expectTensor.shape)
-    # print(ArrayIDTensor)
-    #--------------------------------------------\
-    if PCA:
-        PATH_OPT=PATH_OPT+"PCA"
-        pcaSTD = False
-        pcaMAHA = False
-        with open(Options.ML_PATH+'ML_PCA.py') as f: exec(f.read())
-    #--------------------------------------------\
-    # Get Random 75% split... NEED TO SORT BY EVENT NOT OTHERWISE!!!
-    length = len(ArrayIDTensor)
-    splitList = [int(length*ML_SPLIT_FRACTION),length - int(length*ML_SPLIT_FRACTION)]
-    listset = list(range(length))
-    random.shuffle(listset)
-    dataInd,testInd = torch.split(torch.tensor(listset),splitList)
-    #---------------------------------------------
-    dataTensorX = inputTensor[dataInd]
-    dataTensorXT = inputTensor[testInd]
-    dataTensorY = expectTensor[dataInd]
-    dataTensorYT = expectTensor[testInd]
-    arrayIndexTensorT = ArrayIDTensor[testInd]
-    eventIndexTensorT = EventIDTensor[testInd]
-    #---------------------------------------------
-    # Pickle Again...
-    with open(Options.ml_database_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
-        pickle.dump([dataTensorX,dataTensorY], f)
-    with open(Options.ml_run_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
-        pickle.dump([dataTensorXT,dataTensorYT,arrayIndexTensorT,eventIndexTensorT], f)
-#------------------------------------------------------------------------------|
-# Load Pickles
-#------------------------------------------------------------------------------/
 if use_KNN:
-    try: dataTensorXT
-    except: 
+    try: 
+        if recreateDatabase:
+            raise FileNotFoundError('[NotAnERROR] Regenerating KNN Database')
         with open(Options.ml_database_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
             dataTensorX,dataTensorY = pickle.load(f)
         with open(Options.ml_run_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
             dataTensorXT,dataTensorYT,arrayIndexTensorT,eventIndexTensorT = pickle.load(f)
-    Options.nEvents = len(dataTensorY)+len(dataTensorYT)
-    print("nEvents:", Options.nEvents)
+    except FileNotFoundError as VALERIN:
+        print(VALERIN)
+        print("[REGENERATION] KNN Database Pickling...")
+        # Read In Data
+        inputTensorL = []
+        expectTensorL = []
+        ArrayIDTensorL = []
+        EventIDTensorL = []
+        for ArrayNumber in (range(nArray)):
+            ml_pkl = Options.datadir+'ML_DATA_PICKLE_AR'+str(ArrayNumber)+'_P'+str(Options.photoLen)+'.pkl'
+            with open(ml_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
+                inptTensor,expTensor,eventIDs = pickle.load(f)
+                inputTensorL.append(inptTensor)
+                expectTensorL.append(expTensor)
+                ArrayIDTensorL.append(torch.Tensor([ArrayNumber]*(len(inptTensor))))
+                EventIDTensorL.append(torch.Tensor(eventIDs))
+        inputTensor = torch.cat(inputTensorL, dim=0)
+        expectTensor = torch.cat(expectTensorL, dim=0)
+        ArrayIDTensor = torch.cat(ArrayIDTensorL, dim=0)
+        EventIDTensor = torch.cat(EventIDTensorL, dim=0)
+        # print(inputTensor.shape)
+        # print(expectTensor.shape)
+        # print(ArrayIDTensor)
+        #--------------------------------------------\
+        if PCA:
+            PATH_OPT=PATH_OPT+"PCA"
+            pcaSTD = False
+            pcaMAHA = False
+            with open(Options.ML_PATH+'ML_PCA.py') as f: exec(f.read())
+        #--------------------------------------------\
+        # Get Random 75% split... NEED TO SORT BY EVENT NOT OTHERWISE!!!
+
+        length = len(np.unique(EventIDTensor.numpy()))
+        print(length)
+        splitList = [int(length*ML_SPLIT_FRACTION),length - int(length*ML_SPLIT_FRACTION)]
+        listset = list(range(length))
+        random.shuffle(listset)
+        dataIndE,testIndE = torch.split(torch.tensor(listset),splitList)
+        dataInd = np.isin(EventIDTensor.numpy(),EventIDTensor.numpy()[dataIndE])
+        testInd = np.isin(EventIDTensor.numpy(),EventIDTensor.numpy()[testIndE])
+        print(inputTensor.shape)
+        print(dataInd)
+
+        # length = len(ArrayIDTensor)
+        # splitList = [int(length*ML_SPLIT_FRACTION),length - int(length*ML_SPLIT_FRACTION)]
+        # listset = list(range(length))
+        # random.shuffle(listset)
+        # dataInd,testInd = torch.split(torch.tensor(listset),splitList)
+
+        #---------------------------------------------
+        dataTensorX = inputTensor[dataInd]
+        dataTensorXT = inputTensor[testInd]
+        dataTensorY = expectTensor[dataInd]
+        dataTensorYT = expectTensor[testInd]
+        arrayIndexTensorT = ArrayIDTensor[testInd]
+        eventIndexTensorT = EventIDTensor[testInd]
+        #---------------------------------------------
+        # Pickle Again...
+        with open(Options.ml_database_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
+            pickle.dump([dataTensorX,dataTensorY], f)
+        with open(Options.ml_run_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
+            pickle.dump([dataTensorXT,dataTensorYT,arrayIndexTensorT,eventIndexTensorT], f)
+#------------------------------------------------------------------------------|
+# KNN
+#------------------------------------------------------------------------------/
+gc.collect()
+if use_KNN:
     #--------------------------------------------/
+    gc.collect()
     try:
         if(reKNN):
             raise FileNotFoundError('[NotAnERROR] Regenerating KNN output')
@@ -155,13 +175,16 @@ if use_KNN:
         if not (KNNOPENED):
             with open(Options.ML_PATH+'ML_Model_detRes_KNN.py') as f: exec(f.read()) # helper file # model definition
             KNNOPENED = True
+        gc.collect()    
         drnet = DRKNN()
+        gc.collect()
         drnet.eval()
         drnet._initialize_weights()
         print(drnet)
         #--------------------------------------------
         # Run Options.KNN (note out is xyzt of gamma)
         drnet.setK(Options.knn_neighbors)
+        gc.collect()
         out,outs = drnet(dataTensorX,dataTensorY,dataTensorXT)
         with open(Options.knn_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
             pickle.dump([out,outs], f)
@@ -182,24 +205,27 @@ try:
 except FileNotFoundError as VALERIN:
     print(VALERIN)
     print("[REGENERATION] LISTMODE output")
+    print("Number of Single Events From KNN: ",len(out))
+    print("Approximate Number of Total Single Events: ",4*len(out))
     for i in range(5):
         print(out[i],arrayIndexTensorT[i],eventIndexTensorT[i])
     outGlobal = ArrayToGlobalMT(out,arrayIndexTensorT)
     outGlobal[:,3] = (outGlobal[:,3]*n_EJ208)/(1000*nanosec*c_const)
     indxs = []
     outPaired = []
-    for i in range(Options.nEvents):
+    maxEVT = int(max(eventIndexTensorT).item())
+    for i in range(maxEVT+1):
         idx = np.where(eventIndexTensorT==i)[0].astype(int)
         if len(idx) > 0:
             indxs.append(idx)
         if len(idx) > 1:
             outPaired.append(outGlobal[idx])
     indxs = np.array(indxs)
-    print(len(indxs))
+    print("Number of KNN Events that are atleast Singles: ",len(indxs))
     # print(len([i for i in range(len(indxs)) if len(indxs[i]) > 1]))
-    print(len(outPaired))
-    print(indxs)
-    print(outPaired[0][:,0:3].T)
+    print("Number of KNN Events that are atleast Coincidence: ",len(outPaired))
+    # print(indxs)
+    # print(outPaired[0][:,0:3].T)
     #----------------------------------------------
     Options.nRTotalEvents = len(indxs)
     Options.nREvents = len(outPaired)
