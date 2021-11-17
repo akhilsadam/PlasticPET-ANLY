@@ -54,7 +54,7 @@ class Options:
 
     #--------------- --------- --------- -------- ADDITIONAL RESOLUTION PLOTS/HISTOGRAMS ------------->/=<--- ---------- ------- ------>------/  - - - - - |
     # Production/Detection Histograms \---------------------------------
-    STRIPHIST = True
+    STRIPHIST = False
     #subdefines - needs striphist, Process_Based_Breakdown True and SiPM_Based_Reconstruction False\
     # note process breakdown does not work for complete scanner!
     STRIP_OPT = ["process_breakdown","electron_processes"] #options "process_breakdown" "photocompton_breakdown" "electron_processes" "subfigures" "DOI" (#2 requires #1) (#3 - default is gamma_processes) (#4 ~requires #3)

@@ -5,7 +5,7 @@ class histogramOptions:
     subfigs = False
     plot_opt = ""
 
-    QE = False
+    QE = True
 
     detMax = 500 if QE else 1000
     detSumMax = 1500 if QE else 1500
