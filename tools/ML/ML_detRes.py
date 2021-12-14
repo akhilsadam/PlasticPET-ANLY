@@ -11,6 +11,8 @@ from matplotlib.colors import ListedColormap,LinearSegmentedColormap
 import matplotlib.cm as cm
 import matplotlib.markers as mk
 import matplotlib.ticker as mticker
+from scipy.optimize import curve_fit
+from scipy import stats
 
 if Options.warmstart:
 	model_path0 = str(Options.ML_PATH)+"Data/ML_DET_RES_"+str(Options.photoLen)+"_Photo.pt"
@@ -86,7 +88,7 @@ def ml_detRes_vis(inpT,expT,pl):
 		
 		axs[i].plot(x,gaussian(x,popt[0],popt[1]), color='red')
 		#axs[i].plot(x,gaussian(x,popt[0],popt[1],popt[2]), color='red')
-		axs[i].text(0.03, 0.90, "Mean,SD,FWHM = ({0:.3f},{1:.3f},{2:.3f}) ".format(popt[0],popt[1],FWHMC*popt[1]),verticalalignment='top',horizontalalignment='left',transform = axs[i].transAxes,fontsize=8)
+		axs[i].text(0.03, 0.90, "Mean,SD,FWHM = ({0:.3f},{1:.3f},{2:.3f}) ".format(popt[0],popt[1],FWHM*popt[1]),verticalalignment='top',horizontalalignment='left',transform = axs[i].transAxes,fontsize=8)
 		axs[i].text(0.97, 0.90, "{0} Events".format(length),verticalalignment='top',horizontalalignment='right',transform = axs[i].transAxes,fontsize=8)
 
 	

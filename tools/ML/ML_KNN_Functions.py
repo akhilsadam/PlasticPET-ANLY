@@ -4,6 +4,7 @@ from tools.ML.ML_detRes import *
 import tqdm
 import torch
 from numba import jit
+import numpy as np
 
 import matplotlib
 matplotlib.use('AGG')
@@ -95,21 +96,22 @@ def kerr(knn_neighbors):
 	plt.show()
 
 def kvisNP(evt,dataTensorY,dataTensorYT,out,outs,knn_neighbors):
-    outz,kvalsz,nkvalsz,expectTensorz = kvisppN(evt,knn_neighbors,dataTensorY.numpy(),dataTensorYT.numpy(),out.numpy(),outs.numpy())
-    fig = plt.figure(figsize=(15,15),constrained_layout=True)
-    ax0 = fig.add_subplot(2, 2, 1, projection='3d')
-    ax1 = fig.add_subplot(2, 2, 2, projection='3d')
-    ax2 = fig.add_subplot(2, 2, 3, projection='3d')
-    ax3 = fig.add_subplot(2, 2, 4, projection='3d')
+    # outz,kvalsz,nkvalsz,expectTensorz = kvisppN(evt,knn_neighbors,dataTensorY.numpy(),dataTensorYT.numpy(),out.numpy(),outs.numpy())
+	outz,kvalsz,nkvalsz,expectTensorz = kvisppN(evt,knn_neighbors,dataTensorY,dataTensorYT,out,outs)
+	fig = plt.figure(figsize=(15,15),constrained_layout=True)
+	ax0 = fig.add_subplot(2, 2, 1, projection='3d')
+	ax1 = fig.add_subplot(2, 2, 2, projection='3d')
+	ax2 = fig.add_subplot(2, 2, 3, projection='3d')
+	ax3 = fig.add_subplot(2, 2, 4, projection='3d')
     
-    kvisplt(fig,ax0,evt,0,outz,kvalsz,nkvalsz,expectTensorz,0.75/6)
-    kvisplt(fig,ax1,evt,1,outz,kvalsz,nkvalsz,expectTensorz,0.75/6)
-    kvisplt(fig,ax2,evt,2,outz,kvalsz,nkvalsz,expectTensorz,0.75/6)
-    kvisplt(fig,ax3,evt,3,outz,kvalsz,nkvalsz,expectTensorz,0.75/6)
-    
-    plt.suptitle("KNN Output Space Neighbor Visualization (Event="+str(evt)+")")
-    plt.savefig(str(Options.ML_PATH)+"/Models/detRes_KNN_VISN.png")
-    plt.close()#plt.show()
+	kvisplt(fig,ax0,evt,0,outz,kvalsz,nkvalsz,expectTensorz,0.75/6)
+	kvisplt(fig,ax1,evt,1,outz,kvalsz,nkvalsz,expectTensorz,0.75/6)
+	kvisplt(fig,ax2,evt,2,outz,kvalsz,nkvalsz,expectTensorz,0.75/6)
+	kvisplt(fig,ax3,evt,3,outz,kvalsz,nkvalsz,expectTensorz,0.75/6)
+
+	plt.suptitle("KNN Output Space Neighbor Visualization (Event="+str(evt)+")")
+	plt.savefig(str(Options.ML_PATH)+"/Models/detRes_KNN_VISN.png")
+	plt.close()#plt.show()
 
 def kvisN(knn_neighbors):
 	out,kvals,nkvals,expectTensor = kvispp(knn_neighbors)

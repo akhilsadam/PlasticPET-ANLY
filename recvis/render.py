@@ -27,8 +27,8 @@ def render():
         for A in range(nArray)
     ])
 
-    dt =  10**3 * (p[3]-p[7]) # ns
-    dx = 0.3*dt
+    dt =  10**3 * (p[3]-p[7]) # ns->ps (does not work with PETSYS - they give picoseconds)
+    dx = 0.3*dt #mm
     center = np.array([(p[0,:]+p[4,:])/2, (p[1,:]+p[5,:])/2, (p[2,:]+p[6,:])/2])
     line = np.array(((p[0,:]-p[4,:]), (p[1,:]-p[5,:]), (p[2,:]-p[6,:])))
     line = dx*line/(np.linalg.norm(line))

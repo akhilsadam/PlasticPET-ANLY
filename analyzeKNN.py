@@ -26,13 +26,19 @@ ngpu = 1
 # OPTIONS
 #--------------------------------------------/
 from analyzeOptions import *
+#---------------------------------------------
+# Constructing ML stuff / Rendering ? - i.e. are we just doing single array studies?
+ML_Construct = True
+# Turns on all of the following if this is a first run / or we have additonal data.
+newData = False
+#--------------------------------------------- 
 # rePickle single arrays
 if not Options.TACC:
     rePickle = True
     if(rePickle):
-        regenerateGlobalPickle(False)
-        regenerateMLPickle(False) # make sure to turn this off if doing single array analysis
-        regenerateLocalPickle(False)
+        regenerateGlobalPickle(newData)
+        regenerateMLPickle(newData) #turn this off if doing single array analysis
+        regenerateLocalPickle(newData)
 else: 
     rePickle = True
     regenerateGlobalPickle(False)
@@ -43,11 +49,8 @@ else:
 # if not Options.TACC:
 #     recreateDatabase = False
 # else:
+recreateDatabase = True
 #---------------------------------------------
-# Constructing ML stuff / Rendering ? - i.e. are we just doing single array studies?
-ML_Construct = False
-#---------------------------------------------
-recreateDatabase = False
 #KNN
 use_KNN = True # also needed for reconstruction
 reKNN = True
