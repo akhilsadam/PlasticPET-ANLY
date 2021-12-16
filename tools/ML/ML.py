@@ -19,6 +19,7 @@ from itertools import repeat
 from functools import partial
 import pandas as pd
 from tqdm import tqdm
+from tools.dimensions import *
 from analyzeOptions import *
 #-------------------------------------------------------
 torch.multiprocessing.set_sharing_strategy('file_system')

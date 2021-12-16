@@ -53,7 +53,7 @@ def render():
     ax2 = fig.add_subplot(122, projection='3d')
     ax = [ax1,ax2]
     for i in tqdm(range(2)):
-        img = ax[i].scatter(xyz[i%3],xyz[(i+1)%3],xyz[(i+2)%3], c=z,s=2,alpha = 0.7,cmap="bwr")
+        img = ax[i].scatter(xyz[i%3],xyz[(i+1)%3],xyz[(i+2)%3], c=z,s=2,alpha = 0.7,cmap="rainbow")
         ax[i].set_xlim(lim[i%3,0],lim[i%3,1])
         ax[i].set_ylim(lim[(i+1)%3,0],lim[(i+1)%3,1])
         ax[i].set_zlim(lim[(i+2)%3,0],lim[(i+2)%3,1])

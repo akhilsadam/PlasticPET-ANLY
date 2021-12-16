@@ -30,7 +30,8 @@ from analyzeOptions import *
 # Constructing ML stuff / Rendering ? - i.e. are we just doing single array studies?
 ML_Construct = True
 # Turns on all of the following if this is a first run / or we have additonal data.
-newData = False
+newData = True
+recreateDatabase = True
 #--------------------------------------------- 
 # rePickle single arrays
 if not Options.TACC:
@@ -49,7 +50,6 @@ else:
 # if not Options.TACC:
 #     recreateDatabase = False
 # else:
-recreateDatabase = True
 #---------------------------------------------
 #KNN
 use_KNN = True # also needed for reconstruction

@@ -1,5 +1,5 @@
 from analyzeOptions import *
-from tools.ML import *
+from tools.ML.ML import *
 from tools.dimensions import *
 import torch
 
