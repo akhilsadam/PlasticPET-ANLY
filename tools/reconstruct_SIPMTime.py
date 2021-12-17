@@ -43,7 +43,7 @@ def ACTTimeReconstruct():
 
 	return recPosT
 
-@lru_cache(maxsize=2000)
+#@lru_cache(maxsize=2000)
 def process_ACTZT(c):
 	photonDatas = photonSiPMData(c)
 	# print(photonDatas)
