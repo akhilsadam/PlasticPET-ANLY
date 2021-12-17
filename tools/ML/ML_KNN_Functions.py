@@ -1,10 +1,12 @@
 from analyzeOptions import *
 from tools.vis import *
 from tools.ML.ML_detRes import *
-import tqdm
+from tqdm import tqdm
 import torch
 from numba import jit
 import numpy as np
+import h5py
+import dask.array as da
 
 import matplotlib
 matplotlib.use('AGG')
@@ -14,6 +16,12 @@ from matplotlib.colors import ListedColormap,LinearSegmentedColormap
 import matplotlib.cm as cm
 import matplotlib.markers as mk
 import matplotlib.ticker as mticker
+
+nkpath = Options.datadir + 'nkvals_HDF5.dat'
+nkpath2 = Options.datadir + 'nkvals2_HDF5.dat'
+# nchunk = [60,60]
+
+# bitshift = 1 # do not change
 
 def knntest(knn_neighbors):
 	drnet.setK(knn_neighbors)
@@ -30,6 +38,7 @@ def knntest(knn_neighbors):
 	ml_detRes_vis2(out,expectTensor,knn_neighbors)
 	return True
 def kvispp():
+	print("MemoryIntensiveSection...")
 	drnet.setK(knn_neighbors)
 	listset = list(range(length))
 	random.shuffle(listset)
@@ -43,28 +52,40 @@ def kvispp():
 	
 	dlength = dataTensorY.shape[0]
 	kvals = dataTensorY[indxs]
-	nkvals = torch.ones((indxs.shape[0],dlength-knn_neighbors,4))
+	print("Creating HDF5...")
+	nkl2 = dlength-knn_neighbors
+	nkvals = np.memmap(nkpath2, dtype=np.float32,
+              mode='w+', shape = (indxs.shape[0],nkl2,4))
+	print("Filling HDF5...")
+	nkvals.fill(1)		  
 	#print(dataTensorY.shape)
 	#print(nkvals.shape)
 	#print(indxs.shape)
 	#print(dlength)
-	for i in range(indxs.shape[0]):
+	print("Looping...")
+	for i in tqdm(range(indxs.shape[0])):
 		u = 0
 		for j in range(dlength):
 			if(j not in indxs[i]):
 				nkvals[i,u,:] = dataTensorY[j,:]
 				u = u + 1
-	
 	return out,kvals,nkvals,expectTensor
-@jit
-def kvisppN(evt,knn_neighbors,dataTensorY,dataTensorYT,out,outs):
-	indxs = outs
+#@jit
+def kvisppN(evt,knn_neighbors,dataTensorY,dataTensorYT,out,indxs):
+	print("MemoryIntensiveSection...")
 	dlength = dataTensorY.shape[0]
 	kvals = dataTensorY[indxs]
-	nkvals = np.ones(shape = (indxs.shape[0],dlength-knn_neighbors,4))
-	for evts in range(indxs.shape[0]):
+	print("Creating HDF5...")
+	nkl2 = dlength-knn_neighbors
+	nkvals = np.memmap(nkpath2, dtype=np.float32,
+              mode='w+', shape = (indxs.shape[0],nkl2,4))
+			  #np.ones(shape = (indxs.shape[0],dlength-knn_neighbors,4))
+	print("Filling HDF5...")
+	nkvals.fill(1)
+	print("Looping...")
+	for evts in tqdm(range(indxs.shape[0])):
 		# print(dataTensorY[~indxs[evts]].shape)
-		index = torch.ones(dlength, dtype=bool)
+		index = np.ones(dlength, dtype=bool) #torch.ones(dlength, dtype=bool)
 		index[indxs[evts]] = False
 		nkvals[evts,:,:] = dataTensorY[index]
 		# print(nkvals[evts])
@@ -98,6 +119,10 @@ def kerr(knn_neighbors):
 def kvisNP(evt,dataTensorY,dataTensorYT,out,outs,knn_neighbors):
     # outz,kvalsz,nkvalsz,expectTensorz = kvisppN(evt,knn_neighbors,dataTensorY.numpy(),dataTensorYT.numpy(),out.numpy(),outs.numpy())
 	outz,kvalsz,nkvalsz,expectTensorz = kvisppN(evt,knn_neighbors,dataTensorY,dataTensorYT,out,outs)
+	# print("Loading HDF5...")
+	# nkvalsz = np.HDF5(nkpath, dtype=np.float32,
+    #           mode='r', shape = (indxs.shape[0],dlength-knn_neighbors,4))
+	print("Plotting...")
 	fig = plt.figure(figsize=(15,15),constrained_layout=True)
 	ax0 = fig.add_subplot(2, 2, 1, projection='3d')
 	ax1 = fig.add_subplot(2, 2, 2, projection='3d')
@@ -115,7 +140,10 @@ def kvisNP(evt,dataTensorY,dataTensorYT,out,outs,knn_neighbors):
 
 def kvisN(knn_neighbors):
 	out,kvals,nkvals,expectTensor = kvispp(knn_neighbors)
-
+	# print("Loading HDF5...")
+	# nkvals = np.HDF5(nkpath2, dtype=np.float32,
+    #           mode='r', shape = (indxs.shape[0],dlength-knn_neighbors,4))
+	print("Plotting...")
 	evt = 5
 	#plt.style.use('dark_background')
 	#plt.rcParams['axes.facecolor'] = 'black'

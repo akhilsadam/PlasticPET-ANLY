@@ -3,7 +3,8 @@ from utils.simpleimport import *
 
 def fitPlt(counts_in,axs,color,x,y,alignment,legend):
     mx=histogramOptions.detSumMax
-    # mx2 = np.max(counts_in)
+    # mx2 = np.max(counts_in) 
+    # note removal of first bin
     hist, bin_edges = np.histogram(counts_in,bins=int(mx/histogramOptions.binwidth_1),range=(0,mx))
     bin_centres = (bin_edges[:-1] + bin_edges[1:])/2
 
@@ -31,7 +32,7 @@ def fitPlt(counts_in,axs,color,x,y,alignment,legend):
         PHOTOPEAK_SHARPNESS = amplitude/fwhm
         PHOTOPEAK_FWHM = fwhm
         PHOTOPEAK_COUNT = counts_inPhotopeak
-        PHOTOPEAK_PROPORTION = counts_inPhotopeak/totalcounts_in
+        PHOTOPEAK_PROPORTION = counts_inPhotopeak/totalcounts_in if totalcounts_in > 0 else 0
         # axs.text(
         #     0.95,
         #     0.80,

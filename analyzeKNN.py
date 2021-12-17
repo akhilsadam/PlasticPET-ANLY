@@ -35,6 +35,7 @@ try: newData
 except: newData = True
 try: recreateDatabase
 except: recreateDatabase = True
+unsafe_vis = False # this
 #--------------------------------------------- 
 # rePickle single arrays
 if not Options.TACC:
@@ -60,6 +61,7 @@ reKNN = True
 PCA = False
 # visualization
 vis = False
+mem_intense_vis = False
 # ML processing
 ML_SPLIT_FRACTION = 0.75
 Options.knn_neighbors = 4
@@ -99,8 +101,11 @@ if not ML_Construct:
     dataOpen = False
     Options.Process_Based_Breakdown = True
     Options.STRIPHIST = True
-    Options.STRIP_OPT = ["process_breakdown","electron_processes"]
-    with open('analyzeSingleArray.py') as f: exec(f.read())
+    # Options.STRIP_OPT = ["process_breakdown","electron_processes"]
+    # with open('analyzeSingleArray.py') as f: exec(f.read())
+    Options.Process_Based_Breakdown = False
+    Options.MaxEventLimit = True
+    Options.MaxEvents = 10000
     Options.STRIP_OPT = ["DOI"]
     with open('analyzeSingleArray.py') as f: exec(f.read())
 else:
@@ -214,7 +219,8 @@ else:
         ml_detRes_vis(out,dataTensorYT,Options.knn_neighbors)
         ml_detRes_vis2(out,dataTensorYT,Options.knn_neighbors)
     #--------------------------------------------
-    if vis:
+    if mem_intense_vis:
+        print("memory_intensive_vis")
         with open(Options.ML_PATH+"ML_KNN_Functions.py") as f: exec(f.read())
         kvisNP(10,dataTensorY,dataTensorYT,out,outs,Options.knn_neighbors)
     #--------------------------------------------

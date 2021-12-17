@@ -82,7 +82,7 @@ class DRKNN(nn.Module):
 		print("LOOPMEM0.1: ", psutil.Process().memory_info().rss / (1024 * 1024))
 		gc.collect()
 		# sum = np.zeros(shape=(len(inputTensor)))
-		indx = np.zeros(shape=(inputTensor.shape[0],self.k))
+		indx = np.zeros(shape=(inputTensor.shape[0],self.k),dtype=np.int64)
 		for i in range((inputTensor.shape[0])):
 			si = torch.sum(((dataTensorX - tensorList[i])**2),dim=(1,2))
 			tpk = torch.topk(si,k=int(self.k),largest=False)[1]
