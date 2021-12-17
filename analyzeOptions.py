@@ -85,9 +85,9 @@ class blenderOptions:
     maxVert = 100000
 #------------------------------------------------------------------_|
 def initializeOptions():
-    Options.num_cores = 48 if (Options.cpus>16) else Options.cpus
+    Options.num_cores = 12 if (Options.cpus>16) else Options.cpus
     Options.MaxEventLimit = False
-    if Options.num_cores == 48: 
+    if Options.num_cores == 12: 
         Options.TACC = True
         print("[STATUS] RUNNING ON TACC!")
 def regenerateGlobalPickle(tfv):
