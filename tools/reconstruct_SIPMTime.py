@@ -106,7 +106,7 @@ def ACTZTimeProcess():
 	#results = Parallel(n_jobs=Options.num_cores)(delayed(process_ACTZT)(c) for c in range(Options.nEvents)
 	#inpt = list(zip(range(Options.nEvents), repeat(Options.photoLen)))
 	#print(inpt)
-	with multiprocessing.Pool(Options.num_cores-1) as pool:
+	with multiprocessing.Pool(Options.num_cores-1, maxtasksperchild = 100) as pool:
 		results = list(tqdm(pool.imap(process_ACTZT,range(Options.nEvents)),total=Options.nEvents)) #zip(range(Options.nEvents), repeat(Options.photoLen))
 	return np.transpose(results)
 
