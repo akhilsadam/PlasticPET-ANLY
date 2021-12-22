@@ -55,9 +55,12 @@ def photonSiPMData(evt):
 	# 			break
 
 	#textLines = [photonSiPMFile.readline().rstrip('\n').split('|') for evt in range(0,Options.nEvents)]
-	textLine = textLines[evt]
+	if evt < len(textLines):
+		textLine = textLines[evt]
+	else:
+		return []
 	for idv in range(len(textLine)-1):
-		photonData = np.asarray(textLine[idv].split(" "))[0:6].astype(float)
+		photonData = np.asarray(textLine[idv].split(" "))[:6].astype(float)
 		photonList.append(photonData)
 	#photonData = float(textLines[evt][idv].split(" ")[0:5]);
 	#print(photonData)
@@ -270,7 +273,7 @@ if Options.Process_Based_Breakdown:
 			photo = 0
 			compton = 0
 			split = line.split("|")
-			split = split[0:(len(split)-1)]
+			split = split[:(len(split)-1)]
 			if(len(np.unique(split))!=len(split)):
 				print("ERROR")
 			for word in split:

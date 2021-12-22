@@ -3,6 +3,7 @@ import multiprocessing
 class Options:
     plotDIR = "../plot/current/"
     datadir = "../data/current/"
+    defaultdatadir = "../data/database_test_2/"
     reflectplotDIR = plotDIR + "reflect/"
     ML_PATH = "tools/ML/"
     photoLen = 5
@@ -19,6 +20,7 @@ class Options:
     MaxEvents = 500 #int(input("Number of Events:"))
     #--------------------------
     COMPLETEDETECTOR = True
+    QE = False # quantum efficiency
     # ------------------------------------------ RECONSTRUCTION SETUP ---->/=<--- ---------- ------- ------>------/  - - - - - |----------------------_|
     # - \---------------------------------
     Process_Based_Breakdown = True
@@ -39,6 +41,7 @@ class Options:
     except: KVIS = "PICKLE"
     
     knn_neighbors = 4 #set value
+    energy_window = 307 if QE else 752 #min energy_window...
 
     #--------------- --------- --------- -------- TESTS ------------->^/v<--- ---------- ------- ------>------/  - - - - - |
     # Reflection Tests \---------------------------------
@@ -57,7 +60,8 @@ class Options:
     STRIPHIST = False
     #subdefines - needs striphist, Process_Based_Breakdown True and SiPM_Based_Reconstruction False\
     # note process breakdown does not work for complete scanner!
-    STRIP_OPT = ["process_breakdown","electron_processes"] #options "process_breakdown" "photocompton_breakdown" "electron_processes" "subfigures" "DOI" (#2 requires #1) (#3 - default is gamma_processes) (#4 ~requires #3)
+    STRIP_OPT = ["process_breakdown","electron_processes","singles"] #options "process_breakdown" "photocompton_breakdown" "electron_processes" "subfigures" "DOI" "singles" 
+    # ^ (#2 requires #1) (#3 - default is gamma_processes) (#4 ~requires #3)
     Creation = False
     Detection = True
     PD = False
@@ -72,7 +76,9 @@ class Options:
     #------------------------------------------------------------------_|
     # PICKLENAMES:
     ml_database_pkl = datadir+'ML_DATABASE_PICKLE_P'+str(photoLen)+'.pkl'
+    ml_default_database_pkl = defaultdatadir +'ML_DATABASE_PICKLE_P'+str(photoLen)+'.pkl'
     ml_run_pkl = datadir+'ML_RUN_PICKLE_P'+str(photoLen)+'.pkl'
+    ml_complete_run_pkl = datadir+'ML_COMPLETE_RUN_PICKLE_P'+str(photoLen)+'.pkl'
     knn_pkl = datadir+'ML_OUT_PICKLE_P'+str(photoLen)+'.pkl'
     renderaddinfo_pkl = datadir+'RENDER_ADDINFO.pkl'
     render_pkl = datadir+'RENDER.pkl'

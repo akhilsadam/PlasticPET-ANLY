@@ -3,6 +3,8 @@ from utils.simpleimport import *
 from tools.energyResolution.plotHistograms import *
 from tools.energyResolution.doiHistograms import *
 
+histogramOptions.reset()
+
 # if Options.COMPLETEDETECTOR and "process_breakdown"  in Options.STRIP_OPT:
 # 	raise("EXCEPTION: Electron Process Breakdown does not work with Complete Detector ... Neither does Gamma Breakdown (but that should never be used).")
 
@@ -22,10 +24,21 @@ if (Options.ArrayNumber == 0):
 			_,_,acvt,_ = pickle.load(f)
 		arL[3,array]=acvt[:,2]
 		# print("Summing UP --")
-l0 = np.sum(arL[0,:],axis=0)
-r0 = np.sum(arL[2,:],axis=0)
-count0 = np.sum( l0 + r0 ,axis=(1,2))
-uninteractedEvents = sum( count0 <= 0 )
+if "singles" in Options.STRIP_OPT:
+	l0 = np.concatenate(arL[0,:],axis=0)
+	r0 = np.concatenate(arL[2,:],axis=0)
+	count0 = np.sum(np.sum(arL[0,:],axis=0)+np.sum(arL[2,:],axis=0),axis=(1,2))
+	print(count0.shape)
+	histogramOptions.plot_opt += "_singles"
+	uninteractedEvents = np.sum( count0 <= 0 )
+	singles=True
+else:
+	l0 = np.sum(arL[0,:],axis=0)
+	r0 = np.sum(arL[2,:],axis=0)
+	count0 = np.sum( l0 + r0 ,axis=(1,2))
+	histogramOptions.plot_opt += "_sum"
+	uninteractedEvents = sum( count0 <= 0 )
+	singles=False
 if "DOI" in Options.STRIP_OPT:
 	leftc = np.concatenate(arL[0,:],axis=0)
 	stripc = np.concatenate(arL[1,:],axis=0)
@@ -47,7 +60,7 @@ if "process_breakdown"  in Options.STRIP_OPT:
 	names = ["Compton","Other","Photo & Compton","Photoelectric Only"]
 	plotname = ["Compton","Other","PhotoCompton","Photo"]
 	legend = tuplejoin(names,[" : "],colors)
-
+	doibreak = False
 	alpha = 0.6
 	if "electron_processes" in Options.STRIP_OPT:
 		histogramOptions.byElectronProcess = True
@@ -73,10 +86,20 @@ if "process_breakdown"  in Options.STRIP_OPT:
 	if "subfigures" in Options.STRIP_OPT:
 		histogramOptions.subfigs = True
 		linecolors = ["navy","lime","cadetblue","darkred"]
+	# assert lengths
+	tplen = len(typeProcess)
+	if len(leftc)%tplen !=0:
+		print("[ERROR] --- DATA POSSIBLY CORRUPTED // DO NOT USE UNLESS ONLY SINGLE RUN DATA")
+		print("[userACTION] PLEASE EDIT DATA AND RERUN PICKLING.")
+		print("[Assertion Failure]: typeProcess length =",tplen,"does not divide",len(leftc),"= left data length")
+		exit()
 elif "DOI" in Options.STRIP_OPT:
+		histogramOptions.processBreak = False
 		doibreak = True
 		colormap = ["grey","darkred","red","crimson","green","blue","navy","indigo","black","black"]
 		legend2 = join(colormap,[":"])
+if singles:
+	typeProcess = np.tile(typeProcess, nArray)
 
 #def pltDet(i):
 #def pltPD(i):
@@ -173,7 +196,7 @@ if Options.Detection:
 				ax2.text(0.0,.90,"Compton electrons are dashed, while photoelectrons are solid.",verticalalignment='top',horizontalalignment='left',transform=ax2.transAxes,fontsize=10)
 				fig2.savefig(Options.plotDIR+"Detected Photon Distributions_"+plotname[c]+"_breakdown.png")
 				#ax2.close()
-		ax[1].hist(counts,bins = int(mx/histogramOptions.binwidth_1),range = [0,mx], color = "black",alpha = 1)
+		ax[1].hist(counts,bins = int(mx/histogramOptions.binwidth_1),range = [histogramOptions.binwidth_1,mx], color = "black",alpha = 1)
 	elif doibreak:
 		counts = countdoi
 		pltDOI(counts,gammaZ,axs,colormap,legend2,0.05,.99)
@@ -247,7 +270,10 @@ if Options.Detection:
 		PHOTOPEAK_COUNT = np.nan
 		PHOTOPEAK_PROPORTION = np.nan
 		axs.text(.95,.80,"Energy Resolution Fit FAILED",verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
-	fig.savefig(Options.plotDIR+"Detected Photon Distributions_Total"+histogramOptions.plot_opt+".png", bbox_inches="tight")
+	if doibreak:
+		fig.savefig(Options.plotDIR+"Detected Photon Distributions_Total"+histogramOptions.plot_opt+"_DOI.png", bbox_inches="tight")
+	else:
+		fig.savefig(Options.plotDIR+"Detected Photon Distributions_Total"+histogramOptions.plot_opt+".png", bbox_inches="tight")
 	#plt.show()
 	plt.close()
 	if (histogramOptions.processBreak and histogramOptions.photocomptonbreak):

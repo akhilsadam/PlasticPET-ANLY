@@ -47,7 +47,7 @@ def ACTTimeReconstruct():
 def process_ACTZT(c):
 	photonDatas = photonSiPMData(c)
 	# print(photonDatas)
-	if (len(photonDatas)==0):
+	if (len(photonDatas)<Options.energy_window):
 		r_Z,r_T,readTime = np.nan,np.nan,np.nan
 	else:
 		# array filtering
@@ -90,7 +90,7 @@ def process_ACTZT(c):
 			readTime = slowestTime-fastestTime
 			#print(minlen)
 			#print(len(np.transpose(photonDataL)),len(np.transpose(photonDataR)))
-			delTime = Ltimes[0:minlen]-Rtimes[0:minlen]
+			delTime = Ltimes[:minlen] - Rtimes[:minlen]
 			#print(delTime)
 			r_Z = np.average(0.5*(LZ - 1000*(c_const/n_EJ208)*(delTime*nanosec)))
 			dist = r_Z if (r_Z <= UZ) else LZ-r_Z

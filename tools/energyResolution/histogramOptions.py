@@ -1,3 +1,6 @@
+from analyzeOptions import Options
+
+
 class histogramOptions:
     processBreak = False
     photocomptonbreak = False
@@ -5,7 +8,7 @@ class histogramOptions:
     subfigs = False
     plot_opt = ""
 
-    QE = True
+    QE = Options.QE
 
     detMax = 500 if QE else 1000
     detSumMax = 1500 if QE else 1500
@@ -13,3 +16,5 @@ class histogramOptions:
     binwidth_0 = 20
     binwidth_1 = 20
     binwidth_2 = 20
+    def reset():
+        histogramOptions.plot_opt = ""

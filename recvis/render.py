@@ -8,7 +8,7 @@ from tools.dimensions import *
 from tools.geo import *
 import pickle
 import os
-def render():
+def render(OOCDataset=False):
     p = np.loadtxt(Options.datadir+"pointdata.txt")
     try:
         with open(Options.renderaddinfo_pkl, 'rb') as f:  # Python 3: open(..., 'rb')
@@ -71,7 +71,11 @@ def render():
     cbar.draw_all()
     plt.figtext(0.45,0.96,'Total Single Events: '+str(Options.nRTotalEvents),fontsize = Options.fontsize)
     plt.figtext(0.45,0.94,'Total Coincidence Events: '+str(Options.nREvents),fontsize = Options.fontsize)
-    plt.suptitle("Complete Reconstruction [mm] via KNN")
-    fig.savefig(os.getcwd()+"/"+Options.plotDIR+"renderI.png")
+    if OOCDataset:
+        plt.suptitle("Complete Reconstruction [mm] via KNN with Dataset")
+        fig.savefig(os.getcwd()+"/"+Options.plotDIR+"renderI_OOC.png")
+    else:
+        plt.suptitle("Complete Reconstruction [mm] via KNN")
+        fig.savefig(os.getcwd()+"/"+Options.plotDIR+"renderI.png")
     plt.show()
     return xyz

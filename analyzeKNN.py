@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from tools.dimensions import *
 from tools.geo import *
 from tools.reconstruct import *
-from tools.ML import *
+from tools.ML.ML import *
 import random
 import gc
 ngpu = 1
@@ -33,23 +33,18 @@ except: ML_Construct = True
 # Turns on all of the following if this is a first run / or we have additonal data.
 try: newData
 except: newData = True
-try: recreateDatabase
-except: recreateDatabase = True
+ML_rePickle = newData # do we need to make ML pickles (singles)?
+recreateDatabase = newData # make the database again
+try: defaultDatabase
+except: defaultDatabase = False # use data from another run as training data
 unsafe_vis = False # this
 #--------------------------------------------- 
 # rePickle single arrays
-if not Options.TACC:
-    rePickle = True
-    if(rePickle):
-        regenerateGlobalPickle(newData)
-        regenerateMLPickle(newData) #turn this off if doing single array analysis
-        regenerateLocalPickle(newData)
-else: 
-    rePickle = newData
-    regenerateGlobalPickle(newData)
-    regenerateMLPickle(newData)
-    regenerateLocalPickle(newData)
+regenerateGlobalPickle(newData)
+regenerateMLPickle(ML_rePickle) #turn this off if doing single array analysis
+regenerateLocalPickle(newData)
 
+rePickle = (newData or ML_rePickle)
 # createDatabase
 # if not Options.TACC:
 #     recreateDatabase = False
@@ -70,6 +65,7 @@ remake_listmode = True
 #------------------------------------------------
 # Filepaths
 # Options.ml_database_pkl = Options.datadir+'ML_DATABASE_PICKLE_P'+str(Options.photoLen)+'.pkl'
+# Options.ml_default_database_pkl = Options.defaultdatadir +'ML_DATABASE_PICKLE_P'+str(Options.photoLen)+'.pkl'
 # Options.ml_run_pkl = Options.datadir+'ML_RUN_PICKLE_P'+str(Options.photoLen)+'.pkl'
 # Options.knn_pkl = Options.datadir+'ML_OUT_PICKLE_P'+str(Options.photoLen)+'.pkl'
 #---------------------------------------------|
@@ -101,8 +97,10 @@ if not ML_Construct:
     dataOpen = False
     Options.Process_Based_Breakdown = True
     Options.STRIPHIST = True
-    # Options.STRIP_OPT = ["process_breakdown","electron_processes"]
-    # with open('analyzeSingleArray.py') as f: exec(f.read())
+    Options.STRIP_OPT = ["process_breakdown","electron_processes","singles"]
+    with open('analyzeSingleArray.py') as f: exec(f.read())
+    Options.STRIP_OPT = ["process_breakdown","electron_processes"]
+    with open('analyzeSingleArray.py') as f: exec(f.read())
     Options.Process_Based_Breakdown = False
     Options.MaxEventLimit = True
     Options.MaxEvents = 10000
@@ -114,10 +112,16 @@ else:
         try: 
             if recreateDatabase:
                 raise FileNotFoundError('[NotAnERROR] Regenerating KNN Database')
-            with open(Options.ml_database_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
-                dataTensorX,dataTensorY = pickle.load(f)
-            with open(Options.ml_run_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
-                dataTensorXT,dataTensorYT,arrayIndexTensorT,eventIndexTensorT = pickle.load(f)
+            if defaultDatabase:
+                with open(Options.ml_default_database_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
+                    dataTensorX,dataTensorY = pickle.load(f)
+                with open(Options.ml_complete_run_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
+                    dataTensorXT,dataTensorYT,arrayIndexTensorT,eventIndexTensorT = pickle.load(f)
+            else:
+                with open(Options.ml_database_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
+                    dataTensorX,dataTensorY = pickle.load(f)
+                with open(Options.ml_run_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
+                    dataTensorXT,dataTensorYT,arrayIndexTensorT,eventIndexTensorT = pickle.load(f)
         except FileNotFoundError as VALERIN:
             print(VALERIN)
             print("[REGENERATION] KNN Database Pickling...")
@@ -148,38 +152,49 @@ else:
                 pcaMAHA = False
                 with open(Options.ML_PATH+'ML_PCA.py') as f: exec(f.read())
             #--------------------------------------------\
-            # Get Random 75% split... NEED TO SORT BY EVENT NOT OTHERWISE!!!
+            if not defaultDatabase:
+                # Get Random 75% split... NEED TO SORT BY EVENT NOT OTHERWISE!!!
 
-            length = len(np.unique(EventIDTensor.numpy()))
-            print(length)
-            splitList = [int(length*ML_SPLIT_FRACTION),length - int(length*ML_SPLIT_FRACTION)]
-            listset = list(range(length))
-            random.shuffle(listset)
-            dataIndE,testIndE = torch.split(torch.tensor(listset),splitList)
-            dataInd = np.isin(EventIDTensor.numpy(),EventIDTensor.numpy()[dataIndE])
-            testInd = np.isin(EventIDTensor.numpy(),EventIDTensor.numpy()[testIndE])
-            print(inputTensor.shape)
-            print(dataInd)
+                length = len(np.unique(EventIDTensor.numpy()))
+                print(length)
+                splitList = [int(length*ML_SPLIT_FRACTION),length - int(length*ML_SPLIT_FRACTION)]
+                listset = list(range(length))
+                random.shuffle(listset)
+                dataIndE,testIndE = torch.split(torch.tensor(listset),splitList)
+                dataInd = np.isin(EventIDTensor.numpy(),EventIDTensor.numpy()[dataIndE])
+                testInd = np.isin(EventIDTensor.numpy(),EventIDTensor.numpy()[testIndE])
+                print(inputTensor.shape)
+                print(dataInd)
 
-            # length = len(ArrayIDTensor)
-            # splitList = [int(length*ML_SPLIT_FRACTION),length - int(length*ML_SPLIT_FRACTION)]
-            # listset = list(range(length))
-            # random.shuffle(listset)
-            # dataInd,testInd = torch.split(torch.tensor(listset),splitList)
+                # length = len(ArrayIDTensor)
+                # splitList = [int(length*ML_SPLIT_FRACTION),length - int(length*ML_SPLIT_FRACTION)]
+                # listset = list(range(length))
+                # random.shuffle(listset)
+                # dataInd,testInd = torch.split(torch.tensor(listset),splitList)
 
-            #---------------------------------------------
-            dataTensorX = inputTensor[dataInd]
-            dataTensorXT = inputTensor[testInd]
-            dataTensorY = expectTensor[dataInd]
-            dataTensorYT = expectTensor[testInd]
-            arrayIndexTensorT = ArrayIDTensor[testInd]
-            eventIndexTensorT = EventIDTensor[testInd]
-            #---------------------------------------------
-            # Pickle Again...
-            with open(Options.ml_database_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
-                pickle.dump([dataTensorX,dataTensorY], f)
-            with open(Options.ml_run_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
-                pickle.dump([dataTensorXT,dataTensorYT,arrayIndexTensorT,eventIndexTensorT], f)
+                #---------------------------------------------
+                dataTensorX = inputTensor[dataInd]
+                dataTensorXT = inputTensor[testInd]
+                dataTensorY = expectTensor[dataInd]
+                dataTensorYT = expectTensor[testInd]
+                arrayIndexTensorT = ArrayIDTensor[testInd]
+                eventIndexTensorT = EventIDTensor[testInd]
+                #---------------------------------------------
+                # Pickle Again...
+                with open(Options.ml_database_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
+                    pickle.dump([dataTensorX,dataTensorY], f)
+                with open(Options.ml_run_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
+                    pickle.dump([dataTensorXT,dataTensorYT,arrayIndexTensorT,eventIndexTensorT], f)
+            else:
+                with open(Options.ml_default_database_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
+                    dataTensorX,dataTensorY = pickle.load(f)
+                dataTensorXT = inputTensor
+                dataTensorYT = expectTensor
+                arrayIndexTensorT = ArrayIDTensor
+                eventIndexTensorT = EventIDTensor
+                #---------------------------------------------
+                with open(Options.ml_complete_run_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
+                    pickle.dump([dataTensorXT,dataTensorYT,arrayIndexTensorT,eventIndexTensorT], f)
     #------------------------------------------------------------------------------|
     # KNN
     #------------------------------------------------------------------------------/
@@ -268,11 +283,17 @@ else:
             lor[0:4,i] = event[0,0:4]
             lor[4:8,i] = event[1,0:4]
             ax.plot3D(A[0,:],A[1,:],A[2,:])
-        plt.savefig(Options.plotDIR+"renderLOR.jpg",dpi=600)
+            ax.set_xlabel("X")
+            ax.set_ylabel("Y")
+            ax.set_zlabel("Z")
+        if defaultDatabase:
+            plt.savefig(Options.plotDIR+"renderLOR_OOC.jpg",dpi=600)
+        else:
+            plt.savefig(Options.plotDIR+"renderLOR.jpg",dpi=600)
         np.savetxt(Options.datadir+"pointdata.txt",lor)
         with open(Options.renderaddinfo_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
             pickle.dump([Options.nRTotalEvents,Options.nREvents,Options.nREventLimit], f)
     #_-----------------------------------
     # plot reconstructed 3d image
     from recvis.render import render
-    render()
+    render(defaultDatabase)

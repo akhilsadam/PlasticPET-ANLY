@@ -45,13 +45,11 @@ def coercion(L1,L2):
 
 # join filepath lists
 def join(L1,L2): 
-    L1,L2,llen = coercion(L1,L2)
-    L3 = [(L1[i]+L2[i]) for i in range(llen)]
-    return L3
+	L1,L2,llen = coercion(L1,L2)
+	return [(L1[i]+L2[i]) for i in range(llen)]
 
 def tuplejoin(L1,L2,L3): 
-    L1,L2,llen = coercion(L1,L2)
-    L2,L3,llen = coercion(L2,L3)
-    
-    L4 = [L1[i]+L2[i]+L3[i] for i in range(llen)]
-    return L4
+	L1,L2,llen = coercion(L1,L2)
+	L2,L3,llen = coercion(L2,L3)
+
+	return [L1[i]+L2[i]+L3[i] for i in range(llen)]
