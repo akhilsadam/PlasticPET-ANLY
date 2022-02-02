@@ -126,6 +126,10 @@ evtDir = beamData[0:Options.nEvents,1,:]
 #print(evtDir)
 #//---------\\ BeamInteract // interaction positions by compton/photoelectric effect
 def beamInteraction():
+
+	def lc(splits):
+		return [float(var) if (len(var)>0) else np.nan for var in splits]
+
 	with open(Options.datadir+"beamInteract.txt") as beamInteract:
 		evtPhotoInteractG = []
 		evtComptonInteractG = []
@@ -136,25 +140,26 @@ def beamInteraction():
 				line = beamInteract.readline()
 				splits = line.rstrip(' \n').split(' ')
 				#print(splits)
-				pos.append([float(var) for var in splits if (len(var)>0)])
+				pos.append(lc(splits))
 			pI = np.transpose(pos)
 			evtPhotoInteractG.append(pI)
 			pos = []
 			for _ in range(3):
 				line = beamInteract.readline()
 				splits = line.rstrip(' \n').split(' ')
-				pos.append([float(var) for var in splits if (len(var)>0)])
+				pos.append(lc(splits))
 			cI = np.transpose(pos)
 			evtComptonInteractG.append(cI)
 			pos = []# x,y,z,PhotonCount,t,gammaID
 			for _ in range(6):
 				line = beamInteract.readline()
 				splits = line.rstrip(' \n').split(' ')
-				pos.append([float(var) for var in splits if (len(var)>0)])
+				pos.append(lc(splits))
 			tI = np.transpose(pos)
 			evtInteractG.append(tI)
 			pos = []
 			line = beamInteract.readline()
+			# print("TI",tI)
 			# photonmask = tI[:,3]>0
 			# comptonmap = np.where(np.isin(tI[:,0],cI[:,0]))
 			# photomap = np.where(np.isin(tI[:,0],pI[:,0]))
@@ -171,16 +176,43 @@ def localizeBeam(evtPhotoInteractG, evtComptonInteractG,evtInteractG):
 	evtComptonInteract = []
 	evtInteract = []
 
+	def assertlen(a):
+		return len(a)==3
+
 	for i in range(Options.nEvents):
 		p0 = evtPhotoInteractG[i]
 		c0 = evtComptonInteractG[i]
 		t0 = evtInteractG[i]
+		
+		# print(t0)
+		
+		az = []
+		for j in range(len(p0)):
+			q = p0[j]
+			print(q)
+			if assertlen(q):
+				q = np.transpose(GlobalToArrayM(q,Options.ArrayNumber)).tolist()
+				az.append(q)
+		
+		bz = []
+		for j in range(len(c0)):
+			q2 = c0[j]
+			if assertlen(q2):
+				q2 = np.transpose(GlobalToArrayM(q2,Options.ArrayNumber)).tolist()
+				bz.append(q2)
+				
+		cz = []
+		for j in range(len(t0)):
+			q3 = t0[j]
+			if assertlen(q3):
+				q3 = np.transpose(GlobalToArrayM(q3,Options.ArrayNumber)).tolist()
+				cz.append(q3)
 
-		pI = np.array([np.transpose(GlobalToArray(p0[j],Options.ArrayNumber)).tolist() for j in range(len(p0))])
+		pI = np.array(az)
 		evtPhotoInteract.append(pI)
-		cI = np.array([np.transpose(GlobalToArray(c0[j],Options.ArrayNumber)).tolist() for j in range(len(c0))])
+		cI = np.array(bz)
 		evtComptonInteract.append(cI)
-		tI = np.array([np.transpose(GlobalToArrayM(t0[j],Options.ArrayNumber)).tolist() for j in range(len(t0))])
+		tI = np.array(cz)
 		evtInteract.append(tI)
 		# print(tI)
 

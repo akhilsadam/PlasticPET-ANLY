@@ -2,7 +2,7 @@ from tools.energyResolution.histogramOptions import *
 from utils.simpleimport import *
 from tools.energyResolution.plotHistograms import *
 from tools.energyResolution.doiHistograms import *
-
+from tools.Fit import Fit
 histogramOptions.reset()
 
 # if Options.COMPLETEDETECTOR and "process_breakdown"  in Options.STRIP_OPT:
@@ -105,7 +105,10 @@ if singles:
 #def pltPD(i):
 
 if Options.Detection:
-	mx=histogramOptions.detMax
+	if singles:
+		mx=histogramOptions.detMax/2
+	else:
+		mx=histogramOptions.detMax
 	#--- produced
 	fig,axs = plt.subplots(ny,nx,figsize=(10,10),sharex=True,sharey=True)
 	fig.suptitle("Detected Photon Distributions"+histogramOptions.plot_opt)
@@ -137,7 +140,10 @@ if Options.Detection:
 	plt.savefig(Options.plotDIR+"Detected Photon Distributions"+histogramOptions.plot_opt+".png", bbox_inches="tight")
 	#plt.show()
 	plt.close()
-	mx=histogramOptions.detSumMax
+	if singles:
+		mx=histogramOptions.detSumMax/2
+	else:
+		mx=histogramOptions.detSumMax
 	#--- Detected Sums
 	if(histogramOptions.processBreak):
 		fig,ax = plt.subplots(2,1,figsize=(5,10))
@@ -204,38 +210,51 @@ if Options.Detection:
 		counts = count0
 		axs.hist(counts,bins = int(mx/histogramOptions.binwidth_1),range = [0,mx], color = "black",alpha = 1)
 	# Energy Resolution Fitting
-	print(count0)
-	print(histogramOptions.binwidth_1)
-	counts = count0[count0>histogramOptions.binwidth_1] # used to be non-zero, now we are cutting out the first bin
+	# print(counts[counts>0])
+	# print(histogramOptions.binwidth_1)
+	counts = counts[counts>Options.energy_window] # cutting out everything below photopeak
+	print(counts)
 	mx2 = np.max(counts)
 	hist, bin_edges = np.histogram(counts,bins=int(mx2/histogramOptions.binwidth_1))
 	bin_centres = (bin_edges[:-1] + bin_edges[1:])/2
 
-	xs = bin_centres[np.where(hist == np.max(hist))]
-	print(xs)
-	p0 = [np.max(hist),int(xs[0]),5]
+	# xs = bin_centres[np.where(hist == np.max(hist))]
+	# print(xs)
+	# p0 = [np.max(hist),int(xs[0]),5]
 	fitted = False
 	try:
-		coeff, var_matrix = curve_fit(gauss, bin_centres, hist, p0=p0)
+		# coeff, var_matrix = curve_fit(gauss, bin_centres, hist, p0=p0)
+		x,val,fit,p = Fit.energyResolution(counts)
+		# fits, bkg_fit =Fit.lazyGaussianFit(bin_centres,hist)
+		# fit = fits[np.argmin(fits[:,0] - mx2)]
+		# if fit != None:
 		fitted = True
+		# else:
+		# 	print("FIT FAILED")
 	except:
 		print("FIT FAILED")
 	# Get the fitted curve
 	if fitted:
-		hist_fit = gauss(bin_centres, *coeff)
-		print(max(hist_fit))
-		fwhm = coeff[2]*FWHM
-		Mean = coeff[1]
-		amplitude = coeff[0]
-		minlim = Mean-2*coeff[2]
-		maxlim = Mean+2*coeff[2]
+		# hist_fit = gauss(bin_centres, *coeff)
+		# print(max(hist_fit))
+		# fwhm = coeff[2]*FWHM
+		# Mean = coeff[1]
+		# amplitude = coeff[0]
+		# minlim = Mean-2*coeff[2]
+		# maxlim = Mean+2*coeff[2]
+		fwhm = fit[2]*FWHM
+		Mean = fit[1]
+		amplitude = fit[0]
+		minlim = Mean-2*fit[2]
+		maxlim = Mean+2*fit[2]
 		countsPhotopeak = np.count_nonzero(counts > minlim) 
 		totalcounts = len(counts)
 
 	if (histogramOptions.processBreak):
 		axs = ax[0]
 		if fitted:
-			ax[1].plot(bin_centres, hist_fit, label='Fit', color = "red")
+			ax[1].plot(x,Fit.gaussian(x,fit[0],fit[1],fit[2]))
+			# ax[1].plot(bin_centres, hist_fit, label='Fit', color = "red")
 		ax[1].set_xlabel("Left+Right Photons in an interacted Event")
 		ax[1].set_ylabel("Interacted Events")
 		ax[1].set_title("Total")
@@ -262,7 +281,8 @@ if Options.Detection:
 		    fontsize=10,
 		)
 		axs.text(.95,.75,"Mean = %4.4f" %(Mean),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
-		axs.text(.95,.70,"Energy Resolution = %4.4f" %(ENERGYRESOLUTION),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
+		if singles:
+			axs.text(.95,.70,"Energy Resolution = %4.4f" %(ENERGYRESOLUTION),verticalalignment='top',horizontalalignment='right',transform=axs.transAxes,fontsize=10)
 	else:
 		ENERGYRESOLUTION = np.nan
 		PHOTOPEAK_SHARPNESS = np.nan

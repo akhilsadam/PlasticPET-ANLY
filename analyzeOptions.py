@@ -3,7 +3,8 @@ import multiprocessing
 class Options:
     plotDIR = "../plot/current/"
     datadir = "../data/current/"
-    defaultdatadir = "../data/database_test_2/"
+    defaultdatadir = "../data/database_rand_0/"
+    electronpath = "electronProcess.txt"
     reflectplotDIR = plotDIR + "reflect/"
     ML_PATH = "tools/ML/"
     photoLen = 5
@@ -20,7 +21,8 @@ class Options:
     MaxEvents = 500 #int(input("Number of Events:"))
     #--------------------------
     COMPLETEDETECTOR = True
-    QE = False # quantum efficiency
+    QE = True # quantum efficiency
+    LYSO = True
     # ------------------------------------------ RECONSTRUCTION SETUP ---->/=<--- ---------- ------- ------>------/  - - - - - |----------------------_|
     # - \---------------------------------
     Process_Based_Breakdown = True
@@ -74,15 +76,6 @@ class Options:
     #---------------
     TIMERES = False
     #------------------------------------------------------------------_|
-    # PICKLENAMES:
-    ml_database_pkl = datadir+'ML_DATABASE_PICKLE_P'+str(photoLen)+'.pkl'
-    ml_default_database_pkl = defaultdatadir +'ML_DATABASE_PICKLE_P'+str(photoLen)+'.pkl'
-    ml_run_pkl = datadir+'ML_RUN_PICKLE_P'+str(photoLen)+'.pkl'
-    ml_complete_run_pkl = datadir+'ML_COMPLETE_RUN_PICKLE_P'+str(photoLen)+'.pkl'
-    knn_pkl = datadir+'ML_OUT_PICKLE_P'+str(photoLen)+'.pkl'
-    renderaddinfo_pkl = datadir+'RENDER_ADDINFO.pkl'
-    render_pkl = datadir+'RENDER.pkl'
-    #------------------------------------------------------------------_|
     # other
     fontsize = 12
 #------------------------------------------------------------------_|
@@ -109,5 +102,17 @@ def regenerateMLPickle(tfv):
         Options.KVIS = "PICKLE"
     else:
         Options.regenerateMLPickles = False
+def regenNames():
+    #------------------------------------------------------------------_|
+    # PICKLENAMES:
+    Options.ml_default_database_pkl = Options.defaultdatadir +'ML_DATABASE_PICKLE_P'+str(Options.photoLen)+'.pkl'
+    Options.ml_database_pkl = Options.datadir+'ML_DATABASE_PICKLE_P'+str(Options.photoLen)+'.pkl'
+    Options.ml_database_test_pkl = Options.datadir+'ML_DATABASE_TEST_PICKLE_P'+str(Options.photoLen)+'.pkl'
+    Options.ml_run_pkl = Options.datadir+'ML_RUN_PICKLE_P'+str(Options.photoLen)+'.pkl'
+    Options.ml_complete_run_pkl = Options.datadir+'ML_COMPLETE_RUN_PICKLE_P'+str(Options.photoLen)+'.pkl'
+    Options.knn_pkl = Options.datadir+'ML_OUT_PICKLE_P'+str(Options.photoLen)+'.pkl'
+    Options.renderaddinfo_pkl = Options.datadir+'RENDER_ADDINFO.pkl'
+    Options.render_pkl = Options.datadir+'RENDER.pkl'
 #------------------------------------------------------------------_|   
+regenNames()
 initializeOptions()

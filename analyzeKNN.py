@@ -4,6 +4,8 @@ import pandas as pd
 import math
 import os
 import io
+
+from torch.utils import data
 os.environ['MPLCONFIGDIR'] = "/home/Desktop/mplib/graph"
 from functools import lru_cache
 from scipy import stats
@@ -51,7 +53,8 @@ rePickle = (newData or ML_rePickle)
 # else:
 #---------------------------------------------
 #KNN
-use_KNN = True # also needed for reconstruction
+try: use_KNN # also needed for reconstruction
+except: use_KNN = True 
 reKNN = True
 PCA = False
 # visualization
@@ -61,7 +64,14 @@ mem_intense_vis = False
 ML_SPLIT_FRACTION = 0.75
 Options.knn_neighbors = 4
 # Reconstruction
-remake_listmode = True
+try: remake_listmode
+except: remake_listmode = True
+# opt
+try: database_test_plot
+except: database_test_plot = False
+if database_test_plot:
+    recreateDatabase = True
+    defaultDatabase = False
 #------------------------------------------------
 # Filepaths
 # Options.ml_database_pkl = Options.datadir+'ML_DATABASE_PICKLE_P'+str(Options.photoLen)+'.pkl'
@@ -179,12 +189,17 @@ else:
                 dataTensorYT = expectTensor[testInd]
                 arrayIndexTensorT = ArrayIDTensor[testInd]
                 eventIndexTensorT = EventIDTensor[testInd]
+                if database_test_plot:
+                    arrayIndexTensorD = ArrayIDTensor[dataInd]
+                    eventIndexTensorD = EventIDTensor[dataInd]
                 #---------------------------------------------
                 # Pickle Again...
                 with open(Options.ml_database_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
                     pickle.dump([dataTensorX,dataTensorY], f)
                 with open(Options.ml_run_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
                     pickle.dump([dataTensorXT,dataTensorYT,arrayIndexTensorT,eventIndexTensorT], f)
+                with open(Options.ml_database_test_pkl, 'wb') as f:
+                    pickle.dump([arrayIndexTensorD,eventIndexTensorD],f)
             else:
                 with open(Options.ml_default_database_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
                     dataTensorX,dataTensorY = pickle.load(f)
@@ -228,11 +243,16 @@ else:
             drnet.setK(Options.knn_neighbors)
             gc.collect()
             out,outs = drnet(dataTensorX,dataTensorY,dataTensorXT)
+            if database_test_plot:
+                out = dataTensorY
+                with open(Options.ml_database_test_pkl, 'rb') as f:
+                    arrayIndexTensorT,eventIndexTensorT = pickle.load(f)
+
             with open(Options.knn_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
                 pickle.dump([out,outs], f)
-
-        ml_detRes_vis(out,dataTensorYT,Options.knn_neighbors)
-        ml_detRes_vis2(out,dataTensorYT,Options.knn_neighbors)
+        if not database_test_plot:
+            ml_detRes_vis(out,dataTensorYT,Options.knn_neighbors)
+            ml_detRes_vis2(out,dataTensorYT,Options.knn_neighbors)
     #--------------------------------------------
     if mem_intense_vis:
         print("memory_intensive_vis")
@@ -244,12 +264,19 @@ else:
         if remake_listmode:
             raise FileNotFoundError('[NotAnERROR] Regenerating LISTMODE output')
         with open(Options.renderaddinfo_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
-            Options.nRTotalEvents,Options.nREvents,Options.nREventLimit = pickle.load(f)
-    except FileNotFoundError as VALERIN:
+            Options.nRTotalEvents,Options.nREvents,Options.nREventLimit,Options.TOTALEVENTS,Options.SOURCE = pickle.load(f)
+    except (FileNotFoundError,ValueError) as VALERIN:
         print(VALERIN)
         print("[REGENERATION] LISTMODE output")
         print("Number of Single Events From KNN: ",len(out))
         print("Approximate Number of Total Single Events: ",4*len(out))
+
+        with open(Options.datadir + Options.electronpath,"r") as f:
+            Options.TOTALEVENTS = len(f.readlines())
+
+        try: Options.SOURCE
+        except: Options.SOURCE = np.array([np.nan,np.nan,np.nan])
+
         for i in range(5):
             print(out[i],arrayIndexTensorT[i],eventIndexTensorT[i])
         outGlobal = ArrayToGlobalMT(out,arrayIndexTensorT)
@@ -292,8 +319,9 @@ else:
             plt.savefig(Options.plotDIR+"renderLOR.jpg",dpi=600)
         np.savetxt(Options.datadir+"pointdata.txt",lor)
         with open(Options.renderaddinfo_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
-            pickle.dump([Options.nRTotalEvents,Options.nREvents,Options.nREventLimit], f)
+            pickle.dump([Options.nRTotalEvents,Options.nREvents,Options.nREventLimit,Options.TOTALEVENTS,Options.SOURCE], f)
     #_-----------------------------------
     # plot reconstructed 3d image
     from recvis.render import render
-    render(defaultDatabase)
+    SPATIALRESOLUTION,SENSITIVITY,SCATTERFRACTION = render(defaultDatabase,database_test_plot)
+    SPATIALRESOLUTION_X,SPATIALRESOLUTION_Y,SPATIALRESOLUTION_Z= SPATIALRESOLUTION

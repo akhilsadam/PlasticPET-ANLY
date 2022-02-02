@@ -2,6 +2,7 @@
 #Geometry Setup
 #------------------------------------------------------------------------------------
 #set up stripPos
+from itsdangerous import exc
 import numpy as np
 from numba import jit
 from tools.dimensions import *
@@ -51,13 +52,14 @@ def GlobalToArray(pos,A):
 	return GlobalToArrayCoordinates(pos[0],pos[1],pos[2],A)
 
 def GlobalToArrayM(pos,A):
-	pos[0:3] = GlobalToArrayCoordinates(pos[0],pos[1],pos[2],A)[0:3]
+	try: pos[0:3] = GlobalToArrayCoordinates(pos[0],pos[1],pos[2],A)[:3]
+	except: print(pos)
 	return pos
 
 def ArrayToGlobalM(*params):
 	pos = list(params)
 	# expect input x,y,z,t,A
-	pos[0:3] = ArrayToGlobalCoordinates(pos[0],pos[1],pos[2],pos[4])[0:3]
+	pos[0:3] = ArrayToGlobalCoordinates(pos[0],pos[1],pos[2],pos[4])[:3]
 	return pos
 
 # @jit(nopython=True, parallel=True)

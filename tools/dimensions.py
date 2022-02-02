@@ -5,7 +5,8 @@ att_len = 4000
 c_const = 299792458.0 #define as double
 n_EJ208 = 1.58
 
-nanosec = 1/1000000000
+nanosec = np.power(10.0,-9)
+tof_const = np.power(10.0,-6)*c_const*0.5
 FWHM = 2*math.sqrt(2*math.log(2))
 #------------------------------------------------------------------------------------
 #Geometry Setup

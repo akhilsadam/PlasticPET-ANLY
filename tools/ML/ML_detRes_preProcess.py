@@ -112,9 +112,14 @@ def MLDRESpreprocess(workers):
 			print(len(tList))
 			eventIDS = [i for i in range(Options.nEvents) if type(inptL[i])==torch.Tensor]
 			#print(tList)
-			trainTensor = torch.stack(tList)
-			inputTensor = trainTensor[:,:,0:2*Options.photoLen]
-			expecTensor = trainTensor[:,:,2*Options.photoLen]
+			if tList:
+				trainTensor = torch.stack(tList)
+				inputTensor = trainTensor[:,:,0:2*Options.photoLen]
+				expecTensor = trainTensor[:,:,2*Options.photoLen]
+			else:
+				trainTensor = None
+				inputTensor = None
+				expecTensor = None
 		with open(ml_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
 			pickle.dump([inputTensor,expecTensor,eventIDS], f)
 	return inputTensor,expecTensor

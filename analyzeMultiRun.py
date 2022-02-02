@@ -15,6 +15,7 @@ import multiprocessing
 import cv2
 import sys
 import matplotlib.pyplot as plt
+from analyzeOptions import *
 #
 #
 # For general run metrics; will create plots based upon the variables used in the filenames!
@@ -23,7 +24,7 @@ import matplotlib.pyplot as plt
 from tools.finite import *
 #-------------------------------------------------------
 #photoLen=5
-filenames=join(["BounceTime1_"],["0","1","2","3"])
+filenames=join(["spatialRes_SS_"],["0","1","2","3","4"])
 #filenames=join(["datacollectionruns/noroughend_"],["12vk_12ej","12vk_2ej","2vk_2ej"])
 GeneralPlots = False
 title="SigmaAlphaStudies"
@@ -50,17 +51,17 @@ if GeneralPlots:
 
     try: df=pd.read_csv(multidatadir+"data.csv")
     except:
+        keyargs = '-D'
         for i in tqdm(range(NRuns)):
-            plotDIR=plotdirs[i]
-            datadir=datadirs[i]
+            Options.plotDIR=plotdirs[i]
+            Options.datadir=datadirs[i]
 
-            infoFile = open(plotDIR+"info.txt")
+            infoFile = open(Options.plotDIR+"info.txt")
             line = pd.Series(infoFile.readline().rstrip('\n').split(' '))
-            keyargs = '-D'
             args = line[line.str.contains('|'.join([keyargs]))].tolist()
             args = [arg.replace(keyargs,"",1) for arg in args]
 
-            row=dict()
+            row = {}
             for arg in args:
                 var,val=arg.split('=')
                 row[var]=float(val)
@@ -75,7 +76,7 @@ if GeneralPlots:
 
             df=df.append(pd.DataFrame(data=row,index=[i]),ignore_index=False)
         df.to_csv(multidatadir+"data.csv",header=True)
-        #print(df)
+            #print(df)
     else:
         xvars = [name for name in df.columns if (name not in yvars) and ("Unnamed" not in name)]
         print(xvars)
@@ -94,8 +95,8 @@ if GeneralPlots:
         plt.close()
 else:
     for i in tqdm(range(NRuns)):
-        plotDIR=plotdirs[i]
-        try: os.makedirs(plotDIR)
+        Options.plotDIR=plotdirs[i]
+        try: os.makedirs(Options.plotDIR)
         except: pass
-        datadir=datadirs[i]
+        Options.datadir=datadirs[i]
         with open('analyzeSingleArray.py') as f: exec(f.read()) # helper file

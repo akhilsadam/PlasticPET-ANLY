@@ -131,11 +131,11 @@ def gammaInteractPosition(evtInteract):
 					#actEvt[i] = np.average(np.transpose(evtInteract[evt])[i])
 					totPhot = np.sum(np.transpose(ICVT)[3])
 					if (totPhot>photonCut):
-						act = np.dot(np.transpose(ICVT)[i],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])
+						act = np.transpose(ICVT)[i][0] # np.dot(np.transpose(ICVT)[i],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])   ##### changed this temporarily
 						actEvtG[gam,i] = act if withinLimitXYZ(act,i) else np.nan
 					else:
 						actEvtG[gam,i] = np.nan
-				time_I_G[gam] = np.dot(np.transpose(ICVT)[4],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])
+				time_I_G[gam] = np.transpose(ICVT)[4][0] if len(ICVT)>0 else np.nan # np.dot(np.transpose(ICVT)[4],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])  ##### changed this temporarily
 			try:
 				indv = np.nanargmin(np.sum(np.power(actEvtG[:,0:2],2),axis=1))
 			except:
