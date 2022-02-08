@@ -178,6 +178,8 @@ def localizeBeam(evtPhotoInteractG, evtComptonInteractG,evtInteractG):
 
 	def assertlen(a):
 		return len(a)==3
+	def assertlen2(a):
+		return len(a)==6
 
 	for i in range(Options.nEvents):
 		p0 = evtPhotoInteractG[i]
@@ -189,7 +191,7 @@ def localizeBeam(evtPhotoInteractG, evtComptonInteractG,evtInteractG):
 		az = []
 		for j in range(len(p0)):
 			q = p0[j]
-			print(q)
+			# print(q)
 			if assertlen(q):
 				q = np.transpose(GlobalToArrayM(q,Options.ArrayNumber)).tolist()
 				az.append(q)
@@ -204,7 +206,7 @@ def localizeBeam(evtPhotoInteractG, evtComptonInteractG,evtInteractG):
 		cz = []
 		for j in range(len(t0)):
 			q3 = t0[j]
-			if assertlen(q3):
+			if assertlen2(q3):
 				q3 = np.transpose(GlobalToArrayM(q3,Options.ArrayNumber)).tolist()
 				cz.append(q3)
 
