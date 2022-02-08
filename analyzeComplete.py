@@ -1,9 +1,12 @@
 import sys
 
-raw_only=("raw_only" in sys.argv)
+raw_only=("raw_only" in sys.argv) # show only the raw data; primitive histograms and plots, no reconstructed objects
+render_only=("render_only" in sys.argv) # show only the rendered/reconstructed objects, no primitive histograms and plots
 
-try: render_only
-except: render_only = False
+database_test_plot=("database_truth" in sys.argv) # make a render with only truth values from KNN (do not actually call the KNN)
+
+# set max event limits in analyzeKNN.py
+# CURRENTLY SET!
 
 if render_only:
     remake_listmode = False # swap to get complete data!

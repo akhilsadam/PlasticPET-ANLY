@@ -85,7 +85,8 @@ with open(Options.ML_PATH+'ML_detRes.py') as f: exec(f.read())
 model_path = str(Options.ML_PATH)+"Data/ML_DET_RES_KNN_"+str(Options.photoLen)+"_Photo.pt"
 # with open('analyzeOptions.py') as f: exec(f.read())
 Options.COMPLETEDETECTOR = True
-Options.MaxEventLimit = False
+Options.MaxEventLimit = True
+Options.MaxEvents = 200
 Options.ReflectionTest = False
 Options.SiPM_Based_Reconstruction = False
 Options.Process_Based_Breakdown = False

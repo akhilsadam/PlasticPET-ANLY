@@ -17,12 +17,12 @@ class Options:
     MaxEventLimit = False
     TACC = False
     #------------------------------------------------------------------------------------ Event / Main SETUP ------------->^/<--- ---------- ------- ------>------/  - - - - - |
-    MaxEventLimit = False #manual override
-    MaxEvents = 500 #int(input("Number of Events:"))
+    MaxEventLimit = True #manual override
+    MaxEvents = 5000 #int(input("Number of Events:"))
     #--------------------------
     COMPLETEDETECTOR = True
     QE = True # quantum efficiency
-    LYSO = True
+    LYSO = False
     # ------------------------------------------ RECONSTRUCTION SETUP ---->/=<--- ---------- ------- ------>------/  - - - - - |----------------------_|
     # - \---------------------------------
     Process_Based_Breakdown = True

@@ -117,6 +117,7 @@ def MLDRESpreprocess(workers):
 				inputTensor = trainTensor[:,:,0:2*Options.photoLen]
 				expecTensor = trainTensor[:,:,2*Options.photoLen]
 			else:
+				print("[ERROR][SEVERE] No Reconstructable Events -- TensorList is empty...")
 				trainTensor = None
 				inputTensor = None
 				expecTensor = None
