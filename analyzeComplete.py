@@ -4,6 +4,7 @@ raw_only=("raw_only" in sys.argv) # show only the raw data; primitive histograms
 render_only=("render_only" in sys.argv) # show only the rendered/reconstructed objects, no primitive histograms and plots
 
 database_test_plot=("database_truth" in sys.argv) # make a render with only truth values from KNN (do not actually call the KNN)
+center_source=("center_source" in sys.argv) # give source position as 0,0,500 if not known from Bash FileInfo
 
 # set max event limits in analyzeKNN.py
 # CURRENTLY SET!

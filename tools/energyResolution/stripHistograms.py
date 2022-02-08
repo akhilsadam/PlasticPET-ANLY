@@ -75,8 +75,8 @@ if "process_breakdown"  in Options.STRIP_OPT:
 		#print(compt)
 		#print(phot)
 		#print(other)
-		types = 2*(phot>0) - 1*(compt>0) #photo,photocompt,other,compt = 2,1,0,-1.
-		typeProcess = (2*(evtType[:,1]>0)) - (evtType[:,0]>0)
+		types = 2*(phot>0) - 1*(compt>0)[:Options.nEvents] #photo,photocompt,other,compt = 2,1,0,-1.
+		typeProcess = (2*(evtType[:,1]>0)) - (evtType[:,0]>0)[:Options.nEvents]
 		histogramOptions.plot_opt += "_gamma"
 	if "photocompton_breakdown" in Options.STRIP_OPT:
 		histogramOptions.photocomptonbreak = True

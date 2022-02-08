@@ -30,8 +30,8 @@ def knnp(dataTensorXnp,tensorListnp,k):
 	mxIndx = 0
 	# print(psutil.Process().memory_info().rss / (1024 * 1024))
 
-	print(dataTensorXnp.shape)
-	print(tensorListnp.shape)
+	# print(dataTensorXnp.shape)
+	# print(tensorListnp.shape)
 
 	for j in range(nevt):
 		for i in (range(len(dataTensorXnp))):
@@ -64,8 +64,8 @@ class DRKNN(nn.Module):
 
 	def forward(self,dataTensorX,dataTensorY,inputTensor):
 		# print(psutil.Process().memory_info().rss / (1024 * 1024))
-		print(dataTensorX.shape)
-		print(inputTensor.shape)
+		# print(dataTensorX.shape)
+		# print(inputTensor.shape)
 
 		#OPTION 1 - NOT WORKING
 		# indx = knnp(dataTensorX.numpy(),inputTensor.numpy(),self.k)
@@ -116,7 +116,7 @@ class DRKNN(nn.Module):
 		# print("EVENT",psutil.Process().memory_info().rss / (1024 * 1024))
 		outs = dataTensorY[indx]
 		out = torch.mean(outs,1)
-		print(out.shape)
+		# print(out.shape)
 		return out,indx
 	
 	def _initialize_weights(self):

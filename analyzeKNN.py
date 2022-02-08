@@ -72,6 +72,8 @@ except: database_test_plot = False
 if database_test_plot:
     recreateDatabase = True
     defaultDatabase = False
+try: center_source
+except: center_source = False
 #------------------------------------------------
 # Filepaths
 # Options.ml_database_pkl = Options.datadir+'ML_DATABASE_PICKLE_P'+str(Options.photoLen)+'.pkl'
@@ -273,10 +275,18 @@ else:
         print("Approximate Number of Total Single Events: ",4*len(out))
 
         with open(Options.datadir + Options.electronpath,"r") as f:
-            Options.TOTALEVENTS = len(f.readlines())
+        #     Options.TOTALEVENTS = len(f.readlines())
+            if Options.MaxEventLimit:
+                Options.TOTALEVENTS = min(Options.MaxEvents,len(f.readlines()))
+            else:
+                Options.TOTALEVENTS = len(f.readlines())
 
         try: Options.SOURCE
-        except: Options.SOURCE = np.array([np.nan,np.nan,np.nan])
+        except: 
+            if center_source:
+                Options.SOURCE = np.array([0,0,500])
+            else:
+                Options.SOURCE = np.array([np.nan,np.nan,np.nan])
 
         for i in range(5):
             print(out[i],arrayIndexTensorT[i],eventIndexTensorT[i])
