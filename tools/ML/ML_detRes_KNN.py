@@ -19,7 +19,7 @@ with open(ML_PATH+'ML_detRes_preProcess.py') as f: exec(f.read()) # helper file 
 # from tools.ML.ML_detRes_preProcess import *
 print("KNNArrayNumber: ", ArrayNumber)
 inputTensor,expectedTensor = MLDRESpreprocess(workers)
-if inputTensor:
+if len(inputTensor) > 0:
 	if("PCA" in Options.MLOPT):
 		PATH_OPT=PATH_OPT+"PCA"
 		pcaSTD = False
@@ -107,6 +107,8 @@ if inputTensor:
 	elif(Options.KVIS=="PICKLE"):
 		print("Pickled")
 		print("DONE")
+else:
+	print("[ERROR][SEVERE] KNN Input is of size None...")
 
 #-------------------------------------------------------
 #with open(ML_PATH+'ML_detRes_LOOP.py') as f: exec(f.read()) # helper file # training loop
