@@ -1,23 +1,29 @@
 import sys
 
-raw_only=("raw_only" in sys.argv) # show only the raw data; primitive histograms and plots, no reconstructed objects
-render_only=("render_only" in sys.argv) # show only the rendered/reconstructed objects, no primitive histograms and plots
+try : raw_only
+except : raw_only=("raw_only" in sys.argv) # show only the raw data; primitive histograms and plots, no reconstructed objects
+try : render_only
+except : render_only=("render_only" in sys.argv) # show only the rendered/reconstructed objects, no primitive histograms and plots
 
-database_test_plot=("database_truth" in sys.argv) # make a render with only truth values from KNN (do not actually call the KNN)
-center_source=("center_source" in sys.argv) # give source position as 0,0,500 if not known from Bash FileInfo
+try: database_test_plot
+except : database_test_plot=("database_truth" in sys.argv) # make a render with only truth values from KNN (do not actually call the KNN)
+try: center_source
+except : center_source=("center_source" in sys.argv) # give source position as 0,0,500 if not known from Bash FileInfo
 
 # set max event limits in analyzeKNN.py
 # CURRENTLY SET!
 
 if render_only:
-    remake_listmode = False # swap to get complete data!
-    newData = False
+    try: remake_listmode
+    except: remake_listmode = False # swap to get complete data!
+    try: newData
+    except: newData = False
 else:
     newData = True # new data?
 
 if not raw_only:
     ML_Construct = True
-    defaultDatabase = True # do you want to use a previously generated KNN Event Database? Allows more events!
+    defaultDatabase = False #DEFAULT = True # (OOC) do you want to use a previously generated KNN Event Database? Allows more events!
     with open('analyzeKNN.py') as f: exec(f.read())
     print("********************")
     print("analyzeKNN complete!")

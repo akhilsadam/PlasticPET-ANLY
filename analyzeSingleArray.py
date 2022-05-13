@@ -71,7 +71,7 @@ try:
 except FileNotFoundError as VALERIN:
 	print(VALERIN)
 	print("[REGENERATION] Local Pickling...")
-	evtPhotoInteract, evtComptonInteract,evtInteract,evtType,evtType2 = localizeBeam(evtPhotoInteractG,evtComptonInteractG,evtInteractG)
+	evtPhotoInteract, evtComptonInteract,evtInteract,evtType,evtType2 = localizeBeam(evtPhotoInteractG,evtComptonInteractG,evtInteractG,Options.ArrayNumber)
 	uninteractedEvents,actEvtPosN,time_I_N = gammaInteractPosition(evtInteract)
 	left,strip,right = photonNPYLoad(Options.ArrayNumber)
 

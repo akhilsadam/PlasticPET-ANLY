@@ -84,7 +84,7 @@ class DRKNN(nn.Module):
 		# sum = np.zeros(shape=(len(inputTensor)))
 		indx = np.zeros(shape=(inputTensor.shape[0],self.k),dtype=np.int64)
 		for i in range((inputTensor.shape[0])):
-			si = torch.sum(((dataTensorX - tensorList[i])**2),dim=(1,2))
+			si = torch.sum(((dataTensorX - tensorList[i])**2),dim=(1,2)) #### MODIFIED TEMPORARILY
 			tpk = torch.topk(si,k=int(self.k),largest=False)[1]
 			# print(tpk)
 			indx[i,:] = tpk
@@ -114,8 +114,17 @@ class DRKNN(nn.Module):
 		# dist = torch.stack([torch.sum((dataTensorX - tensorList[i])**2) for i in range(len(inputTensor))])
 
 		# print("EVENT",psutil.Process().memory_info().rss / (1024 * 1024))
+		print(dataTensorY.shape)
 		outs = dataTensorY[indx]
-		out = torch.mean(outs,1)
+
+		out = torch.mean(outs,1) #### MODIFIED TEMPORARILY!!!
+		# weights = torch.from_numpy(np.array([(self.k-i) for i in range(self.k)]))
+		# weights = weights / torch.sum(weights)
+		# weights = weights[:,None] #.repeat(1,4)
+		# print(weights.shape)
+		# print(torch.transpose(outs,0,1).shape)
+		# out = torch.transpose(torch.tensordot(weights,torch.transpose(outs,0,1),dims=1),0,1)
+
 		# print(out.shape)
 		return out,indx
 	

@@ -23,11 +23,13 @@ from tools.reconstruct import *
 from tools.ML.ML import *
 import random
 import gc
+import jpcm
 ngpu = 1
 #---------------------------------------------|
 # OPTIONS
 #--------------------------------------------/
-from analyzeOptions import *
+if __name__ == '__main__':
+    from analyzeOptions import *
 #---------------------------------------------
 # Constructing ML stuff / Rendering ? - i.e. are we just doing single array studies?
 try: ML_Construct
@@ -74,6 +76,13 @@ if database_test_plot:
     defaultDatabase = False
 try: center_source
 except: center_source = False
+
+settings=[]
+if use_KNN: settings.append("USE KNN")
+if remake_listmode: settings.append("remake LISTMODE")
+if database_test_plot: settings.append("make DATABASE_TEST_PLOT")
+if center_source: settings.append("CENTER_SOURCE")
+print("SETTINGS:",settings)
 #------------------------------------------------
 # Filepaths
 # Options.ml_database_pkl = Options.datadir+'ML_DATABASE_PICKLE_P'+str(Options.photoLen)+'.pkl'
@@ -87,8 +96,8 @@ with open(Options.ML_PATH+'ML_detRes.py') as f: exec(f.read())
 model_path = str(Options.ML_PATH)+"Data/ML_DET_RES_KNN_"+str(Options.photoLen)+"_Photo.pt"
 # with open('analyzeOptions.py') as f: exec(f.read())
 Options.COMPLETEDETECTOR = True
-Options.MaxEventLimit = True
-Options.MaxEvents = 200
+Options.MaxEventLimit = False # True # CHANGE IF YOU WANT TO SET A LIMIT ON RECO!
+Options.MaxEvents = 400
 Options.ReflectionTest = False
 Options.SiPM_Based_Reconstruction = False
 Options.Process_Based_Breakdown = False
@@ -201,8 +210,9 @@ else:
                     pickle.dump([dataTensorX,dataTensorY], f)
                 with open(Options.ml_run_pkl, 'wb') as f:  # Python 3: open(..., 'wb')
                     pickle.dump([dataTensorXT,dataTensorYT,arrayIndexTensorT,eventIndexTensorT], f)
-                with open(Options.ml_database_test_pkl, 'wb') as f:
-                    pickle.dump([arrayIndexTensorD,eventIndexTensorD],f)
+                if database_test_plot:
+                    with open(Options.ml_database_test_pkl, 'wb') as f:
+                        pickle.dump([arrayIndexTensorD,eventIndexTensorD],f)
             else:
                 with open(Options.ml_default_database_pkl, 'rb') as f:  # Python 3: open(..., 'wb')
                     dataTensorX,dataTensorY = pickle.load(f)
@@ -284,7 +294,7 @@ else:
         try: Options.SOURCE
         except: 
             if center_source:
-                Options.SOURCE = np.array([0,0,500])
+                Options.SOURCE = np.array([0,0,0])
             else:
                 Options.SOURCE = np.array([np.nan,np.nan,np.nan])
 
@@ -313,17 +323,23 @@ else:
         Options.nREventLimit = Options.nREvents
         lor = np.zeros(shape=(8,Options.nREvents))
 
-        fig = plt.figure(figsize=(8,8))
-        ax = plt.axes(projection='3d')
-        for i in range(Options.nREvents):
-            event = outPaired[i]
-            A = event[:,0:4].T
-            lor[0:4,i] = event[0,0:4]
-            lor[4:8,i] = event[1,0:4]
-            ax.plot3D(A[0,:],A[1,:],A[2,:])
+        fig = plt.figure(figsize=(20,8),constrained_layout=True)
+        ax1 = fig.add_subplot(121, projection='3d')
+        ax2 = fig.add_subplot(122, projection='3d')
+        axs = [ax1,ax2]
+        for ax in axs:
+            for i in range(Options.nREvents):
+                event = outPaired[i]
+                A = event[:,0:4].T
+                lor[0:4,i] = event[0,0:4]
+                lor[4:8,i] = event[1,0:4]
+                ax.plot3D(A[0,:],A[1,:],A[2,:],c=tuple(jpcm.maps.rurikon),alpha=0.2)
             ax.set_xlabel("X")
             ax.set_ylabel("Y")
             ax.set_zlabel("Z")
+        ax2.set_xlim([-20+Options.SOURCE[0],20+Options.SOURCE[0]])
+        ax2.set_ylim([-20+Options.SOURCE[1],20+Options.SOURCE[1]])
+        ax2.set_zlim([-20+UZ+Options.SOURCE[2],20+UZ+Options.SOURCE[2]])
         if defaultDatabase:
             plt.savefig(Options.plotDIR+"renderLOR_OOC.jpg",dpi=600)
         else:

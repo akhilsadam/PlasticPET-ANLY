@@ -2,13 +2,10 @@
 #Geometry Setup
 #------------------------------------------------------------------------------------
 #set up stripPos
-from itsdangerous import exc
 import numpy as np
 from numba import jit
 from tools.dimensions import *
 import multiprocessing
-from tqdm import tqdm
-import torch
 from analyzeOptions import Options
 @jit(nopython=True, parallel=True)
 def stripPosGenerate():

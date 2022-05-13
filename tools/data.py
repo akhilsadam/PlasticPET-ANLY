@@ -1,4 +1,7 @@
+import io
 import numpy as np
+
+from tools.geo import GlobalToArrayM
 #------------------------------------------------------------------------------------
 #Data Setup
 try: Options.COMPLETEDETECTOR
@@ -169,7 +172,7 @@ def beamInteraction():
 			# evtType2[i,:] = [len(cI),len(pI)] 
 	return evtPhotoInteractG,evtComptonInteractG,evtInteractG
 
-def localizeBeam(evtPhotoInteractG, evtComptonInteractG,evtInteractG):
+def localizeBeam(evtPhotoInteractG, evtComptonInteractG,evtInteractG,ArrayNumber):
 	evtType = np.zeros((Options.nEvents,2),dtype=int) # nCompton, nPhoto (number of interactions for gamma by event)
 	evtType2 = np.zeros((Options.nEvents,2),dtype=int) # nCompton, nPhoto (number of interactions for gamma by event, regardless of photon production)
 	evtPhotoInteract = []
@@ -193,21 +196,21 @@ def localizeBeam(evtPhotoInteractG, evtComptonInteractG,evtInteractG):
 			q = p0[j]
 			# print(q)
 			if assertlen(q):
-				q = np.transpose(GlobalToArrayM(q,Options.ArrayNumber)).tolist()
+				q = np.transpose(GlobalToArrayM(q,ArrayNumber)).tolist()
 				az.append(q)
 		
 		bz = []
 		for j in range(len(c0)):
 			q2 = c0[j]
 			if assertlen(q2):
-				q2 = np.transpose(GlobalToArrayM(q2,Options.ArrayNumber)).tolist()
+				q2 = np.transpose(GlobalToArrayM(q2,ArrayNumber)).tolist()
 				bz.append(q2)
 				
 		cz = []
 		for j in range(len(t0)):
 			q3 = t0[j]
 			if assertlen2(q3):
-				q3 = np.transpose(GlobalToArrayM(q3,Options.ArrayNumber)).tolist()
+				q3 = np.transpose(GlobalToArrayM(q3,ArrayNumber)).tolist()
 				cz.append(q3)
 
 		pI = np.array(az)
@@ -216,7 +219,12 @@ def localizeBeam(evtPhotoInteractG, evtComptonInteractG,evtInteractG):
 		evtComptonInteract.append(cI)
 		tI = np.array(cz)
 		evtInteract.append(tI)
-		# print(tI)
+
+		if ArrayNumber == 12 and len(tI[0])>0:
+			for q in tI:
+				print((q[0]**2+q[1]**2)**0.5)
+				# if (q[0]**2+q[1]**2)**0.5 < 100:
+					
 
 		if ((len(tI)>0) and (len(cI)>0) and (len(pI)>0)) :
 			# print(tI)

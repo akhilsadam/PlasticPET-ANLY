@@ -3,7 +3,7 @@ import multiprocessing
 class Options:
     plotDIR = "../plot/current/"
     datadir = "../data/current/"
-    defaultdatadir = "../data/database_rand_0/"
+    defaultdatadir = "../data/database_rand_0/" # "../data/database_rand_0/"
     electronpath = "electronProcess.txt"
     reflectplotDIR = plotDIR + "reflect/"
     ML_PATH = "tools/ML/"
@@ -17,8 +17,8 @@ class Options:
     MaxEventLimit = False
     TACC = False
     #------------------------------------------------------------------------------------ Event / Main SETUP ------------->^/<--- ---------- ------- ------>------/  - - - - - |
-    MaxEventLimit = True #manual override
-    MaxEvents = 5000 #int(input("Number of Events:"))
+    MaxEventLimit = False #manual override
+    MaxEvents = 400 #int(input("Number of Events:"))
     #--------------------------
     COMPLETEDETECTOR = True
     QE = True # quantum efficiency
@@ -106,13 +106,22 @@ def regenNames():
     #------------------------------------------------------------------_|
     # PICKLENAMES:
     Options.ml_default_database_pkl = Options.defaultdatadir +'ML_DATABASE_PICKLE_P'+str(Options.photoLen)+'.pkl'
-    Options.ml_database_pkl = Options.datadir+'ML_DATABASE_PICKLE_P'+str(Options.photoLen)+'.pkl'
+    Options.ml_database_pkl = (
+        f'{Options.datadir}ML_DATABASE_PICKLE_P{str(Options.photoLen)}.pkl'
+    )
+
     Options.ml_database_test_pkl = Options.datadir+'ML_DATABASE_TEST_PICKLE_P'+str(Options.photoLen)+'.pkl'
-    Options.ml_run_pkl = Options.datadir+'ML_RUN_PICKLE_P'+str(Options.photoLen)+'.pkl'
+    Options.ml_run_pkl = (
+        f'{Options.datadir}ML_RUN_PICKLE_P{str(Options.photoLen)}.pkl'
+    )
+
     Options.ml_complete_run_pkl = Options.datadir+'ML_COMPLETE_RUN_PICKLE_P'+str(Options.photoLen)+'.pkl'
-    Options.knn_pkl = Options.datadir+'ML_OUT_PICKLE_P'+str(Options.photoLen)+'.pkl'
-    Options.renderaddinfo_pkl = Options.datadir+'RENDER_ADDINFO.pkl'
-    Options.render_pkl = Options.datadir+'RENDER.pkl'
+    Options.knn_pkl = (
+        f'{Options.datadir}ML_OUT_PICKLE_P{str(Options.photoLen)}.pkl'
+    )
+
+    Options.renderaddinfo_pkl = f'{Options.datadir}RENDER_ADDINFO.pkl'
+    Options.render_pkl = f'{Options.datadir}RENDER.pkl'
 #------------------------------------------------------------------_|   
 regenNames()
 initializeOptions()

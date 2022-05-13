@@ -2,6 +2,7 @@ import math
 import numpy as np
 import pickle
 from iminuit import Minuit
+from sklearn.cluster import KMeans
 from itertools import chain
 from tools.dimensions import *
 from tools.geo import *
@@ -109,34 +110,56 @@ def TOF_GammaInteractRec(recPos,evtPos):
 	#print(evtIC[evt])
 	#break
 #
+
+def kmeanSplit(X):
+	# print(X)
+	if np.isnan(X).any():
+		return np.tile(np.nan, (len(X)))
+	if len(X) < nGamma:
+		return np.array([0])
+	kmeans = KMeans(n_clusters=nGamma, random_state=0).fit(X)
+	# print(kmeans.labels_)
+	return kmeans.labels_
+
 def gammaInteractPosition(evtInteract):
 	evtIC = evtInteract
 	# errorPosN = np.zeros(shape=(Options.nEvents,3))
 	# errorPos = np.zeros(shape=(3),dtype = list)
 	actEvtPosN = np.zeros(shape=(Options.nEvents,3))
-	actEvtG = np.zeros(shape=(3,3),dtype = list)
+	actEvtG = np.zeros(shape=(nGamma,3),dtype = list)
 	#actEvt = np.zeros(shape=(3),dtype = list)
 	time_I_N = np.zeros(shape=(Options.nEvents))
-	time_I_G = np.zeros(shape=(3))
-	photonCut = 10
+	time_I_G = np.zeros(shape=(nGamma))
+	photonCut = 0 ##### changed this temporarily # 10
 	uninteractedEvents = 0
 	for evt in range(Options.nEvents):
 		if (len(evtIC[evt])>0):
 			allIC = np.asarray(evtIC[evt])
-			for gam in range(3):
+
+			# kmeans call
+			ids = kmeanSplit(allIC[:,:3])
+			allIC[:,5] = ids
+
+			# print(allIC)
+
+			for gam in range(nGamma):
 				# print(allIC)
-				ICVT = allIC[(allIC[:,5]).astype(int)==gam,:]
+				# ICVT = allIC[(allIC[:,5]).astype(int)==gam,:] ##### changed this temporarily
+				unsorted = allIC[ids==gam,:]
+				# print("unsorted", unsorted)
+				ICVT = unsorted[unsorted[:, 4].argsort()]
 				# print(ICVT)
 				for i in range(3):
 					#actEvt[i] = np.average(np.transpose(evtInteract[evt])[i])
 					totPhot = np.sum(np.transpose(ICVT)[3])
 					if (totPhot>photonCut):
-						act = np.transpose(ICVT)[i][0] # np.dot(np.transpose(ICVT)[i],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])   ##### changed this temporarily
-						actEvtG[gam,i] = act if withinLimitXYZ(act,i) else np.nan
+						act = np.transpose(ICVT)[i][0] # np.dot(np.transpose(ICVT)[i],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])  ##### changed this temporarily
+						actEvtG[gam,i] = act # if withinLimitXYZ(act,i) else np.nan
 					else:
 						actEvtG[gam,i] = np.nan
-				time_I_G[gam] = np.transpose(ICVT)[4][0] if len(ICVT)>0 else np.nan # np.dot(np.transpose(ICVT)[4],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])  ##### changed this temporarily
+				time_I_G[gam] = np.transpose(ICVT)[4][0] if len(ICVT)>0 else np.nan  ##### changed this temporarily # # np.dot(np.transpose(ICVT)[4],np.transpose(ICVT)[3])/np.sum(np.transpose(ICVT)[3])			
 			try:
+				# print(actEvtG)
 				indv = np.nanargmin(np.sum(np.power(actEvtG[:,0:2],2),axis=1))
 			except:
 				uninteractedEvents += 1
